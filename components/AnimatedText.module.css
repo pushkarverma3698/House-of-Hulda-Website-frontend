@@ -1,0 +1,9 @@
+.animatedText {
+  /* Ensure the text lines have overflow hidden so words mask in upward */
+  clip-path: polygon(0 0, 100% 0, 100% 120%, 0 120%);
+}
+.animatedText .line {
+  overflow: hidden;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}

@@ -1,0 +1,72 @@
+.testimonials {
+  background: var(--bg-alt);
+  text-align: center;
+  padding: clamp(6rem, 12vw, 10rem) 0;
+}
+
+.carousel {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.quoteMark {
+  font-family: var(--font-serif);
+  font-size: 6rem;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.5;
+  margin-bottom: -1rem;
+}
+
+.quoteText {
+  color: var(--primary);
+  line-height: 1.4;
+  margin-bottom: 3rem;
+  font-style: italic;
+}
+
+.authorGroup {
+  margin-bottom: 3rem;
+}
+
+.author {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 0.25rem;
+}
+
+.origin {
+  font-size: 0.9rem;
+  color: var(--green-light);
+}
+
+.dots {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  transition: transform 0.3s, background 0.3s;
+}
+
+.dot:hover {
+  background: color-mix(in srgb, var(--primary) 40%, transparent);
+}
+
+.dot.active {
+  background: var(--accent);
+  transform: scale(1.5);
+}

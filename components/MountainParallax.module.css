@@ -1,0 +1,190 @@
+/* ═══════════════════════════════════════════════════════════
+   MountainParallax — Unified Himalayan Scene
+   ═══════════════════════════════════════════════════════════
+   
+   The "scene" is a full-viewport (100vh) container with all
+   mountain layers anchored to the BOTTOM. This creates one
+   cohesive landscape — like looking through a window.
+   
+   The "content" sits below with normal page flow.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Root wrapper — holds scene + content */
+.wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ── THE SCENE — Full-Viewport Mountain Composition ── */
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 700px;
+  overflow: hidden;
+}
+
+/* ── Sky Gradient — The atmospheric backdrop ── */
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    180deg,
+    #080e0c 0%,        /* Deep night at top */
+    #0e1a16 10%,
+    #132820 25%,        /* Dark forest atmosphere */
+    #1a3428 40%,
+    #1e3a2c 55%,        /* Mid green */
+    #1A2E1A 75%,        /* Connects to mountain palette */
+    #162618 100%
+  );
+}
+
+/* ── Film Grain Texture ── */
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  opacity: 0.04;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
+/* ── Mountain Layers — Anchored to bottom, filling upward ── */
+.mountainLayer {
+  position: absolute;
+  left: 0;
+  bottom: 0;               /* KEY: anchored to bottom of scene */
+  width: 100%;
+  height: 100%;             /* Full scene height so SVG can position mountains */
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ── Cabin Layer ── */
+.cabinLayer {
+  position: absolute;
+  left: 0;
+  bottom: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.layerImage {
+  object-fit: cover;
+  object-position: bottom center;
+}
+
+/* ── Foreground Trees Layer ── */
+.treesLayer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 120%;             /* Taller — trees rush past quickly */
+  z-index: 8;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ── Mist Overlay Layer ── */
+.mistLayer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 80%;
+  z-index: 9;
+  pointer-events: none;
+  will-change: transform, opacity;
+  overflow: hidden;
+}
+
+.mistAnimationWrapper {
+  position: absolute;
+  inset: 0;
+  width: 150%;              /* Wider for panning animation */
+  height: 100%;
+  animation: driftMist 60s linear infinite alternate;
+}
+
+.mistImage {
+  object-fit: cover;
+  object-position: bottom;
+  mix-blend-mode: screen;
+  opacity: 0.8;
+}
+
+@keyframes driftMist {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-15%); }
+}
+
+/* ── Mist Band — Soft transition between scene and content ── */
+.mistBand {
+  position: absolute;
+  bottom: -2px;             /* Overlap to prevent gap */
+  left: 0;
+  width: 100%;
+  height: 250px;
+  z-index: 15;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    var(--bg, #F5F2ED) 0%,
+    var(--bg, #F5F2ED) 15%,
+    rgba(245, 242, 237, 0.8) 40%,
+    rgba(245, 242, 237, 0.3) 70%,
+    transparent 100%
+  );
+}
+
+/* ── Content — Normal page flow below the scene ── */
+.content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  background: var(--bg, #F5F2ED);
+}
+
+/* ── GPU Optimization ── */
+.mountainLayer,
+.cabinLayer,
+.treesLayer,
+.mistLayer {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .mistLayer {
+    height: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .scene {
+    min-height: 500px;
+  }
+
+  /* Simplify — fewer layers on mobile */
+  .treesLayer {
+    height: 100%;
+    opacity: 0.6;
+  }
+
+  .grain,
+  .mistLayer {
+    display: none;
+  }
+}
