@@ -1,5 +1,9 @@
 import './globals.css';
 import LenisProvider from '../components/LenisProvider';
+import CustomCursor from '../components/CustomCursor';
+import ColorMorphProvider from '../components/ColorMorphProvider';
+import CartDrawer from '../components/CartDrawer';
+import { CartProvider } from '../context/CartContext';
 
 export const metadata = {
   title: 'House of Hulda — A Mountain Retreat in Naggar, Himachal Pradesh',
@@ -20,7 +24,14 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body>
-        <LenisProvider>{children}</LenisProvider>
+        <CartProvider>
+          <LenisProvider>
+            <CustomCursor />
+            <ColorMorphProvider />
+            <CartDrawer />
+            {children}
+          </LenisProvider>
+        </CartProvider>
       </body>
     </html>
   );

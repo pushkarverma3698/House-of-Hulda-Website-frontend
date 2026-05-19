@@ -75,6 +75,42 @@ import { useGSAP } from '@gsap/react';
 ### Lenis + GSAP Sync
 The `LenisProvider.js` wraps the entire app. GSAP ScrollTrigger is automatically aware of the smooth scroll position. If you add new scroll-dependent features, ensure they work within the Lenis RAF loop.
 
+### Build & Dev Server Guidelines (Required Pattern)
+**ALWAYS check for build errors before reporting success or moving forward:**
+
+1. **Check dev server logs immediately after starting:**
+   ```bash
+   tail -20 /tmp/hulda-dev-*PORT*.log
+   ```
+   Look for `⨯ Error:` or `MODULE_NOT_FOUND` messages.
+
+2. **Common build errors and fixes:**
+   - **`Cannot find module 'X'`** → Run `npm install X` or `npm ci`
+   - **`address already in use :::PORT`** → Kill existing process: `pkill -9 -f "next dev"; sleep 2`
+   - **`turbopack.root` warning** → Already configured, ignore or set absolute path in `next.config.mjs`
+
+3. **Standard dev server start sequence:**
+   ```bash
+   # Kill any existing process on target port
+   kill $(lsof -t -i :PORT) 2>/dev/null; sleep 1
+   
+   # Start dev server with explicit PORT
+   cd "/path/to/project" && PORT=3001 npm run dev > /tmp/hulda-dev-3001.log 2>&1 &
+   
+   # Verify startup (wait 3-4 seconds, then check)
+   sleep 3 && tail -15 /tmp/hulda-dev-3001.log
+   
+   # Should see: "✓ Ready in XXXms" (NOT ⨯ Error)
+   ```
+
+4. **If Chrome cannot load the site:**
+   - Check logs for MODULE_NOT_FOUND errors
+   - Run `npm ci` to ensure all dependencies are installed
+   - Verify server is listening: `lsof -i :3001 | grep LISTEN`
+   - Try accessing `http://localhost:3001` directly (wait 5 seconds for full page load)
+
+5. **Never assume "server is running" without verifying logs** — always check the last 15 lines of the log file for actual startup status.
+
 ---
 
 ## 🧠 Memory & Workflow
@@ -165,5 +201,12 @@ Changelog:
             - Full theme, technical, and workflow documentation
             - Inspiration site analysis integrated
             - Parallax layer system documented
+
+2026-05-19  Added Build & Dev Server Guidelines
+            - Documented build error checking pattern
+            - Added dependency management fixes (npm ci, npm install)
+            - Included port conflict resolution
+            - Standard dev server startup sequence
+            - Chrome loading troubleshooting checklist
 ─────────────────────────────────────────────────
 ```

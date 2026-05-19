@@ -1,0 +1,70 @@
+.wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 140px;
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--stone, #8C8C7A);
+}
+
+/* Native date input hidden behind display span */
+.input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+  top: 1.4rem;
+}
+
+.display {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--ink, #1A1A1A);
+  background: transparent;
+  border-bottom: 1.5px solid var(--border, rgba(61,90,61,0.2));
+  padding: 0.6rem 0;
+  cursor: pointer;
+  transition: border-color 0.3s var(--ease);
+  white-space: nowrap;
+}
+
+.field:focus-within .display {
+  border-color: var(--cedar-light, #C4956A);
+}
+
+.arrow {
+  font-size: 1.2rem;
+  color: var(--stone, #8C8C7A);
+  padding-bottom: 0.6rem;
+  flex-shrink: 0;
+}
+
+.nights {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--cedar-light, #C4956A);
+  padding-bottom: 0.6rem;
+  white-space: nowrap;
+}

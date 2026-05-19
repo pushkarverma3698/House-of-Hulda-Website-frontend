@@ -1,49 +1,75 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap');
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────────────── */
 
 :root {
-  /* Palette A: Misty Deodar (default) */
-  --forest-deep:   #1A2E1A;
-  --deodar:        #3D5A3D;
-  --cedar:         #C4956A;
-  --parchment:     #E8DDD0;
-  --mist:          #D4DCD4;
-  --snow:          #F5F2ED;
-  --ink:           #1C1C1C;
-  --moss:          #6B7F5E;
-  --lantern:       #D4A76A;
+  /* ── ALTITUDE ZONE PALETTE ─────────────────────────────────────────── */
 
-  /* Active palette vars (maps to one of 3) */
+  /* Sky Zone (hero / top) */
+  --sky-900:       #07111A;   /* deep midnight navy */
+  --sky-700:       #0D2033;   /* dark storm blue */
+  --sky-300:       #8AAEC4;   /* haze blue */
+
+  /* Mountain Zone (mid-page dark sections) */
+  --mtn-900:       #111B11;   /* deepest forest */
+  --mtn-700:       #1A2E1A;   /* forest deep */
+  --mtn-500:       #2D4A2D;   /* pine mid */
+  --mtn-300:       #5A7A5A;   /* sage light */
+
+  /* Hearth Zone (warm content sections) */
+  --hearth-bg:     #F5F0E8;   /* warm cream */
+  --hearth-alt:    #EDE5D8;   /* parchment */
+  --cedar:         #8B5E3C;   /* rich cedar brown */
+  --cedar-light:   #C4956A;   /* warm tan */
+  --gold:          #C4924A;   /* lantern gold */
+  --gold-light:    #D4A76A;   /* soft gold */
+
+  /* Neutrals */
+  --snow:          #F7F4EF;   /* primary light bg */
+  --ink:           #1A1A1A;   /* primary text */
+  --stone:         #8C8C7A;   /* muted/secondary text */
+
+  /* Legacy aliases (backward compat for existing components) */
+  --forest-deep:   var(--mtn-700);
+  --deodar:        #3D5A3D;
+  --parchment:     var(--hearth-alt);
+  --mist:          #D4DCD4;
+  --moss:          #6B7F5E;
+  --lantern:       var(--gold-light);
+
+  /* ── SEMANTIC ACTIVE VARS ───────────────────────────────────────────── */
   --bg:            var(--snow);
-  --bg-alt:        var(--parchment);
-  --primary:       var(--forest-deep);
-  --accent:        var(--cedar);
-  --accent-light:  var(--lantern);
-  --green:         var(--deodar);
-  --green-light:   var(--moss);
+  --bg-alt:        var(--hearth-alt);
+  --primary:       var(--mtn-700);
+  --accent:        var(--cedar-light);
+  --accent-light:  var(--gold-light);
+  --green:         var(--mtn-500);
+  --green-light:   var(--mtn-300);
   --text:          var(--ink);
   --border:        rgba(61,90,61,0.15);
   --nav-bg:        rgba(26,46,26,0.0);
 
-  /* Typography */
+  /* ── TYPOGRAPHY ──────────────────────────────────────────────────────── */
   --font-serif:    'Playfair Display', Georgia, serif;
   --font-sans:     'Inter', system-ui, sans-serif;
   --font-ui:       'Outfit', system-ui, sans-serif;
+  --font-display:  'Cormorant Garamond', Georgia, serif;
 
-  /* Spacing */
+  /* ── SPACING ─────────────────────────────────────────────────────────── */
   --section-py:    clamp(5rem, 10vw, 9rem);
   --container:     1240px;
 
-  /* Radius */
+  /* ── RADIUS ──────────────────────────────────────────────────────────── */
   --r-sm:          4px;
   --r-md:          12px;
   --r-lg:          24px;
   --r-xl:          40px;
 
-  /* Transitions */
+  /* ── TRANSITIONS ─────────────────────────────────────────────────────── */
   --ease:          cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-bounce:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-expo:  cubic-bezier(0.95, 0.05, 0.795, 0.035);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 /* Palette B: Monsoon Cedar */
@@ -88,11 +114,13 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg);
+  background: var(--sky-900);
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
 }
+
+main { background: var(--bg); }
 
 img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }

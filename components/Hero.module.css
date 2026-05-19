@@ -14,7 +14,17 @@
   color: var(--snow);
   text-align: center;
   padding-bottom: 8vh;
-  pointer-events: auto;       /* Re-enable clicks for buttons */
+  pointer-events: auto;
+}
+
+/* Subtle radial vignette behind text content so it reads on any background */
+.content::before {
+  content: '';
+  position: absolute;
+  inset: -60px -80px;
+  background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.3) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .title {
@@ -31,10 +41,18 @@
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
+.eyebrow {
+  color: rgba(245, 242, 237, 0.7);
+  letter-spacing: 0.22em;
+}
+
 .actions {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
   margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
 .crystalBtn {
@@ -42,31 +60,39 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 1.25rem 3rem;
+  padding: 1.1rem 2.8rem;
   font-family: var(--font-ui);
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: 0.15em;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--lantern);
-  background: rgba(200, 160, 100, 0.05);
-  border: 1px solid rgba(212, 167, 106, 0.4);
-  border-radius: 4px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: inset 0 0 20px rgba(212, 167, 106, 0.1), 0 8px 32px rgba(0, 0, 0, 0.4);
+  color: #E8C87A;
+  background: rgba(180, 130, 50, 0.12);
+  border: 1px solid rgba(212, 167, 106, 0.55);
+  border-radius: 3px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 220, 120, 0.15),
+    inset 0 0 24px rgba(196, 146, 74, 0.12),
+    0 0 40px rgba(196, 146, 74, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  animation: crystalFloat 4s ease-in-out infinite;
+  animation: crystalFloat 5s ease-in-out infinite;
   text-decoration: none;
 }
 
 .crystalBtn:hover {
-  background: rgba(212, 167, 106, 0.15);
-  border-color: rgba(212, 167, 106, 0.8);
-  box-shadow: inset 0 0 30px rgba(212, 167, 106, 0.3), 0 12px 40px rgba(0, 0, 0, 0.6);
-  color: var(--snow);
-  transform: translateY(-4px);
+  background: rgba(212, 167, 106, 0.22);
+  border-color: rgba(220, 180, 100, 0.9);
+  color: #F5E8C0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 220, 120, 0.3),
+    inset 0 0 32px rgba(196, 146, 74, 0.25),
+    0 0 60px rgba(196, 146, 74, 0.35),
+    0 12px 48px rgba(0, 0, 0, 0.6);
+  transform: translateY(-3px);
 }
 
 .crystalGlow {
@@ -89,8 +115,14 @@
 }
 
 @keyframes crystalFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: inset 0 1px 0 rgba(255,220,120,0.15), inset 0 0 24px rgba(196,146,74,0.12), 0 0 40px rgba(196,146,74,0.2), 0 8px 32px rgba(0,0,0,0.5);
+  }
+  50% {
+    transform: translateY(-6px);
+    box-shadow: inset 0 1px 0 rgba(255,220,120,0.22), inset 0 0 28px rgba(196,146,74,0.18), 0 0 55px rgba(196,146,74,0.32), 0 14px 40px rgba(0,0,0,0.55);
+  }
 }
 
 @keyframes rotateGlow {
@@ -118,6 +150,25 @@
   animation: scrollPulse 2s ease-in-out infinite;
 }
 
+.ghostBtn {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: rgba(245, 242, 237, 0.75);
+  border-bottom: 1px solid rgba(245, 242, 237, 0.3);
+  padding-bottom: 0.2rem;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+  text-decoration: none;
+}
+
+.ghostBtn:hover {
+  color: var(--gold-light);
+  border-color: var(--gold-light);
+}
+
 @keyframes scrollPulse {
   0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
   50% { opacity: 0.8; transform: scaleY(1); }
@@ -127,6 +178,7 @@
   .actions {
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
   }
   .scrollHint {
     display: none;
