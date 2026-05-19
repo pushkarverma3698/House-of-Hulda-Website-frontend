@@ -2,17 +2,38 @@
 import { useState, useEffect } from 'react';
 import styles from './Navbar.module.css';
 
-const palettes = [
-  { id: 'A', label: 'Misty Deodar', swatch: ['#1A2E1A', '#C4956A', '#F5F2ED'] },
-  { id: 'B', label: 'Monsoon Cedar', swatch: ['#1F2B1F', '#A67C52', '#F0E8DC'] },
-  { id: 'C', label: 'Alpine Hearth', swatch: ['#4A6741', '#B8845A', '#F5F5F0'] },
-];
+// Inline SVG monogram — stylised "H" framed by deodar fronds.
+function Mark() {
+  return (
+    <svg
+      className={styles.mark}
+      viewBox="0 0 32 32"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      {/* outer ring */}
+      <circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.55" />
+      {/* deodar peak silhouette */}
+      <path
+        d="M5 22 L11 13 L13 16 L16 9 L19 16 L21 13 L27 22 Z"
+        fill="currentColor"
+        opacity="0.18"
+      />
+      {/* H letterform */}
+      <path
+        d="M11 10 L11 22 M21 10 L21 22 M11 16 L21 16"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [palette, setPalette] = useState('A');
-  const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -20,13 +41,10 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-palette', palette);
-  }, [palette]);
-
   const navLinks = [
     { href: '#stay', label: 'The Stay' },
     { href: '#experience', label: 'Experience' },
+    { href: '#marketplace', label: 'Market' },
     { href: '#story', label: 'Our Story' },
   ];
 
@@ -35,89 +53,54 @@ export default function Navbar() {
       <nav className={`${styles.nav} ${scrolled ? styles.scrolled : ''}`}>
         <div className={styles.inner}>
           {/* Logo */}
-          <a href="#" className={styles.logo}>
-            <span className={styles.logoIcon}>⌂</span>
-            <span className={styles.logoText}>
-              <span className={styles.logoMain}>House of Hulda</span>
-              <span className={styles.logoSub}>Naggar · Himachal Pradesh</span>
-            </span>
+          <a href="#" className={styles.logo} aria-label="House of Hulda — Home">
+            <Mark />
+            <span className={styles.logoMain}>House of Hulda</span>
           </a>
 
           {/* Desktop Links */}
           <ul className={styles.links}>
-            {navLinks.map(link => (
+            {navLinks.map((link) => (
               <li key={link.href}>
-                <a href={link.href} className={styles.link}>{link.label}</a>
+                <a href={link.href} className={styles.link}>
+                  {link.label}
+                </a>
               </li>
             ))}
           </ul>
 
-          {/* Right side */}
-          <div className={styles.right}>
-            {/* Palette Switcher */}
-            <div className={styles.palettePicker}>
-              <button
-                className={styles.paletteBtn}
-                onClick={() => setPaletteOpen(!paletteOpen)}
-                title="Switch color palette"
-                aria-label="Color theme switcher"
-              >
-                <span className={styles.paletteIconDots}>
-                  {palettes.find(p => p.id === palette)?.swatch.map((c, i) => (
-                    <span key={i} style={{ background: c }} className={styles.dot} />
-                  ))}
-                </span>
-                <span className={styles.paletteLabel}>Palette</span>
-              </button>
+          {/* Reserve CTA (desktop) */}
+          <a href="#booking" className={styles.reserve}>
+            Reserve
+          </a>
 
-              {paletteOpen && (
-                <div className={styles.paletteDropdown}>
-                  <p className={styles.paletteTitle}>Choose a vibe</p>
-                  {palettes.map(p => (
-                    <label key={p.id} className={styles.paletteOption}>
-                      <input
-                        type="radio"
-                        name="palette"
-                        value={p.id}
-                        checked={palette === p.id}
-                        onChange={() => { setPalette(p.id); setPaletteOpen(false); }}
-                        className={styles.paletteRadio}
-                      />
-                      <span className={styles.paletteSwatches}>
-                        {p.swatch.map((c, i) => (
-                          <span key={i} style={{ background: c }} className={styles.swatchPill} />
-                        ))}
-                      </span>
-                      <span className={styles.paletteName}>{p.label}</span>
-                      {palette === p.id && <span className={styles.paletteCheck}>✓</span>}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Hamburger */}
-            <button
-              className={`${styles.hamburger} ${menuOpen ? styles.open : ''}`}
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Toggle menu"
-            >
-              <span /><span /><span />
-            </button>
-          </div>
+          {/* Hamburger (mobile) */}
+          <button
+            className={`${styles.hamburger} ${menuOpen ? styles.open : ''}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+          >
+            <span /><span /><span />
+          </button>
         </div>
       </nav>
 
       {/* Mobile menu */}
       <div className={`${styles.mobileMenu} ${menuOpen ? styles.mobileOpen : ''}`}>
         <ul className={styles.mobileLinks}>
-          {navLinks.map(link => (
+          {navLinks.map((link) => (
             <li key={link.href}>
               <a href={link.href} className={styles.mobileLink} onClick={() => setMenuOpen(false)}>
                 {link.label}
               </a>
             </li>
           ))}
+          <li>
+            <a href="#booking" className={styles.mobileReserve} onClick={() => setMenuOpen(false)}>
+              Reserve a Stay
+            </a>
+          </li>
         </ul>
       </div>
     </>

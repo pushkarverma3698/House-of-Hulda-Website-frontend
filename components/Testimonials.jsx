@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { gsap } from '../lib/gsap';
 import styles from './Testimonials.module.css';
 
 const REVIEWS = [
@@ -9,53 +10,87 @@ const REVIEWS = [
     origin: "Berlin, Germany"
   },
   {
-    quote: "The Deodar Suite feels like you're sleeping in the canopy of the forest. The attention to detail in the woodwork and the warmth of the hospitality is unmatched.",
+    quote: "The Deodar Suite feels like sleeping in the canopy of the forest. The attention to detail in the woodwork and the warmth of the hospitality is unmatched.",
     author: "Rohan S.",
     origin: "Mumbai, India"
   },
   {
-    quote: "Waking up to the golden light hitting the snow peaks, followed by a warm Himachali breakfast—House of Hulda is the mountain home I've always dreamt of.",
+    quote: "Waking up to golden light hitting the snow peaks, followed by a warm Himachali breakfast — House of Hulda is the mountain home I've always dreamt of.",
     author: "Sarah Jenkins",
     origin: "London, UK"
   }
 ];
 
 export default function Testimonials() {
-  const sectionRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const quoteRef = useRef(null);
+  const timerRef = useRef(null);
+  const isHovering = useRef(false);
+
+  const goTo = (index) => {
+    if (!quoteRef.current || index === activeIndex) return;
+    gsap.to(quoteRef.current, {
+      opacity: 0,
+      y: -24,
+      duration: 0.35,
+      ease: 'power2.in',
+      onComplete: () => {
+        setActiveIndex(index);
+        gsap.fromTo(
+          quoteRef.current,
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }
+        );
+      },
+    });
+  };
+
+  const advance = () => {
+    if (!isHovering.current) {
+      setActiveIndex((prev) => {
+        const next = (prev + 1) % REVIEWS.length;
+        goTo(next);
+        return next;
+      });
+    }
+  };
 
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.1 });
-
-    const reveals = sectionRef.current.querySelectorAll('.reveal');
-    reveals.forEach(el => observer.observe(el));
-
-    return () => observer.disconnect();
+    timerRef.current = setInterval(advance, 6000);
+    return () => clearInterval(timerRef.current);
   }, []);
 
   return (
-    <section className={`section ${styles.testimonials}`} ref={sectionRef}>
+    <section className={`section ${styles.testimonials}`}>
       <div className="container">
-        <div className={styles.carousel}>
-          {/* We'll just show the first one for the MVP, or stack them cleanly */}
-          <div className={`${styles.wrap} reveal`}>
-            <div className={styles.quoteMark}>"</div>
-            <h3 className={`heading-lg ${styles.quoteText}`}>{REVIEWS[0].quote}</h3>
+        <div
+          className={styles.carousel}
+          onMouseEnter={() => { isHovering.current = true; }}
+          onMouseLeave={() => { isHovering.current = false; }}
+        >
+          <div className={styles.decorQuote} aria-hidden="true">&ldquo;</div>
+
+          <div ref={quoteRef} className={styles.wrap}>
+            <blockquote className={`heading-lg ${styles.quoteText}`}>
+              {REVIEWS[activeIndex].quote}
+            </blockquote>
             <div className={styles.authorGroup}>
-              <p className={styles.author}>{REVIEWS[0].author}</p>
-              <p className={styles.origin}>{REVIEWS[0].origin}</p>
+              <p className={styles.author}>{REVIEWS[activeIndex].author}</p>
+              <p className={styles.origin}>{REVIEWS[activeIndex].origin}</p>
             </div>
-            
-            <div className={styles.dots}>
-              <button className={`${styles.dot} ${styles.active}`} aria-label="Review 1"></button>
-              <button className={styles.dot} aria-label="Review 2"></button>
-              <button className={styles.dot} aria-label="Review 3"></button>
-            </div>
+          </div>
+
+          <div className={styles.dots} role="tablist" aria-label="Reviews">
+            {REVIEWS.map((_, i) => (
+              <button
+                key={i}
+                role="tab"
+                aria-selected={i === activeIndex}
+                aria-label={`Review ${i + 1}`}
+                className={`${styles.dot} ${i === activeIndex ? styles.active : ''}`}
+                onClick={() => goTo(i)}
+              />
+            ))}
           </div>
         </div>
       </div>

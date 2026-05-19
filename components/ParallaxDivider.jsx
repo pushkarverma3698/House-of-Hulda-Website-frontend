@@ -1,34 +1,26 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import { gsap } from '../lib/gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import styles from './ParallaxDivider.module.css';
 
 export default function ParallaxDivider() {
   const containerRef = useRef(null);
   const imageRef = useRef(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current || !imageRef.current) return;
-      
-      const rect = containerRef.current.getBoundingClientRect();
-      const viewHeight = window.innerHeight;
-      
-      // Calculate how far the section is from the center of the viewport
-      if (rect.top <= viewHeight && rect.bottom >= 0) {
-        // Map scroll percentage to a Y translation value (from -20% to +20%)
-        const scrollPercent = (viewHeight - rect.top) / (viewHeight + rect.height);
-        const yPos = (scrollPercent - 0.5) * 40; // -20% to 20%
-        
-        imageRef.current.style.transform = `translateY(${yPos}%) scale(1.2)`;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    // Trigger once on mount
-    handleScroll();
-    
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  useGSAP(() => {
+    gsap.to(imageRef.current, {
+      y: '20%',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true,
+      },
+    });
+  }, { scope: containerRef });
 
   return (
     <section className={styles.container} ref={containerRef}>

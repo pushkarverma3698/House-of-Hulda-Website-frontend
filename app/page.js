@@ -4,9 +4,10 @@ import About from '@/components/About';
 import Rooms from '@/components/Rooms';
 import Experience from '@/components/Experience';
 import ParallaxDivider from '@/components/ParallaxDivider';
+import Marketplace from '@/components/Marketplace';
 import Testimonials from '@/components/Testimonials';
 import Gallery from '@/components/Gallery';
-import BookingCTA from '@/components/BookingCTA';
+import BookingForm from '@/components/BookingForm';
 import Footer from '@/components/Footer';
 import MountainParallax from '@/components/MountainParallax';
 
@@ -15,19 +16,18 @@ export default function Home() {
     <>
       <Navbar />
       <MountainParallax>
-        {/* Hero text overlays the mountain scene (position: absolute inside scene) */}
         <Hero />
       </MountainParallax>
 
-      {/* Content sections flow normally below the scene */}
       <main>
         <About />
         <Rooms />
         <Experience />
         <ParallaxDivider />
+        <Marketplace />
         <Testimonials />
         <Gallery />
-        <BookingCTA />
+        <BookingForm />
       </main>
 
       <Footer />
