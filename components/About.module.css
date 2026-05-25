@@ -3,6 +3,12 @@
   z-index: 10;
 }
 
+.imageTopWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 5fr 6fr;
@@ -12,6 +18,9 @@
 
 .imageCol {
   position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .imageWrap {
@@ -88,19 +97,22 @@
 }
 
 @media (max-width: 992px) {
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 4rem;
+  .imageTopWrapper {
+    gap: 3rem;
   }
-  
+
+  .imageCol {
+    max-width: 100%;
+  }
+
   .imageWrap {
     aspect-ratio: 16/9;
   }
-  
+
   .textCol {
     padding-right: 0;
   }
-  
+
   .stats {
     flex-wrap: wrap;
     gap: 2rem;

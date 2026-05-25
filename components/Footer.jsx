@@ -23,9 +23,9 @@ export default function Footer() {
           <div className={styles.linkCol}>
             <h3 className={styles.colTitle}>Socials</h3>
             <ul className={styles.links}>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Instagram</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Facebook</a></li>
-              <li><a href="#" target="_blank" rel="noopener noreferrer">Airbnb</a></li>
+              <li><a href="https://instagram.com/houseofhulda" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+              <li><a href="https://facebook.com/houseofhulda" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+              <li><a href="https://airbnb.com/rooms/houseofhulda" target="_blank" rel="noopener noreferrer">Airbnb</a></li>
             </ul>
           </div>
         </div>
