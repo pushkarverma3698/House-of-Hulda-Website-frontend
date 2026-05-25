@@ -71,7 +71,7 @@ export default function About() {
 
   return (
     <section id="about" className={`section ${styles.about}`} ref={sectionRef}>
-      <div className={`container ${styles.grid}`}>
+      <div className={`container ${styles.imageTopWrapper}`}>
         <div className={styles.imageCol}>
           <div className={styles.imageWrap} ref={imageWrapRef}>
             <div ref={imageInnerRef} style={{ width: '100%', height: '100%' }}>
@@ -95,10 +95,13 @@ export default function About() {
           </h2>
           <div data-reveal>
             <p className="body-lg" style={{ marginBottom: '1.5rem' }}>
-              Perched at 2,000 metres in the ancient village of Naggar, the House of Hulda is more than a retreat — it&apos;s a return to a simpler, deeper way of living.
+              Perched at 6,000 feet above sea level in Naggar, House of Hulda is a sanctuary where the boundary between wilderness and comfort dissolves.
             </p>
-            <p className="body-lg" style={{ marginBottom: '2.5rem' }}>
-              Built with traditional Himachali Kath Kuni architecture, every wooden beam and stone wall holds the warmth of local craftsmanship. Here, time slows to the rhythm of floating mist and rustling deodar pines.
+            <p className="body-lg" style={{ marginBottom: '1.5rem' }}>
+              We built this not as a hotel, but as an extension of our own mountain home. Every stone placed with intention. Every window frames deodar forests and Himalayan peaks.
+            </p>
+            <p className="body-lg" style={{ marginBottom: '2.5rem', fontStyle: 'italic', color: 'var(--text-secondary)' }}>
+              "The mountains are calling, and we must go." — John Muir
             </p>
           </div>
 
@@ -107,22 +110,22 @@ export default function About() {
               <span
                 className={styles.statNumber}
                 ref={(el) => (counterRefs.current[0] = el)}
-              >2,000</span>
-              <span className={styles.statLabel}>Metres Elevation</span>
+              >6,000</span>
+              <span className={styles.statLabel}>Feet Elevation</span>
             </div>
             <div className={styles.stat}>
               <span
                 className={styles.statNumber}
                 ref={(el) => (counterRefs.current[1] = el)}
-              >4</span>
-              <span className={styles.statLabel}>Boutique Rooms</span>
+              >3</span>
+              <span className={styles.statLabel}>Sanctuaries of Wood & Light</span>
             </div>
             <div className={styles.stat}>
               <span
                 className={styles.statNumber}
                 ref={(el) => (counterRefs.current[2] = el)}
               >∞</span>
-              <span className={styles.statLabel}>Mountain Views</span>
+              <span className={styles.statLabel}>Mountain Memories</span>
             </div>
           </div>
         </div>

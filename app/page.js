@@ -7,7 +7,6 @@ import ParallaxDivider from '@/components/ParallaxDivider';
 import Marketplace from '@/components/Marketplace';
 import Testimonials from '@/components/Testimonials';
 import Gallery from '@/components/Gallery';
-import Story from '@/components/Story';
 import Blog from '@/components/Blog';
 import BookingForm from '@/components/BookingForm';
 import Footer from '@/components/Footer';
@@ -23,7 +22,6 @@ export default function Home() {
 
       <main>
         <About />
-        <Story />
         <Rooms />
         <Experience />
         <ParallaxDivider />
