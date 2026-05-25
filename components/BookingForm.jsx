@@ -6,7 +6,7 @@ import MagneticButton from './MagneticButton';
 import { rooms } from '../lib/roomData';
 import styles from './BookingForm.module.css';
 
-const WHATSAPP_NUMBER = '919779260517'; // Target WhatsApp number
+const WHATSAPP_NUMBER = '918284088838'; // India country code + phone number
 
 function diffDays(a, b) {
   return Math.round((new Date(b) - new Date(a)) / (1000 * 60 * 60 * 24));
