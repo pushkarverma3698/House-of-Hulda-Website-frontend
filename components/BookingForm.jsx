@@ -1,12 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DateRangePicker from './DateRangePicker';
 import RoomSelector from './RoomSelector';
 import MagneticButton from './MagneticButton';
 import { rooms } from '../lib/roomData';
 import styles from './BookingForm.module.css';
 
-const WHATSAPP_NUMBER = '919XXXXXXXXX'; // Replace with actual WhatsApp number
+const WHATSAPP_NUMBER = '919779260517'; // Target WhatsApp number
 
 function diffDays(a, b) {
   return Math.round((new Date(b) - new Date(a)) / (1000 * 60 * 60 * 24));
@@ -25,8 +25,8 @@ function buildWhatsAppMessage(data) {
     `Guests: ${data.guests}\n` +
     `Nights: ${nights}\n` +
     (total > 0 ? `Estimated Total: ₹${total.toLocaleString()}\n` : '') +
-    `\nName: ${data.name}\n` +
-    `Phone: ${data.phone}\n` +
+    (data.name ? `\nName: ${data.name}\n` : '') +
+    (data.phone ? `Phone: ${data.phone}\n` : '') +
     (data.requests ? `Special Requests: ${data.requests}` : '')
   );
 }
@@ -43,14 +43,33 @@ export default function BookingForm() {
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
+  // Auto-select room from URL hash changes (e.g. #booking?room=whisperwood-suite)
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#booking')) {
+        const queryIdx = hash.indexOf('?');
+        if (queryIdx !== -1) {
+          const params = new URLSearchParams(hash.substring(queryIdx));
+          const roomParam = params.get('room');
+          if (roomParam) {
+            set('room', roomParam);
+          }
+        }
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
   const validate = () => {
     const e = {};
     if (!form.checkIn) e.checkIn = 'Required';
     if (!form.checkOut) e.checkOut = 'Required';
     if (form.checkIn && form.checkOut && form.checkIn >= form.checkOut) e.checkOut = 'Must be after check-in';
     if (!form.room) e.room = 'Please select a room';
-    if (!form.name.trim()) e.name = 'Required';
-    if (!form.phone.trim()) e.phone = 'Required';
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Invalid email';
     return e;
   };
@@ -63,7 +82,7 @@ export default function BookingForm() {
     setStatus('loading');
 
     try {
-      // Send email via API route
+      // Send email/booking via API route
       const res = await fetch('/api/booking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

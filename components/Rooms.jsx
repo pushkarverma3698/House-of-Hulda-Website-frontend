@@ -7,40 +7,31 @@ import styles from './Rooms.module.css';
 
 const ROOMS = [
   {
-    id: 'deodar',
-    name: 'The Deodar Suite',
+    id: 'whisperwood-suite',
+    name: 'The Whisperwood Suite',
     price: '₹4,500',
     guests: 2,
-    description: 'A spacious wooden haven overlooking cedar forests. Features a private balcony and deep soaking tub filled with mountain spring water.',
-    features: ['Private balcony', 'Soaking tub', 'Valley view', 'King bed'],
+    description: 'A spacious wooden sanctuary overlooking ancient cedar forests. Features a private balcony and a hand-carved copper tub filled with fresh mountain spring water.',
+    features: ['Private Balcony', 'Forest-View Tub', 'King Cedar Bed', 'Hearthside Seating'],
     image: 'https://images.unsplash.com/photo-1519974719765-e6559eac2575?auto=format&fit=crop&q=80&w=1400',
   },
   {
-    id: 'valley',
-    name: 'The Valley View',
+    id: 'cloudloft-sanctuary',
+    name: 'The Cloudloft Sanctuary',
     price: '₹5,500',
     guests: 3,
-    description: 'Panoramic windows framing the entire Kullu Valley. Wake up to golden hour over the Himalayas directly from bed.',
-    features: ['Floor-to-ceiling windows', 'Telescope', 'Fireplace', 'Queen bed'],
+    description: 'Panoramic floor-to-ceiling glass framing the entire Kullu Valley. Wake up to the Himalayan golden hour directly from your bed, complete with a private brass telescope.',
+    features: ['Valley Panorama', 'Brass Telescope', 'Stone Hearth', 'Queen Bed'],
     image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=1400',
   },
   {
-    id: 'fireplace',
-    name: 'The Fireplace Room',
+    id: 'amber-hearth-room',
+    name: 'The Amber Hearth Room',
     price: '₹3,500',
     guests: 2,
-    description: 'Cozy, intimate, and romantic. A traditional stone fireplace and rich woolen textiles make snowy nights magical.',
-    features: ['Stone fireplace', 'Woolen textiles', 'Garden view', 'Double bed'],
+    description: 'Cozy, intimate, and wrapped in local river stone. A traditional crackling fireplace and rich hand-woven Himachali woolens make snowy mountain nights magical.',
+    features: ['Stone Fireplace', 'Himachali Woolens', 'Garden Outlook', 'Double Bed'],
     image: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&q=80&w=1400',
-  },
-  {
-    id: 'attic',
-    name: 'The Attic Nest',
-    price: '₹6,500',
-    guests: 4,
-    description: 'A magical space under the eaves. Sloped wooden ceilings, skylights for stargazing, and an incredibly cozy family atmosphere.',
-    features: ['Skylight windows', 'Sloped ceilings', 'Stargazing deck', 'Bunk + Queen'],
-    image: 'https://images.unsplash.com/photo-1616486029423-aaa4789e8c9a?auto=format&fit=crop&q=80&w=1400',
   },
 ];
 
@@ -85,7 +76,7 @@ export default function Rooms() {
       },
     });
 
-    // Recompute scrollWidth once lazy Unsplash images settle
+    // Recompute scrollWidth once eager images settle
     const imgs = track.querySelectorAll('img');
     imgs.forEach((img) => {
       if (!img.complete) {
@@ -105,7 +96,7 @@ export default function Rooms() {
 
       {/* Counter */}
       <div className={styles.counter} ref={counterRef} aria-live="polite">
-        01 / 04
+        01 / 03
       </div>
 
       {/* Section header */}
@@ -124,7 +115,8 @@ export default function Rooms() {
                 src={room.image}
                 alt={room.name}
                 className={styles.panelImage}
-                loading={i === 0 ? 'eager' : 'lazy'}
+                loading="eager"
+                decoding="async"
               />
               <div className={styles.imageOverlay} />
             </div>
@@ -152,7 +144,7 @@ export default function Rooms() {
                   <span className={styles.priceLabel}> / night · up to {room.guests} guests</span>
                 </div>
                 <MagneticButton>
-                  <a href="#booking" className={styles.bookBtn}>
+                  <a href={`#booking?room=${room.id}`} className={styles.bookBtn}>
                     Book this Room
                   </a>
                 </MagneticButton>

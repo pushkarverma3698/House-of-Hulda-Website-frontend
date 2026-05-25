@@ -29,7 +29,7 @@
 /* ── Room counter ── */
 .counter {
   position: absolute;
-  top: 2rem;
+  top: clamp(6.5rem, 8vh, 8.5rem);
   right: clamp(1.5rem, 5vw, 4rem);
   font-family: var(--font-ui);
   font-size: 0.8rem;
@@ -42,7 +42,7 @@
 /* ── Section header (top-left) ── */
 .sectionHeader {
   position: absolute;
-  top: 3.5rem;
+  top: clamp(6.5rem, 8vh, 8.5rem);
   left: clamp(1.5rem, 5vw, 4rem);
   z-index: 20;
   display: flex;
@@ -101,8 +101,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: clamp(2rem, 5vw, 5rem) clamp(2rem, 5vw, 4rem);
+  justify-content: flex-start;
+  padding: clamp(9.5rem, 12vh, 12rem) clamp(2rem, 5vw, 4rem) clamp(2rem, 5vw, 4rem);
   background: var(--mtn-900, #111B11);
   overflow-y: auto;
 }

@@ -27,7 +27,7 @@ export default function ParallaxDivider() {
       <div className={styles.imageWrap}>
         <img 
           ref={imageRef}
-          src="https://images.unsplash.com/photo-1542384701-c0e46eadea3b?auto=format&fit=crop&q=80&w=2000" 
+          src="/images/misty-divider.png" 
           alt="Misty landscape in Naggar" 
           className={styles.image}
         />

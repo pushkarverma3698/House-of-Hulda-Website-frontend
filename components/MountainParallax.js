@@ -64,6 +64,9 @@ export default function MountainParallax({ children }) {
         {/* Horizon atmospheric glow — warm cinematic light at ridge line */}
         <div className={styles.horizonGlow} />
 
+        {/* Top shadow gradient for navbar visibility */}
+        <div className={styles.topShadow} />
+
         {/* Layer 1: Himalayan background (z:1) */}
         <div className={styles.mountainLayer} ref={bgRef} style={{ zIndex: 1 }}>
           <Image src="/mountains/parallax-bg.jpg" alt="Himalayan landscape" fill sizes="100vw" className={styles.layerImage} priority />

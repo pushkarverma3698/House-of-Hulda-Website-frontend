@@ -8,7 +8,7 @@ export async function POST(request) {
     const { checkIn, checkOut, room, guests, name, email, phone, requests } = data;
 
     // Validate required fields
-    if (!checkIn || !checkOut || !room || !name || !phone) {
+    if (!checkIn || !checkOut || !room) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -29,8 +29,8 @@ export async function POST(request) {
 New Booking Request — House of Hulda
 =====================================
 
-Name: ${name}
-Phone / WhatsApp: ${phone}
+${name ? `Name: ${name}` : ''}
+${phone ? `Phone / WhatsApp: ${phone}` : ''}
 ${email ? `Email: ${email}` : ''}
 
 Room: ${room}
@@ -52,7 +52,7 @@ Submitted: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} I
       body: JSON.stringify({
         from: 'bookings@houseofhulda.com',
         to: [toEmail],
-        subject: `New Booking Request — ${name} · ${checkIn}`,
+        subject: `New Booking Request — ${name || 'Quick Booking'} · ${checkIn}`,
         text: emailBody,
       }),
     });

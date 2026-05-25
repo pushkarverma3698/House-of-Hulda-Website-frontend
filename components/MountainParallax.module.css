@@ -108,6 +108,24 @@
   filter: blur(24px);
 }
 
+/* ── Top Shadow Vignette — Gradient for navbar legibility ── */
+.topShadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 220px;
+  z-index: 15;                /* Above mountain layers, below nav (50) and content (12) */
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(7, 17, 26, 0.85) 0%,
+    rgba(7, 17, 26, 0.5) 45%,
+    rgba(7, 17, 26, 0.25) 70%,
+    transparent 100%
+  );
+}
+
 /* ── SVG Layer — Inline SVG mountain silhouettes ── */
 .svgLayer {
   position: absolute;
@@ -122,7 +140,7 @@
   left: 0;
   bottom: 0;               /* KEY: anchored to bottom of scene */
   width: 100%;
-  height: 100%;             /* Full scene height so SVG can position mountains */
+  height: 140%;             /* 140% height for unified widescreen scaling */
   pointer-events: none;
   will-change: transform;
 }
@@ -133,7 +151,7 @@
   left: 0;
   bottom: 0px;
   width: 100%;
-  height: 100%;
+  height: 140%;             /* Unify height to 140% */
   z-index: 5;
   pointer-events: none;
   will-change: transform;
@@ -150,7 +168,7 @@
   left: 0;
   bottom: 0;
   width: 100%;
-  height: 120%;             /* Taller — trees rush past quickly */
+  height: 140%;             /* Unify height to 140% */
   z-index: 8;
   pointer-events: none;
   will-change: transform;

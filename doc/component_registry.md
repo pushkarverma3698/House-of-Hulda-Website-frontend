@@ -126,3 +126,9 @@ ParallaxDivider:             ·─────· (single section, scrubbed)
 
 ### 2026-04-09 — Initial Registry — Full Audit
 Complete inventory of all 13 components with animation patterns, Z-index usage, and ScrollTrigger configurations documented. Identified Hero.jsx scroll listener as migration target.
+
+### 2026-05-25 — Parallax & Rooms Upgrades — Enhancement Suite
+- Standardized all `MountainParallax` layers (`.mountainLayer`, `.cabinLayer`, `.treesLayer`) to `140%` height to fix widescreen asset alignment.
+- Added `.topShadow` vignette overlay for sticky navbar readability.
+- Re-architected `Rooms.jsx` to display 3 rooms (Whisperwood, Cloudloft, Amber Hearth), shifted headers/content down to clear sticky navbar, and enabled eager image loading to resolve scroll lag.
+- Enhanced booking form redirect to WhatsApp number `919779260517` and made Name/Phone optional for a quick checkout.
