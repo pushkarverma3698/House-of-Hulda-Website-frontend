@@ -147,13 +147,9 @@ export default function Rooms() {
               </ul>
 
               <div className={styles.roomFooter}>
-                <div className={styles.pricing}>
-                  <span className={styles.price}>{room.price}</span>
-                  <span className={styles.priceLabel}> / night · up to {room.guests} guests</span>
-                </div>
                 <MagneticButton>
                   <a href="#booking" className={styles.bookBtn}>
-                    Book this Room
+                    Inquire Now
                   </a>
                 </MagneticButton>
               </div>
