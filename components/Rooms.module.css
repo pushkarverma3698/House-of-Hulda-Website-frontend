@@ -148,32 +148,10 @@
   flex-shrink: 0;
 }
 
-/* ── Pricing + CTA ── */
+/* ── CTA ── */
 .roomFooter {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.pricing {
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-}
-
-.price {
-  font-family: var(--font-serif);
-  font-size: 1.75rem;
-  font-weight: 500;
-  color: var(--gold-light, #D4A76A);
-}
-
-.priceLabel {
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-  color: rgba(245, 244, 239, 0.4);
-  letter-spacing: 0.05em;
 }
 
 .bookBtn {
