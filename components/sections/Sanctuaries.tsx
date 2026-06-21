@@ -1,5 +1,9 @@
+"use client";
+
+import { useRef } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { Placeholder } from "@/components/ui/Placeholder";
+import { useScrollFrame, useScrollEngine } from "@/lib/scroll-progress";
 
 /**
  * ACT III — the rooms. Honest product: hand-built kathkuni (stone + deodar)
@@ -31,6 +35,20 @@ const ROOMS = [
 ];
 
 export function Sanctuaries() {
+  const offsetRef = useRef<HTMLDivElement>(null);
+  const { reducedMotion } = useScrollEngine();
+
+  useScrollFrame((p) => {
+    if (reducedMotion || !offsetRef.current) return;
+    // Map scroll progress to float the middle card relative to neighbors
+    const startP = 0.28;
+    const endP = 0.68;
+    const normalized = Math.max(0, Math.min(1, (p - startP) / (endP - startP)));
+    // Floating y-shift
+    const yShift = (40 - normalized * 90).toFixed(1);
+    offsetRef.current.style.transform = `translate3d(0, ${yShift}px, 0)`;
+  });
+
   return (
     <section
       id="sanctuaries"
@@ -54,16 +72,36 @@ export function Sanctuaries() {
       </Reveal>
 
       <div className="grid gap-[18px] [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
-        {ROOMS.map((r, i) => (
-          <Reveal key={r.id} delay={i * 0.08} className={r.offset ? "mt-[6vh]" : ""}>
-            <div className="h-[clamp(280px,42vh,420px)]">
-              <Placeholder label={r.caption} src={r.src} alt={r.alt} tone="warm" />
-            </div>
-            <div className="mt-[14px] text-[10.5px] uppercase tracking-[0.2em] text-cream/60">
-              {r.caption}
-            </div>
-          </Reveal>
-        ))}
+        {ROOMS.map((r, i) => {
+          if (r.offset) {
+            return (
+              <div 
+                key={r.id} 
+                ref={offsetRef} 
+                className="transition-transform duration-100 ease-out mt-[6vh] will-change-transform"
+              >
+                <Reveal delay={i * 0.08}>
+                  <div className="h-[clamp(280px,42vh,420px)]">
+                    <Placeholder label={r.caption} src={r.src} alt={r.alt} tone="warm" />
+                  </div>
+                  <div className="mt-[14px] text-[10.5px] uppercase tracking-[0.2em] text-cream/60">
+                    {r.caption}
+                  </div>
+                </Reveal>
+              </div>
+            );
+          }
+          return (
+            <Reveal key={r.id} delay={i * 0.08}>
+              <div className="h-[clamp(280px,42vh,420px)]">
+                <Placeholder label={r.caption} src={r.src} alt={r.alt} tone="warm" />
+              </div>
+              <div className="mt-[14px] text-[10.5px] uppercase tracking-[0.2em] text-cream/60">
+                {r.caption}
+              </div>
+            </Reveal>
+          );
+        })}
       </div>
 
       <Reveal

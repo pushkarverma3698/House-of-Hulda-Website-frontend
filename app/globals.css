@@ -90,14 +90,15 @@ body {
 /* reveal-on-scroll: text rises and settles (never slides aggressively) */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(40px) skewY(1.0deg) scale(0.98);
+  transform-origin: 50% 100%;
   transition:
-    opacity 1.15s cubic-bezier(0.2, 0.7, 0.2, 1),
-    transform 1.15s cubic-bezier(0.2, 0.7, 0.2, 1);
+    opacity 1.25s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) skewY(0deg) scale(1);
 }
 
 /* ---- warm editorial craft layer (light sub-pages) ----
@@ -139,18 +140,82 @@ body {
   animation: kenburns 22s ease-out forwards;
 }
 
+/* breathing lamp pulse keyframe */
+@keyframes lampPulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 0.7;
+  }
+}
+
+/* dual-layer deep mist/fog drifts */
+@keyframes fogDriftA {
+  0% { transform: translate3d(-8%, -3%, 0) scale(1.1); opacity: 0; }
+  10% { opacity: 0.22; }
+  50% { transform: translate3d(8%, 3%, 0) scale(1.22); opacity: 0.35; }
+  90% { opacity: 0.22; }
+  100% { transform: translate3d(-8%, -3%, 0) scale(1.1); opacity: 0; }
+}
+@keyframes fogDriftB {
+  0% { transform: translate3d(6%, 8%, 0) scale(1.28) rotate(-1deg); opacity: 0; }
+  15% { opacity: 0.26; }
+  50% { transform: translate3d(-6%, -8%, 0) scale(1.12) rotate(1deg); opacity: 0.14; }
+  85% { opacity: 0.26; }
+  100% { transform: translate3d(6%, 8%, 0) scale(1.28) rotate(-1deg); opacity: 0; }
+}
+
+/* draw constellation line animation */
+@keyframes drawPath {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Glassmorphic dial panel reflection effect */
+.glass-panel-reflection {
+  position: relative;
+  overflow: hidden;
+}
+.glass-panel-reflection::after {
+  content: "";
+  position: absolute;
+  top: -150%;
+  left: -150%;
+  width: 300%;
+  height: 300%;
+  background: linear-gradient(
+    45deg,
+    transparent 45%,
+    rgba(255, 255, 255, 0.04) 48%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.04) 52%,
+    transparent 55%
+  );
+  transform: rotate(-15deg);
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.glass-panel-reflection:hover::after {
+  transform: translate(50%, 50%) rotate(-15deg);
+}
+
 /* Full prefers-reduced-motion path: cross-fades, no heavy motion, story intact */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation: none !important;
+    transition: none !important;
   }
   html {
     scroll-behavior: auto;
   }
   .reveal {
-    transition: opacity 0.6s ease;
-    transform: none;
+    transition: opacity 0.6s ease !important;
+    transform: none !important;
   }
 }
