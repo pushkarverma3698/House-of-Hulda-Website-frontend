@@ -1,79 +1,119 @@
 import Link from "next/link";
 import { BUSINESS, whatsappLink } from "@/lib/site-config";
 
+const NAV = [
+  { href: "/stay", label: "Stay" },
+  { href: "/cafe", label: "Café" },
+  { href: "/naggar", label: "Naggar" },
+  { href: "/blog", label: "Journal" },
+];
+
 /**
- * Static cinematic chrome for the content routes (/stay, /cafe, /naggar, /blog).
- * No scroll engine here — these are calm, readable cluster pages that still wear
- * the house's dark, warm, deodar-and-lantern aesthetic.
+ * Warm editorial chrome for the content routes (/stay, /cafe, /naggar, /blog).
+ *
+ * The cinematic homepage stays dark; these pages flip to a bright, printed-paper
+ * world — bone stock, deodar-brown ink, terracotta accents — the way a boutique
+ * mountain stay actually presents itself. A barely-there paper grain + warm
+ * vignette keep the background from reading as flat white. The footer drops back
+ * into deep deodar so the page closes on a warm, grounded note.
  */
 export function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen">
-      {/* fixed graded backdrop */}
-      <div
-        aria-hidden
-        className="fixed inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(120% 80% at 50% -10%, rgba(217,154,78,0.10), transparent 55%), linear-gradient(180deg, #0a0f17 0%, #0d1119 55%, #120f0c 100%)",
-        }}
-      />
+    <div className="relative min-h-screen bg-bone text-bark">
+      <div aria-hidden className="paper-vignette" />
+      <div aria-hidden className="paper-grain" />
 
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-white/8 bg-[rgba(10,15,23,0.62)] px-[clamp(20px,4vw,52px)] py-[18px] backdrop-blur-[10px]">
-        <Link href="/" className="block no-underline">
-          <div className="font-display text-[20px] font-semibold leading-none tracking-[0.02em] text-cream">
-            House&nbsp;of&nbsp;Hulda
-          </div>
-          <div className="mt-[5px] text-[9px] uppercase tracking-[0.34em] text-cream/55">
-            Naggar · Manali
-          </div>
-        </Link>
-        <nav className="flex items-center gap-[clamp(12px,2vw,26px)] text-[11px] uppercase tracking-[0.16em] text-cream/70">
-          <Link href="/stay" className="hidden transition-colors hover:text-cream sm:inline">Stay</Link>
-          <Link href="/cafe" className="hidden transition-colors hover:text-cream sm:inline">Café</Link>
-          <Link href="/naggar" className="hidden transition-colors hover:text-cream sm:inline">Naggar</Link>
-          <Link href="/blog" className="hidden transition-colors hover:text-cream sm:inline">Journal</Link>
-          <Link
-            href="/#the-invitation"
-            className="rounded-full bg-cream/95 px-[16px] py-[9px] text-[10px] font-bold tracking-[0.16em] text-ink transition-transform hover:scale-[1.03]"
-          >
-            Reserve
+      <header className="sticky top-0 z-40 border-b border-bark/8 bg-[rgba(246,241,231,0.82)] backdrop-blur-[12px]">
+        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-[clamp(20px,5vw,56px)] py-[15px]">
+          <Link href="/" className="block no-underline">
+            <div className="font-display text-[21px] font-semibold leading-none tracking-[0.01em] text-bark">
+              House&nbsp;of&nbsp;Hulda
+            </div>
+            <div className="mt-[5px] text-[9px] uppercase tracking-[0.34em] text-deodar/70">
+              Naggar · Manali
+            </div>
           </Link>
-        </nav>
+          <nav className="flex items-center gap-[clamp(14px,2vw,28px)] text-[11px] uppercase tracking-[0.16em] text-deodar">
+            {NAV.map((n) => (
+              <Link key={n.href} href={n.href} className="hidden transition-colors hover:text-clay sm:inline">
+                {n.label}
+              </Link>
+            ))}
+            <Link
+              href="/#the-invitation"
+              className="rounded-full bg-clay px-[17px] py-[9px] text-[10px] font-bold tracking-[0.16em] text-parchment transition-transform hover:scale-[1.04]"
+            >
+              Reserve
+            </Link>
+          </nav>
+        </div>
       </header>
 
-      <main className="relative z-[1]">{children}</main>
+      <main className="relative z-[3]">{children}</main>
 
-      <footer className="border-t border-white/10 px-[clamp(20px,5vw,40px)] py-[48px]">
-        <div className="mx-auto flex max-w-[1100px] flex-wrap items-end justify-between gap-[24px]">
-          <div>
-            <div className="font-display text-[22px] font-semibold leading-none text-cream">House of Hulda</div>
-            <div className="mt-[10px] text-[11px] uppercase tracking-[0.2em] text-cream/55">
+      <footer className="relative z-[3] mt-[clamp(60px,12vh,140px)] bg-bark text-[rgba(246,241,231,0.92)]">
+        <div className="mx-auto flex max-w-[1200px] flex-wrap items-start justify-between gap-[36px] px-[clamp(20px,5vw,56px)] py-[clamp(48px,8vh,84px)]">
+          <div className="max-w-[34ch]">
+            <div className="font-display text-[26px] font-semibold leading-none text-parchment">House of Hulda</div>
+            <div className="mt-[12px] text-[11px] uppercase tracking-[0.2em] text-cream/55">
               Naggar · Manali · Himachal Pradesh · 2,000m
             </div>
-            <div className="mt-[12px] flex flex-wrap items-center gap-[14px] text-[12px] text-cream/70">
+            <p className="mt-[16px] text-[14px] font-light leading-[1.7] text-cream/70">
+              A hand-built kathkuni home in stone and deodar — rooms, an attic café and a table for
+              everyone, held open above the Kullu valley.
+            </p>
+            <div className="mt-[18px] flex flex-wrap items-center gap-[14px] text-[13px]">
               <a
                 href={whatsappLink("Hello House of Hulda! I'd love to know more about staying with you.")}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-colors hover:text-cream"
+                className="text-cream/85 transition-colors hover:text-amber"
               >
                 {BUSINESS.phoneDisplay}
               </a>
               <span className="text-cream/25">·</span>
-              <a href={`mailto:${BUSINESS.email}`} className="transition-colors hover:text-cream">
+              <a href={`mailto:${BUSINESS.email}`} className="text-cream/85 transition-colors hover:text-amber">
                 {BUSINESS.email}
               </a>
             </div>
           </div>
-          <div className="flex items-center gap-[18px] text-[11px] uppercase tracking-[0.14em] text-cream/60">
-            <a href={BUSINESS.social.instagram} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-cream">
-              Instagram
-            </a>
-            <a href={BUSINESS.social.airbnb} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-cream">
-              Airbnb
-            </a>
-            <Link href="/#the-invitation" className="transition-colors hover:text-cream">Reserve</Link>
+
+          <div className="flex flex-col items-start gap-[16px] md:items-end">
+            <nav className="flex flex-wrap gap-[18px] text-[11px] uppercase tracking-[0.16em] text-cream/65">
+              {NAV.map((n) => (
+                <Link key={n.href} href={n.href} className="transition-colors hover:text-amber">
+                  {n.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="flex flex-wrap items-center gap-[16px] text-[11px] uppercase tracking-[0.14em] text-cream/65">
+              <a
+                href={BUSINESS.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-amber"
+                aria-label="Directions to House of Hulda, Naggar"
+              >
+                Directions
+              </a>
+              <a href={BUSINESS.social.instagram} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-amber">
+                Instagram
+              </a>
+              <a href={BUSINESS.social.airbnb} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-amber">
+                Airbnb
+              </a>
+            </div>
+            <Link
+              href="/#the-invitation"
+              className="mt-[6px] rounded-full bg-amber px-[22px] py-[12px] text-[11px] font-bold uppercase tracking-[0.14em] text-ink transition-transform hover:scale-[1.04]"
+            >
+              Reserve your stay
+            </Link>
+          </div>
+        </div>
+        <div className="border-t border-cream/10 px-[clamp(20px,5vw,56px)] py-[20px] text-[11px] text-cream/40">
+          <div className="mx-auto max-w-[1200px]">
+            © {new Date().getFullYear()} {BUSINESS.legalName} · Naggar, Himachal Pradesh
           </div>
         </div>
       </footer>

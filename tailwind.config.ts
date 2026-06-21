@@ -22,6 +22,15 @@ const config: Config = {
         ember: "#c2603a",
         // Base canvas before grade kicks in
         canvas: "#0a0f17",
+
+        // ── Warm editorial palette (light sub-pages: /stay /cafe /naggar /blog) ──
+        parchment: "#FBF7EF", // lightest surface
+        bone: "#F6F1E7", // page background
+        sand: "#ECE2CF", // bands / cards
+        clay: "#B05C36", // terracotta accent + buttons
+        bark: "#2E2117", // primary text on light
+        deodar: "#5A4632", // secondary brown text
+        moss: "#6F6B4C", // sage tertiary
       },
       fontFamily: {
         display: ["var(--font-cormorant)", "Georgia", "serif"],

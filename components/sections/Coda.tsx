@@ -12,6 +12,29 @@ const EXPLORE = [
   { href: "/blog", label: "Journal" },
 ];
 
+const FAQ_ITEMS = [
+  {
+    q: "Is House of Hulda a private home or a shared stay?",
+    a: "Both. You can book a private kathkuni room (styled with mud plaster and deodar beams), a single bed in our shared attic café-loft, or rent the entire house for a group, family, or team offsite.",
+  },
+  {
+    q: "Do you serve food?",
+    a: "Yes — our kitchen serves authentic Himachali home-cooked thalis, mountain breakfasts, and fresh coffee. The attic-loft café is open through the daytime, and at night, we gather around one communal table.",
+  },
+  {
+    q: "How is the WiFi speed for remote work?",
+    a: "We have high-speed, stable fiber broadband that covers the entire property, including the private rooms, deck, and attic café. It's reliable for video calls, heavy code pushes, and remote work.",
+  },
+  {
+    q: "Can we host startup team offsites?",
+    a: "Absolutely. The house is designed for structured focus and deep work. We can host small teams (up to 8 people) with full boarding, private rooms, and dedicated workspace in the attic café.",
+  },
+  {
+    q: "How do I reach Naggar from Manali?",
+    a: "Naggar sits quietly above the Beas river, about 22 km from Manali (a 45-minute taxi drive) and 30 km from Bhuntar Airport. It's easily reachable by car or local taxi.",
+  },
+];
+
 /**
  * ACT VII — the coda. The journey opened on "a light is on"; it closes by
  * promising that light stays on for the guest. Image-led, no abstract
@@ -97,6 +120,34 @@ export function Coda() {
           </figure>
         </Reveal>
       </div>
+
+      {/* FAQ Section */}
+      <Reveal className="border-t border-white/12 pt-[10vh] pb-[8vh]">
+        <div className="max-w-[800px] mx-auto">
+          <div className="mb-[16px] text-[11px] uppercase tracking-[0.34em] text-cream/55 text-center md:text-left">
+            Common Questions
+          </div>
+          <h3 className="m-0 font-display text-[clamp(28px,3.6vw,46px)] font-medium leading-[1.08] text-center md:text-left mb-[36px]">
+            Frequently Asked Questions
+          </h3>
+          <div className="space-y-[12px] text-left">
+            {FAQ_ITEMS.map((faq, idx) => (
+              <details
+                key={idx}
+                className="group border-b border-white/8 pb-[18px] [&_summary::-webkit-details-marker]:hidden"
+              >
+                <summary className="flex items-center justify-between cursor-pointer list-none text-[15.5px] font-medium text-cream/90 hover:text-cream transition-colors py-[8px]">
+                  <span>{faq.q}</span>
+                  <span className="ml-[16px] text-amber text-[20px] font-light transition-transform duration-300 group-open:rotate-45">+</span>
+                </summary>
+                <p className="mt-[8px] text-[14px] font-light leading-[1.75] text-cream/70 max-w-[72ch]">
+                  {faq.a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </Reveal>
 
       {/* footer */}
       <footer className="flex flex-wrap items-end justify-between gap-[32px] border-t border-white/12 pb-[60px] pt-[48px]">

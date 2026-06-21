@@ -34,11 +34,11 @@ export const BUSINESS = {
     country: "IN",
     postalCode: "175130",
   },
-  // TODO[launch]: exact rooftop pin from Google Business Profile (Naggar centre for now)
-  geo: { lat: 32.1, lng: 77.17 },
+  // Exact pin from the "House Of Hulda Manali" Google Business Profile.
+  geo: { lat: 32.1215824, lng: 77.1583061 },
 
-  // TODO[launch]: replace with the Google Business Profile share link once live
-  mapsUrl: "https://maps.google.com/?q=Naggar+Manali+Himachal+Pradesh+India",
+  mapsUrl:
+    "https://www.google.com/maps/place/House+Of+Hulda+Manali/@32.1215824,77.1583061,17z/data=!3m1!4b1!4m2!3m1!1s0x39048b079fa0bca1:0x1265b886fe50e657",
 
   social: {
     instagram: "https://www.instagram.com/houseofhuldamanali/",

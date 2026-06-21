@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { PageShell } from "@/components/layout/PageShell";
 import { Markdown } from "@/lib/markdown";
 import { getAllPosts, getPost } from "@/lib/blog";
-import { SITE } from "@/lib/schema";
+import { SITE, breadcrumbJsonLd } from "@/lib/schema";
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -56,27 +56,34 @@ export default async function BlogPostPage({ params }: Params) {
     mainEntityOfPage: `${SITE.url}/blog/${post.slug}`,
   };
 
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: "Home", url: "/" },
+    { name: "Journal", url: "/blog" },
+    { name: post.title, url: `/blog/${post.slug}` },
+  ]);
+
   return (
     <PageShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
       <article className="mx-auto max-w-[760px] px-[clamp(20px,5vw,40px)] pt-[clamp(60px,12vh,120px)] pb-[clamp(40px,8vh,90px)]">
-        <Link href="/blog" className="text-[11px] uppercase tracking-[0.18em] text-cream/55 transition-colors hover:text-cream">
+        <Link href="/blog" className="text-[11px] font-medium uppercase tracking-[0.18em] text-deodar transition-colors hover:text-clay">
           ← The journal
         </Link>
         {post.date && (
-          <div className="mt-[24px] text-[11px] uppercase tracking-[0.16em] text-amber/70">{formatDate(post.date)}</div>
+          <div className="mt-[24px] text-[11px] font-bold uppercase tracking-[0.16em] text-clay">{formatDate(post.date)}</div>
         )}
-        <div className="mt-[16px]">
+        <div className="mt-[20px]">
           <Markdown source={post.body} />
         </div>
 
-        <div className="mt-[56px] rounded-[16px] border border-white/10 bg-white/[0.03] p-[clamp(24px,4vw,40px)] text-center">
-          <h2 className="m-0 font-display text-[clamp(24px,3.2vw,36px)] font-medium text-cream">
+        <div className="mt-[64px] rounded-[20px] border border-bark/8 bg-sand/20 p-[clamp(24px,4vw,40px)] text-center shadow-[0_20px_50px_-25px_rgba(46,33,23,0.12)]">
+          <h2 className="m-0 font-display text-[clamp(24px,3.2vw,36px)] font-medium text-bark">
             Come see it for yourself.
           </h2>
           <Link
             href="/#the-invitation"
-            className="mt-[22px] inline-block rounded-full bg-amber px-[28px] py-[15px] text-[12px] font-bold uppercase tracking-[0.14em] text-ink shadow-[0_10px_30px_rgba(217,154,78,0.28)] transition-transform hover:scale-[1.03]"
+            className="mt-[24px] inline-block rounded-full bg-clay px-[30px] py-[15px] text-[12px] font-bold uppercase tracking-[0.16em] text-parchment shadow-[0_10px_30px_rgba(176,92,54,0.22)] transition-transform hover:scale-[1.03] hover:bg-clay/90"
           >
             Reserve your stay
           </Link>

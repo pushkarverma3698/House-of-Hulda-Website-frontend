@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
+import { EditorialHero } from "@/components/editorial/EditorialHero";
 import { getAllPosts } from "@/lib/blog";
+import { breadcrumbJsonLd } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Journal — Naggar, Kathkuni & Slow Mountain Living",
@@ -20,34 +22,40 @@ function formatDate(iso: string): string {
 
 export default function BlogIndex() {
   const posts = getAllPosts();
+  const breadcrumbs = breadcrumbJsonLd([
+    { name: "Home", url: "/" },
+    { name: "Journal", url: "/blog" },
+  ]);
 
   return (
     <PageShell>
-      <section className="mx-auto max-w-[860px] px-[clamp(20px,5vw,40px)] pt-[clamp(60px,12vh,120px)]">
-        <div className="text-[11px] uppercase tracking-[0.34em] text-amber/80">The journal</div>
-        <h1 className="mt-[16px] font-display text-[clamp(40px,7vw,80px)] font-medium leading-[1.02] tracking-[-0.02em] text-cream">
-          Notes from the valley.
-        </h1>
-        <p className="mt-[20px] max-w-[56ch] text-[clamp(16px,1.9vw,19px)] font-light leading-[1.75] text-cream/80">
-          Slow reading on Naggar, kathkuni stone-and-deodar building, Himachali food and what a
-          mountain workation really feels like.
-        </p>
-      </section>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
+      <EditorialHero
+        src="/images/journal-window.jpg"
+        alt="A quiet window corner with a journal overlooking the misty valley at House of Hulda"
+        eyebrow="The Journal"
+        title="Notes from the valley."
+        intro="Slow reading on Naggar, kathkuni stone-and-deodar building, Himachali food, and what a mountain workation or team offsite in the Himalayas really feels like."
+        meta="Thoughts · Stories · Guides"
+      />
 
-      <section className="mx-auto mt-[clamp(44px,8vh,80px)] max-w-[860px] px-[clamp(20px,5vw,40px)] pb-[clamp(40px,8vh,90px)]">
-        <ul className="divide-y divide-white/10 border-t border-white/10">
+      <section className="mx-auto mt-[clamp(56px,10vh,110px)] max-w-[860px] px-[clamp(20px,5vw,56px)] pb-[clamp(40px,8vh,90px)]">
+        <ul className="divide-y divide-bark/10 border-t border-bark/10">
           {posts.map((p) => (
             <li key={p.slug}>
-              <Link href={`/blog/${p.slug}`} className="group block py-[clamp(22px,3.4vh,34px)]">
+              <Link href={`/blog/${p.slug}`} className="group block py-[clamp(24px,3.8vh,38px)]">
                 {p.date && (
-                  <div className="text-[11px] uppercase tracking-[0.16em] text-cream/45">{formatDate(p.date)}</div>
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-deodar/60">{formatDate(p.date)}</div>
                 )}
-                <h2 className="mt-[8px] font-display text-[clamp(22px,3vw,30px)] font-medium leading-[1.2] text-cream transition-colors group-hover:text-amber">
+                <h2 className="mt-[8px] font-display text-[clamp(24px,3vw,32px)] font-medium leading-[1.2] text-bark transition-colors group-hover:text-clay">
                   {p.title}
                 </h2>
-                <p className="mt-[10px] max-w-[64ch] text-[14.5px] font-light leading-[1.65] text-cream/65">
+                <p className="mt-[10px] max-w-[68ch] text-[14.5px] font-light leading-[1.65] text-deodar">
                   {p.description}
                 </p>
+                <div className="mt-[14px] text-[11px] font-semibold uppercase tracking-[0.14em] text-clay inline-flex items-center gap-[4px]">
+                  Read story <span className="transition-transform group-hover:translate-x-[3px]">→</span>
+                </div>
               </Link>
             </li>
           ))}

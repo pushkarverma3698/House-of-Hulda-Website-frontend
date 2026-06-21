@@ -20,8 +20,19 @@ export function Threshold() {
     <section
       id="threshold"
       aria-label="Act 0 · Threshold"
-      className="flex min-h-screen flex-col items-center justify-center px-[clamp(20px,5vw,40px)] pb-[90px] pt-[120px] text-center"
+      className="relative flex min-h-screen flex-col items-center justify-center px-[clamp(20px,5vw,40px)] pb-[90px] pt-[120px] text-center"
     >
+      {/* Subtle warm breathing glow representing the homestay's welcoming light */}
+      <div 
+        aria-hidden 
+        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[50vw] w-[50vw] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60"
+        style={{
+          background: "radial-gradient(circle, rgba(255,196,120,0.08) 0%, rgba(255,170,70,0.02) 45%, rgba(0,0,0,0) 70%)",
+          filter: "blur(40px)",
+          animation: "windowFlicker 6s ease-in-out infinite",
+        }}
+      />
+
       <Reveal className="mb-[34px] text-[11px] uppercase tracking-[0.4em] text-cream/65">
         Naggar · Himachal Pradesh · 2,000m
       </Reveal>

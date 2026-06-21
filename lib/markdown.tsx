@@ -14,13 +14,13 @@ function renderInline(text: string, keyBase: string): ReactNode[] {
   return parts.map((part, i) => {
     const key = `${keyBase}-${i}`;
     const bold = part.match(/^\*\*([^*]+)\*\*$/);
-    if (bold) return <strong key={key}>{bold[1]}</strong>;
+    if (bold) return <strong key={key} className="font-semibold text-bark">{bold[1]}</strong>;
     const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (link) {
       const [, label, href] = link;
       if (href.startsWith("/")) {
         return (
-          <Link key={key} href={href} className="text-amber underline-offset-4 hover:underline">
+          <Link key={key} href={href} className="text-clay font-medium underline underline-offset-4 hover:text-clay/85">
             {label}
           </Link>
         );
@@ -31,7 +31,7 @@ function renderInline(text: string, keyBase: string): ReactNode[] {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-amber underline-offset-4 hover:underline"
+          className="text-clay font-medium underline underline-offset-4 hover:text-clay/85"
         >
           {label}
         </a>
@@ -51,23 +51,23 @@ export function Markdown({ source }: { source: string }) {
         if (!block) return null;
         const key = `b-${i}`;
 
-        if (block === "---") return <hr key={key} className="my-[40px] border-white/12" />;
+        if (block === "---") return <hr key={key} className="my-[40px] border-bark/12" />;
 
         if (block.startsWith("### "))
           return (
-            <h3 key={key} className="mt-[40px] mb-[14px] font-display text-[clamp(20px,2.4vw,26px)] font-medium text-cream">
+            <h3 key={key} className="mt-[40px] mb-[14px] font-display text-[clamp(20px,2.4vw,26px)] font-medium text-bark">
               {renderInline(block.slice(4), key)}
             </h3>
           );
         if (block.startsWith("## "))
           return (
-            <h2 key={key} className="mt-[52px] mb-[18px] font-display text-[clamp(26px,3.4vw,38px)] font-medium leading-[1.15] text-cream">
+            <h2 key={key} className="mt-[52px] mb-[18px] font-display text-[clamp(26px,3.4vw,38px)] font-medium leading-[1.15] text-bark">
               {renderInline(block.slice(3), key)}
             </h2>
           );
         if (block.startsWith("# "))
           return (
-            <h2 key={key} className="mt-[8px] mb-[20px] font-display text-[clamp(30px,4.4vw,48px)] font-medium leading-[1.1] text-cream">
+            <h2 key={key} className="mt-[8px] mb-[20px] font-display text-[clamp(30px,4.4vw,48px)] font-medium leading-[1.1] text-bark">
               {renderInline(block.slice(2), key)}
             </h2>
           );
@@ -75,7 +75,7 @@ export function Markdown({ source }: { source: string }) {
         if (/^[-*] /.test(block)) {
           const items = block.split("\n").filter((l) => /^[-*] /.test(l.trim()));
           return (
-            <ul key={key} className="my-[18px] list-disc space-y-[8px] pl-[22px] text-cream/80">
+            <ul key={key} className="my-[18px] list-disc space-y-[8px] pl-[22px] text-deodar">
               {items.map((li, j) => (
                 <li key={`${key}-${j}`} className="leading-[1.7]">
                   {renderInline(li.trim().replace(/^[-*] /, ""), `${key}-${j}`)}
@@ -86,7 +86,7 @@ export function Markdown({ source }: { source: string }) {
         }
 
         return (
-          <p key={key} className="my-[18px] text-[clamp(15px,1.7vw,17px)] font-light leading-[1.85] text-cream/80">
+          <p key={key} className="my-[18px] text-[clamp(15px,1.7vw,17.5px)] font-light leading-[1.85] text-deodar">
             {renderInline(block, key)}
           </p>
         );
