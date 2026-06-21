@@ -33,6 +33,17 @@ export function Arrival() {
   
   const [activeIndex, setActiveIndex] = useState(1); // default to Golden Hour
   const [mode, setMode] = useState<"auto" | "manual">("auto");
+  const [displayText, setDisplayText] = useState(TIMES[1].desc);
+  const [fadeState, setFadeState] = useState<"in" | "out">("in");
+
+  useEffect(() => {
+    setFadeState("out");
+    const t = setTimeout(() => {
+      setDisplayText(TIMES[activeIndex].desc);
+      setFadeState("in");
+    }, 200);
+    return () => clearTimeout(t);
+  }, [activeIndex]);
   
   const currentTodRef = useRef(0.35);
   const targetTodRef = useRef(0.35);
@@ -218,7 +229,7 @@ export function Arrival() {
           </div>
 
           {/* Atmosphere Dial Panel */}
-          <div className="mt-[clamp(24px,3.8vh,36px)] w-full max-w-[480px] rounded-[24px] border border-white/10 bg-black/40 p-[20px] backdrop-blur-[16px] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+          <div className="mt-[clamp(24px,3.8vh,36px)] w-full max-w-[480px] rounded-[24px] border border-white/10 bg-black/40 p-[20px] backdrop-blur-[16px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] glass-panel-reflection">
             <div className="flex items-center justify-between border-b border-white/8 pb-[10px] mb-[16px]">
               <span className="text-[9px] uppercase tracking-[0.25em] text-white/50 flex items-center gap-[6px]">
                 <span className={`h-[5px] w-[5px] rounded-full ${mode === "auto" ? "bg-amber animate-pulse" : "bg-white/40"}`} />
@@ -248,8 +259,8 @@ export function Arrival() {
                     <div
                       className={`w-[42px] h-[42px] rounded-full border flex items-center justify-center transition-all duration-300 ${
                         isActive
-                          ? "border-amber bg-amber/20 text-amber shadow-[0_0_15px_rgba(217,154,78,0.4)]"
-                          : "border-white/10 bg-white/5 text-white/60 group-hover:border-white/30 group-hover:bg-white/10 group-hover:text-white"
+                          ? "border-amber bg-amber/20 text-amber shadow-[0_0_18px_rgba(217,154,78,0.5)] scale-[1.06]"
+                          : "border-white/10 bg-white/5 text-white/60 group-hover:border-white/30 group-hover:bg-white/10 group-hover:text-white group-hover:scale-[1.03]"
                       }`}
                     >
                       {idx === 0 && (
@@ -289,8 +300,12 @@ export function Arrival() {
 
             {/* Description Block */}
             <div className="mt-[16px] min-h-[44px] text-left border-t border-white/5 pt-[12px] flex flex-col justify-center">
-              <p className="m-0 font-display italic text-[14px] leading-[1.4] text-cream/90 transition-all duration-300">
-                {TIMES[activeIndex].desc}
+              <p
+                className={`m-0 font-display italic text-[14px] leading-[1.4] text-cream/90 transition-all duration-300 ${
+                  fadeState === "in" ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
+                }`}
+              >
+                {displayText}
               </p>
             </div>
           </div>

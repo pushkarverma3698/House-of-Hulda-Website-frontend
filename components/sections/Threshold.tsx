@@ -25,11 +25,11 @@ export function Threshold() {
       {/* Subtle warm breathing glow representing the homestay's welcoming light */}
       <div 
         aria-hidden 
-        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[50vw] w-[50vw] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60"
+        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[50vw] w-[50vw] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(255,196,120,0.08) 0%, rgba(255,170,70,0.02) 45%, rgba(0,0,0,0) 70%)",
-          filter: "blur(40px)",
-          animation: "windowFlicker 6s ease-in-out infinite",
+          background: "radial-gradient(circle, rgba(255,196,120,0.12) 0%, rgba(255,170,70,0.03) 45%, rgba(0,0,0,0) 70%)",
+          filter: "blur(50px)",
+          animation: "lampPulse 7s ease-in-out infinite",
         }}
       />
 

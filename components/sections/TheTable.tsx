@@ -44,6 +44,16 @@ export function TheTable() {
               animation: "steamRise 5s ease-in infinite 1.2s",
             }}
           />
+          <div
+            className="pointer-events-none absolute h-[44px] w-[6px] rounded-full"
+            style={{
+              left: "50%",
+              top: "29%",
+              background: "linear-gradient(0deg,rgba(255,240,220,0),rgba(255,240,220,0.35))",
+              filter: "blur(6px)",
+              animation: "steamRise 4.7s ease-in infinite 2.3s",
+            }}
+          />
         </Reveal>
 
         <div>
