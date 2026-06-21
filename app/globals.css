@@ -1,275 +1,117 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap');
-
-/* ─── DESIGN TOKENS ─────────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  /* ── ALTITUDE ZONE PALETTE ─────────────────────────────────────────── */
-
-  /* Sky Zone (hero / top) */
-  --sky-900:       #07111A;   /* deep midnight navy */
-  --sky-700:       #0D2033;   /* dark storm blue */
-  --sky-300:       #8AAEC4;   /* haze blue */
-
-  /* Mountain Zone (mid-page dark sections) */
-  --mtn-900:       #111B11;   /* deepest forest */
-  --mtn-700:       #1A2E1A;   /* forest deep */
-  --mtn-500:       #2D4A2D;   /* pine mid */
-  --mtn-300:       #5A7A5A;   /* sage light */
-
-  /* Hearth Zone (warm content sections) */
-  --hearth-bg:     #F5F0E8;   /* warm cream */
-  --hearth-alt:    #EDE5D8;   /* parchment */
-  --cedar:         #8B5E3C;   /* rich cedar brown */
-  --cedar-light:   #C4956A;   /* warm tan */
-  --gold:          #C4924A;   /* lantern gold */
-  --gold-light:    #D4A76A;   /* soft gold */
-
-  /* Neutrals */
-  --snow:          #F7F4EF;   /* primary light bg */
-  --ink:           #1A1A1A;   /* primary text */
-  --stone:         #8C8C7A;   /* muted/secondary text */
-
-  /* Legacy aliases (backward compat for existing components) */
-  --forest-deep:   var(--mtn-700);
-  --deodar:        #3D5A3D;
-  --parchment:     var(--hearth-alt);
-  --mist:          #D4DCD4;
-  --moss:          #6B7F5E;
-  --lantern:       var(--gold-light);
-
-  /* ── SEMANTIC ACTIVE VARS ───────────────────────────────────────────── */
-  --bg:            var(--snow);
-  --bg-alt:        var(--hearth-alt);
-  --primary:       var(--mtn-700);
-  --accent:        var(--cedar-light);
-  --accent-light:  var(--gold-light);
-  --green:         var(--mtn-500);
-  --green-light:   var(--mtn-300);
-  --text:          var(--ink);
-  --border:        rgba(61,90,61,0.15);
-  --nav-bg:        rgba(26,46,26,0.0);
-
-  /* ── TYPOGRAPHY ──────────────────────────────────────────────────────── */
-  --font-serif:    'Playfair Display', Georgia, serif;
-  --font-sans:     'Inter', system-ui, sans-serif;
-  --font-ui:       'Outfit', system-ui, sans-serif;
-  --font-display:  'Cormorant Garamond', Georgia, serif;
-
-  /* ── SPACING ─────────────────────────────────────────────────────────── */
-  --section-py:    clamp(5rem, 10vw, 9rem);
-  --container:     1240px;
-
-  /* ── RADIUS ──────────────────────────────────────────────────────────── */
-  --r-sm:          4px;
-  --r-md:          12px;
-  --r-lg:          24px;
-  --r-xl:          40px;
-
-  /* ── TRANSITIONS ─────────────────────────────────────────────────────── */
-  --ease:          cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --ease-bounce:   cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-in-expo:  cubic-bezier(0.95, 0.05, 0.795, 0.035);
-  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  color-scheme: dark;
 }
 
-/* Palette B: Monsoon Cedar */
-[data-palette="B"] {
-  --bg:            #F0E8DC;
-  --bg-alt:        #E0E5E0;
-  --primary:       #1F2B1F;
-  --accent:        #A67C52;
-  --accent-light:  #C49A6C;
-  --green:         #2C3E2C;
-  --green-light:   #7B8F8B;
-  --text:          #2C2C2C;
-  --border:        rgba(31,43,31,0.15);
-}
-
-/* Palette C: Alpine Hearth */
-[data-palette="C"] {
-  --bg:            #F5F5F0;
-  --bg-alt:        #EAEAE5;
-  --primary:       #1F2B1F;
-  --accent:        #B8845A;
-  --accent-light:  #D4A76A;
-  --green:         #4A6741;
-  --green-light:   #8A8A7A;
-  --text:          #2A2A2A;
-  --border:        rgba(74,103,65,0.15);
-}
-
-/* ─── RESET & BASE ───────────────────────────────────────────────────── */
-
-*, *::before, *::after {
+* {
   box-sizing: border-box;
+}
+
+html,
+body {
   margin: 0;
   padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-}
-
-body {
-  font-family: var(--font-sans);
-  background: var(--sky-900);
-  color: var(--text);
-  line-height: 1.6;
+  background: #0a0f17;
   overflow-x: hidden;
 }
 
-main { background: var(--bg); }
-
-img { display: block; max-width: 100%; }
-a { color: inherit; text-decoration: none; }
-button { cursor: pointer; border: none; background: none; font: inherit; }
-
-/* ─── LAYOUT UTILITIES ───────────────────────────────────────────────── */
-
-.container {
-  width: 100%;
-  max-width: var(--container);
-  margin: 0 auto;
-  padding: 0 clamp(1.5rem, 5vw, 4rem);
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  color: #f3ece1;
 }
 
-.section { padding: var(--section-py) 0; }
-.section-alt { background: var(--bg-alt); }
-
-/* ─── TYPOGRAPHY ─────────────────────────────────────────────────────── */
-
-.display {
-  font-family: var(--font-serif);
-  font-size: clamp(3rem, 7vw, 6.5rem);
-  font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+::selection {
+  background: rgba(217, 154, 78, 0.3);
 }
 
-.heading-xl {
-  font-family: var(--font-serif);
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+/* ---- the reusable atmosphere keyframes (story bible motion language) ---- */
+@keyframes mistDriftA {
+  0% { transform: translate3d(-6%, 0, 0); }
+  50% { transform: translate3d(6%, -1.5%, 0); }
+  100% { transform: translate3d(-6%, 0, 0); }
+}
+@keyframes mistDriftB {
+  0% { transform: translate3d(5%, 0, 0); }
+  50% { transform: translate3d(-7%, 1.5%, 0); }
+  100% { transform: translate3d(5%, 0, 0); }
+}
+@keyframes windowFlicker {
+  0%, 100% { opacity: 1; }
+  45% { opacity: 0.82; }
+  70% { opacity: 0.94; }
+}
+@keyframes steamRise {
+  0% { transform: translateY(8px) scaleX(1); opacity: 0; }
+  25% { opacity: 0.5; }
+  100% { transform: translateY(-46px) scaleX(1.5); opacity: 0; }
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+@keyframes hintBob {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50% { transform: translateY(7px); opacity: 1; }
 }
 
-.heading-lg {
-  font-family: var(--font-serif);
-  font-size: clamp(1.6rem, 3vw, 2.5rem);
-  font-weight: 500;
-  line-height: 1.2;
+/* ---- cinematic top layer: vignette + fine film grain (ties every act into
+   one continuous shot; pointer-events:none so it never blocks interaction) ---- */
+.cine-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+.cine-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 120% at 50% 42%, transparent 58%, rgba(0, 0, 0, 0.45) 100%);
+}
+.cine-overlay::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grainShift 1.2s steps(3) infinite;
+}
+@keyframes grainShift {
+  0% { transform: translate(0, 0); }
+  33% { transform: translate(-2%, 1%); }
+  66% { transform: translate(1%, -2%); }
+  100% { transform: translate(0, 0); }
 }
 
-.heading-md {
-  font-family: var(--font-serif);
-  font-size: clamp(1.2rem, 2vw, 1.75rem);
-  font-weight: 500;
-}
-
-.eyebrow {
-  font-family: var(--font-ui);
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.body-lg {
-  font-size: clamp(1rem, 1.5vw, 1.15rem);
-  line-height: 1.75;
-  color: color-mix(in srgb, var(--text), transparent 25%);
-}
-
-/* ─── BUTTONS ────────────────────────────────────────────────────────── */
-
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: var(--snow);
-  background: var(--primary);
-  padding: 0.875rem 2.25rem;
-  border-radius: 100px;
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s;
-}
-.btn-primary:hover {
-  background: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.2);
-}
-
-.btn-outline {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: var(--primary);
-  background: transparent;
-  padding: 0.875rem 2.25rem;
-  border-radius: 100px;
-  border: 1.5px solid var(--primary);
-  transition: transform 0.3s var(--ease), background 0.3s, color 0.3s;
-}
-.btn-outline:hover {
-  background: var(--primary);
-  color: var(--snow);
-  transform: translateY(-2px);
-}
-
-.btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-ui);
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--accent);
-  padding: 0.25rem 0;
-  border-bottom: 1px solid var(--accent);
-  transition: gap 0.3s var(--ease), opacity 0.3s;
-}
-.btn-ghost:hover {
-  gap: 0.9rem;
-  opacity: 0.8;
-}
-
-/* ─── SCROLL ANIMATIONS ──────────────────────────────────────────────── */
-
+/* reveal-on-scroll: text rises and settles (never slides aggressively) */
 .reveal {
   opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+  transform: translateY(24px);
+  transition:
+    opacity 1.15s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 1.15s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.reveal.visible {
+.reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
-.reveal-delay-1 { transition-delay: 0.15s; }
-.reveal-delay-2 { transition-delay: 0.3s; }
-.reveal-delay-3 { transition-delay: 0.45s; }
-.reveal-delay-4 { transition-delay: 0.6s; }
 
-/* ─── CUSTOM SCROLLBAR ───────────────────────────────────────────────── */
-
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--green-light); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--green); }
-
-/* ─── SELECTION ──────────────────────────────────────────────────────── */
-
-::selection {
-  background: var(--accent);
-  color: var(--snow);
+/* Full prefers-reduced-motion path: cross-fades, no heavy motion, story intact */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    transition: opacity 0.6s ease;
+    transform: none;
+  }
 }
