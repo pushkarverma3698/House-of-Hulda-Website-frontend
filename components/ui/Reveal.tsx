@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ElementType, type ReactNode } from "react";
+import React, { useEffect, useRef, type ElementType, type ReactNode } from "react";
 
 /**
  * Reveal-on-scroll: text rises and settles once, then unobserves.
@@ -8,7 +8,7 @@ import { useEffect, useRef, type ElementType, type ReactNode } from "react";
  */
 export function Reveal({
   children,
-  as: Tag = "div",
+  as: Tag = "div" as ElementType,
   delay = 0,
   className = "",
   ...rest
@@ -39,14 +39,14 @@ export function Reveal({
     return () => io.disconnect();
   }, []);
 
-  return (
-    <Tag
-      ref={ref}
-      className={`reveal ${className}`}
-      style={{ transitionDelay: delay ? `${delay}s` : undefined }}
-      {...rest}
-    >
-      {children}
-    </Tag>
+  return React.createElement(
+    Tag,
+    {
+      ref,
+      className: `reveal ${className}`,
+      style: { transitionDelay: delay ? `${delay}s` : undefined },
+      ...rest,
+    },
+    children
   );
 }

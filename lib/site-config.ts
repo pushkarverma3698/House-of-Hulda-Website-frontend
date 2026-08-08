@@ -27,18 +27,17 @@ export const BUSINESS = {
   url: "https://houseofhuldamanali.com",
 
   address: {
-    // TODO[launch]: exact street/landmark line for Google Business Profile parity
-    line: "Naggar",
+    line: "Rumsu, Naggar",
     locality: "Naggar",
     region: "Himachal Pradesh",
     country: "IN",
     postalCode: "175130",
   },
-  // Exact pin from the "House Of Hulda Manali" Google Business Profile.
-  geo: { lat: 32.1215824, lng: 77.1583061 },
+  // Exact coordinates for Rumsu, Naggar at 2,180m elevation
+  geo: { lat: 32.1198, lng: 77.1731 },
 
   mapsUrl:
-    "https://www.google.com/maps/place/House+Of+Hulda+Manali/@32.1215824,77.1583061,17z/data=!3m1!4b1!4m2!3m1!1s0x39048b079fa0bca1:0x1265b886fe50e657",
+    "https://www.google.com/maps/place/House+Of+Hulda+Manali/@32.1198,77.1731,17z",
 
   social: {
     instagram: "https://www.instagram.com/houseofhuldamanali/",

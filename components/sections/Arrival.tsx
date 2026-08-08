@@ -179,8 +179,8 @@ export function Arrival() {
           style={{ opacity: 0.25, transform: "scale(1.09)" }}
         >
           <Image
-            src="/images/arrival-golden-hour.jpg"
-            alt="House of Hulda kathkuni heritage homestay glowing at golden hour above the Naggar valley, Manali"
+            src="/images/arrival_courtyard_dusk.jpg"
+            alt="House of Hulda kathkuni heritage homestay glowing at dusk above the Naggar valley with mountain mist and starry sky"
             fill
             priority
             sizes="100vw"

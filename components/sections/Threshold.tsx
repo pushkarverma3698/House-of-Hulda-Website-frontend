@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Image from "next/image";
 import { Reveal } from "@/components/ui/Reveal";
 import { track } from "@/lib/analytics";
 
@@ -22,12 +23,25 @@ export function Threshold() {
       aria-label="Act 0 · Threshold"
       className="relative flex min-h-screen flex-col items-center justify-center px-[clamp(20px,5vw,40px)] pb-[90px] pt-[120px] text-center"
     >
+      {/* IMAX Nolan-style Naggar Mountain Road Backdrop */}
+      <div className="absolute inset-0 -z-20 overflow-hidden opacity-40 mix-blend-luminosity">
+        <Image
+          src="/images/nolan_valley_drive.jpg"
+          alt="Naggar mountain road IMAX valley drive"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center scale-105 transition-transform duration-1000"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-charcoal/80 via-transparent to-charcoal" />
+      </div>
+
       {/* Subtle warm breathing glow representing the homestay's welcoming light */}
       <div 
         aria-hidden 
         className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[50vw] w-[50vw] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(255,196,120,0.12) 0%, rgba(255,170,70,0.03) 45%, rgba(0,0,0,0) 70%)",
+          background: "radial-gradient(circle, rgba(255,196,120,0.15) 0%, rgba(255,170,70,0.04) 45%, rgba(0,0,0,0) 70%)",
           filter: "blur(50px)",
           animation: "lampPulse 7s ease-in-out infinite",
         }}

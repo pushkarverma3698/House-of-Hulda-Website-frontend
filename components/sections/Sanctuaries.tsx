@@ -13,9 +13,9 @@ import { useScrollFrame, useScrollEngine } from "@/lib/scroll-progress";
 const ROOMS = [
   {
     id: "room-lantern",
-    src: "/images/room-lantern.jpg",
+    src: "/images/deodar_suite_interior.jpg",
     alt: "Kathkuni bedroom — mud-plaster walls, deodar beams, warm lantern light and Himachali wool",
-    caption: "The private room",
+    caption: "The Deodar Suite",
     offset: false,
   },
   {

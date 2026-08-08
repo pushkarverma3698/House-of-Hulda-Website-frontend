@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Mulish } from "next/font/google";
 import { lodgingBusinessJsonLd, SITE } from "@/lib/schema";
 import { Analytics } from "@/components/Analytics";
 import { WhatsappFab } from "@/components/ui/WhatsappFab";
+import { Providers } from "@/app/providers";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -65,7 +66,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+  booking,
+}: {
+  children: React.ReactNode
+  booking: React.ReactNode
+}) {
   return (
     <html lang="en-IN" className={`${cormorant.variable} ${mulish.variable}`}>
       <body className="font-body">
@@ -74,8 +81,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           // schema validates against Google Rich Results — see lib/schema.ts
           dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd()) }}
         />
-        {children}
-        <WhatsappFab />
+        <Providers>
+          {children}
+          {booking}
+          <WhatsappFab />
+        </Providers>
         <Analytics />
       </body>
     </html>

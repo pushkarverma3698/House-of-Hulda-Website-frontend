@@ -20,9 +20,21 @@ body {
 
 body {
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   color: #f3ece1;
 }
+
+/* ---- Apple-Tier HUD Typography ---- */
+.hud-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
 
 ::selection {
   background: rgba(217, 154, 78, 0.3);
@@ -70,7 +82,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(120% 120% at 50% 42%, transparent 58%, rgba(0, 0, 0, 0.45) 100%);
+  background: radial-gradient(120% 120% at 50% 42%, transparent 58%, rgba(0, 0, 0, 0.25) 100%);
 }
 .cine-overlay::after {
   content: "";
@@ -85,6 +97,31 @@ body {
   33% { transform: translate(-2%, 1%); }
   66% { transform: translate(1%, -2%); }
   100% { transform: translate(0, 0); }
+}
+
+/* ---- HERO ENTRANCE ---- */
+/* The first frame of the cinematic holds for 0.8s then the title rises */
+@keyframes heroTitleRise {
+  0%   { opacity: 0; transform: translateY(28px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.hero-title-enter {
+  animation: heroTitleRise 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.9s both;
+}
+.hero-sub-enter {
+  animation: heroTitleRise 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.3s both;
+}
+.hero-hint-enter {
+  animation: heroTitleRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.7s both;
+}
+
+/* Film chapter heading — slides up from 12px below and fades in */
+@keyframes chapterReveal {
+  0%   { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.chapter-heading {
+  animation: chapterReveal 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* reveal-on-scroll: text rises and settles (never slides aggressively) */

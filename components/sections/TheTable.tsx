@@ -16,9 +16,9 @@ export function TheTable() {
         <Reveal className="relative">
           <div className="relative h-[clamp(360px,64vh,640px)] overflow-hidden rounded-[14px] shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
             <Placeholder
-              label="A Himachali thali — siddu, red rice, dal, chai"
-              src="/images/table-himachali.jpg"
-              alt="Himachali thali at House of Hulda — siddu, rajma, red rice, dal and chai in clay cups on a low wooden café table"
+              label="Himachali Dham feast — Siddu, Red Rice, Rajma, Chai by the Hearth"
+              src="/images/himachali_culinary_hearth.jpg"
+              alt="Authentic Himachali Dham feast at House of Hulda — siddu, rajma, red rice, and chai served on traditional brass thalis around a warm hearth fireplace"
               radius={14}
               tone="fire"
             />
