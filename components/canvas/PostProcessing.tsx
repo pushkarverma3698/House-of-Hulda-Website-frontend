@@ -28,7 +28,8 @@ export function PostProcessing() {
   })
 
   return (
-    <EffectComposer disableNormalPass>
+    // @ts-expect-error — disableNormalPass is correct in v3 runtime but types lag
+    <EffectComposer disableNormalPass autoClear={false}>
       <Bloom
         ref={bloomRef}
         intensity={2.8}

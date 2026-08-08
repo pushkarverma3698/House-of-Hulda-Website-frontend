@@ -4,73 +4,103 @@ import { useEffect, useRef, memo } from 'react'
 import { useNight } from '@/lib/store/night'
 
 const TOTAL_HERO_FRAMES = 240
+const CACHE_SIZE = 40
+const PRELOAD_WINDOW_AHEAD = 20
+const PRELOAD_WINDOW_BEHIND = 5
 
 function padFrame(num: number): string {
   return String(num).padStart(3, '0')
 }
 
+class FrameCache {
+  private cache = new Map<number, HTMLImageElement>()
+  private inFlight = new Set<number>()
+  
+  public get(index: number): HTMLImageElement | undefined {
+    // LRU trick: delete and re-insert to move to back of Map (most recently used)
+    if (this.cache.has(index)) {
+      const img = this.cache.get(index)!
+      this.cache.delete(index)
+      this.cache.set(index, img)
+      return img
+    }
+    return undefined
+  }
+
+  public async load(index: number, onDecode?: () => void) {
+    if (this.cache.has(index) || this.inFlight.has(index)) return
+    
+    // Evict oldest if we exceed capacity
+    if (this.cache.size >= CACHE_SIZE) {
+      const oldestKey = this.cache.keys().next().value
+      if (oldestKey !== undefined) {
+        const img = this.cache.get(oldestKey)
+        if (img) {
+          img.src = '' // Free memory aggressively
+        }
+        this.cache.delete(oldestKey)
+      }
+    }
+
+    this.inFlight.add(index)
+    
+    try {
+      const img = new Image()
+      
+      // Wait for network load first, then attempt decode
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = () => reject(new Error(`Failed to load frame ${index}`))
+        img.src = `/frames/hero/frame_${padFrame(index)}.jpg`
+      })
+
+      // Try background decode, but don't block if it fails
+      try {
+        await img.decode()
+      } catch (e) {
+        // ignore decode error, the image is loaded anyway
+      }
+      
+      this.cache.set(index, img)
+      onDecode?.()
+    } catch (e) {
+      // Load failed
+    } finally {
+      this.inFlight.delete(index)
+    }
+  }
+
+  public getNearestLoaded(targetIndex: number): HTMLImageElement | null {
+    const exact = this.get(targetIndex)
+    if (exact) return exact
+    
+    // Search radiating outwards
+    for (let offset = 1; offset < CACHE_SIZE / 2; offset++) {
+      const imgMinus = this.get(targetIndex - offset)
+      if (imgMinus) return imgMinus
+      
+      const imgPlus = this.get(targetIndex + offset)
+      if (imgPlus) return imgPlus
+    }
+    
+    return null
+  }
+}
+
 export const ScrollCanvas = memo(function ScrollCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const framesRef = useRef<(HTMLImageElement | null)[]>(new Array(TOTAL_HERO_FRAMES).fill(null))
-  const lastDrawnIdxRef = useRef<number>(0)
-  const isMountedRef = useRef<boolean>(true)
-
-  useEffect(() => {
-    isMountedRef.current = true
-    const frames = framesRef.current
-
-    // Step 1: Preload critical initial keyframes immediately (first 25 frames)
-    for (let i = 1; i <= Math.min(25, TOTAL_HERO_FRAMES); i++) {
-      const img = new Image()
-      img.src = `/frames/hero/frame_${padFrame(i)}.jpg`
-      img.onload = () => {
-        if (isMountedRef.current) frames[i - 1] = img
-      }
-      frames[i - 1] = img
-    }
-
-    // Step 2: Progressive background preloading of remaining frames (26 to 240) in non-blocking batches
-    const loadBatch = (start: number, batchSize: number) => {
-      if (!isMountedRef.current || start > TOTAL_HERO_FRAMES) return
-      const end = Math.min(TOTAL_HERO_FRAMES, start + batchSize - 1)
-      for (let i = start; i <= end; i++) {
-        if (!frames[i - 1]) {
-          const img = new Image()
-          img.src = `/frames/hero/frame_${padFrame(i)}.jpg`
-          img.onload = () => {
-            if (isMountedRef.current) frames[i - 1] = img
-          }
-          frames[i - 1] = img
-        }
-      }
-      if (end < TOTAL_HERO_FRAMES) {
-        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-          ;(window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => loadBatch(end + 1, batchSize))
-        } else {
-          setTimeout(() => loadBatch(end + 1, batchSize), 40)
-        }
-      }
-    }
-
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      ;(window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => loadBatch(26, 30))
-    } else {
-      setTimeout(() => loadBatch(26, 30), 100)
-    }
-
-    return () => {
-      isMountedRef.current = false
-    }
-  }, [])
+  const cacheRef = useRef(new FrameCache())
+  const lastTargetIdxRef = useRef<number>(-1)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
+    const cache = cacheRef.current
 
     let animFrameId: number
-
+    
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
       canvas.width = window.innerWidth * dpr
@@ -87,53 +117,44 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
 
       ctx.clearRect(0, 0, width, height)
 
-      // Precise 240-frame sequence mapping:
-      // t in [0.0, 0.70] spans frames 1 to 240 (drone dive -> orchard -> dormer window -> master sanctuary)
-      // t in [0.70, 0.85] holds master sanctuary with warm dusk grading
-      // t in [0.85, 1.00] fades alpha to reveal Three.js Celestial Night & StarField
-      let targetFrameIdx = 0
+      let targetFrameIdx = 1
       let alpha = 1.0
 
       if (t < 0.70) {
         const localT = Math.max(0, Math.min(1, t / 0.70))
-        targetFrameIdx = Math.floor(localT * (TOTAL_HERO_FRAMES - 1))
+        targetFrameIdx = 1 + Math.floor(localT * (TOTAL_HERO_FRAMES - 1))
       } else if (t < 0.85) {
-        targetFrameIdx = TOTAL_HERO_FRAMES - 1
+        targetFrameIdx = TOTAL_HERO_FRAMES
         alpha = 1.0
       } else {
         const fadeProgress = (t - 0.85) / 0.15
         alpha = Math.max(0, 1.0 - fadeProgress)
-        targetFrameIdx = TOTAL_HERO_FRAMES - 1
+        targetFrameIdx = TOTAL_HERO_FRAMES
       }
 
-      // Find the closest ready image to avoid any frame flicker or blank screens
-      const frames = framesRef.current
-      let drawImg: HTMLImageElement | null = null
-      const directImg = frames[targetFrameIdx]
-      if (directImg && directImg.complete && directImg.naturalWidth > 0) {
-        drawImg = directImg
-        lastDrawnIdxRef.current = targetFrameIdx
-      } else {
-        // Fallback: search backwards and forwards for nearest loaded frame
-        for (let offset = 1; offset < 25; offset++) {
-          const prev = frames[targetFrameIdx - offset]
-          if (prev && prev.complete && prev.naturalWidth > 0) {
-            drawImg = prev
-            break
-          }
-          const next = frames[targetFrameIdx + offset]
-          if (next && next.complete && next.naturalWidth > 0) {
-            drawImg = next
-            break
-          }
+      // Preload window management
+      if (targetFrameIdx !== lastTargetIdxRef.current) {
+        lastTargetIdxRef.current = targetFrameIdx
+        
+        // Priority 1: Current frame
+        cache.load(targetFrameIdx)
+        
+        // Priority 2: Look ahead (we assume forward scroll is more likely)
+        for (let i = 1; i <= PRELOAD_WINDOW_AHEAD; i++) {
+          const idx = targetFrameIdx + i
+          if (idx <= TOTAL_HERO_FRAMES) cache.load(idx)
         }
-        if (!drawImg && frames[lastDrawnIdxRef.current]?.complete) {
-          drawImg = frames[lastDrawnIdxRef.current]
+        
+        // Priority 3: Look behind
+        for (let i = 1; i <= PRELOAD_WINDOW_BEHIND; i++) {
+          const idx = targetFrameIdx - i
+          if (idx >= 1) cache.load(idx)
         }
       }
+
+      const drawImg = cache.getNearestLoaded(targetFrameIdx)
 
       if (drawImg && drawImg.complete && drawImg.naturalWidth > 0) {
-        // Atmospheric twilight grading as dusk falls (t > 0.40)
         if (t > 0.40 && t <= 0.85) {
           const twilightProgress = Math.min(1, (t - 0.40) / 0.40)
           const brightness = 1.0 - twilightProgress * 0.35
@@ -146,7 +167,6 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
 
         ctx.globalAlpha = alpha
 
-        // Crisp cover-fit calculation with aspect ratio preservation
         const imgRatio = drawImg.naturalWidth / drawImg.naturalHeight
         const canvasRatio = width / height
         let drawWidth = width
@@ -154,6 +174,8 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         let offsetX = 0
         let offsetY = 0
 
+        // Phase 2 Safe Area Contract: 
+        // Force cover-fit keeping center subject intact
         if (canvasRatio > imgRatio) {
           drawHeight = width / imgRatio
           offsetY = (height - drawHeight) / 2

@@ -64,12 +64,13 @@ export const Navigation = memo(function Navigation({
         </div>
 
         {/* Primary Reserve CTA */}
-        <button
-          onClick={onOpenBooking}
+        <Link
+          href="/book"
+          scroll={false}
           className="px-4 py-1.5 rounded-full bg-[#f59e0b] hover:bg-[#fbbf24] text-neutral-950 font-mono text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(245,158,11,0.5)] hover:shadow-[0_0_20px_rgba(245,158,11,0.8)] active:scale-95 cursor-pointer"
         >
           Reserve
-        </button>
+        </Link>
 
         {/* Mobile Menu Trigger */}
         <button

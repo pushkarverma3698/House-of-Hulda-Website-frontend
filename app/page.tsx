@@ -1,9 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { ScrollCanvas } from '@/components/canvas/ScrollCanvas'
 import { Preloader } from '@/components/film/Preloader'
-import { BookDrawer } from '@/components/film/BookDrawer'
 import { TimeRail } from '@/components/film/TimeRail'
 import { Marketplace } from '@/components/film/Marketplace'
 import { Soundscape } from '@/components/film/Soundscape'
@@ -22,7 +22,6 @@ const SceneRoot = dynamic(
 const STAGGER_MS = [0,40,80,120,160,200,240,280,320,360,400,440,480,520,560,600,640,680]
 
 export default function Home() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [selectedStar, setSelectedStar] = useState<CelestialGod | null>(null)
   const [isHearthMenuOpen, setIsHearthMenuOpen] = useState(false)
 
@@ -35,7 +34,7 @@ export default function Home() {
       <SceneRoot />
 
       {/* Navigation Header */}
-      <Navigation onOpenBooking={() => setIsDrawerOpen(true)} />
+      <Navigation />
 
       {/* z-20 Fixed UI Overlays */}
       <TimeRail />
@@ -58,7 +57,7 @@ export default function Home() {
             Text lives on the ground — no box.
             A deep bottom gradient anchors it.
         ═══════════════════════════════════════════ */}
-        <section className="h-[120vh] flex flex-col justify-end pb-28 px-8 md:px-24">
+        <section className="relative h-[120vh] flex flex-col justify-end pb-28 px-8 md:px-24">
           {/* Directional gradient: reads at any light level */}
           <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/60 via-black/30 to-transparent pointer-events-none" />
           <div className="relative space-y-5 max-w-2xl">
@@ -90,7 +89,7 @@ export default function Home() {
             L-02: 16:23 — THE WATER
             Right-side alignment, no box
         ═══════════════════════════════════════════ */}
-        <section className="h-[120vh] flex flex-col justify-center px-8 md:px-24 items-end">
+        <section className="relative h-[120vh] flex flex-col justify-center px-8 md:px-24 items-end">
           <div className="absolute inset-x-0 inset-y-0 bg-gradient-to-l from-black/75 via-black/30 to-transparent pointer-events-none" />
           <div className="relative space-y-4 max-w-lg text-right">
             <p className="hud-mono text-amber-400 tracking-widest text-[10px]">
@@ -111,7 +110,7 @@ export default function Home() {
             L-03: 17:07 — DEODAR AND STONE
             Left-side, lower third placement
         ═══════════════════════════════════════════ */}
-        <section className="h-[120vh] flex flex-col justify-end pb-28 px-8 md:px-24">
+        <section className="relative h-[120vh] flex flex-col justify-end pb-28 px-8 md:px-24">
           <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none" />
           <div className="relative space-y-4 max-w-xl">
             <p className="hud-mono text-amber-400 tracking-widest text-[10px]">
@@ -136,7 +135,7 @@ export default function Home() {
             L-04: 17:50 — THE ORCHARD TURNS
             Center, upper-third — the golden hour shot
         ═══════════════════════════════════════════ */}
-        <section className="h-[120vh] flex flex-col justify-center items-center text-center px-8 md:px-24">
+        <section className="relative h-[120vh] flex flex-col justify-center items-center text-center px-8 md:px-24">
           <div className="absolute inset-x-0 inset-y-0 bg-gradient-to-b from-black/60 via-transparent to-black/60 pointer-events-none" />
           <div className="relative space-y-4 max-w-2xl">
             <p className="hud-mono text-amber-300 tracking-widest text-[10px]">
@@ -161,7 +160,7 @@ export default function Home() {
             L-05: 18:29 — THE LOFT
             Right-side panel, mid-section
         ═══════════════════════════════════════════ */}
-        <section className="h-[120vh] flex flex-col justify-center px-8 md:px-24 items-end">
+        <section className="relative h-[120vh] flex flex-col justify-center px-8 md:px-24 items-end">
           <div className="absolute inset-x-0 inset-y-0 bg-gradient-to-l from-black/80 via-black/35 to-transparent pointer-events-none" />
           <div className="relative space-y-4 max-w-lg text-right">
             <p className="hud-mono text-amber-400 tracking-widest text-[10px]">
@@ -186,7 +185,7 @@ export default function Home() {
             L-06: 19:07 — THE HEARTH
             Center cinematic panel with amber warmth
         ═══════════════════════════════════════════ */}
-        <section className="h-[120vh] flex flex-col justify-center items-center text-center px-8 md:px-24">
+        <section className="relative h-[120vh] flex flex-col justify-center items-center text-center px-8 md:px-24">
           <div className="absolute inset-x-0 inset-y-0 bg-gradient-to-b from-black/70 via-black/20 to-black/75 pointer-events-none" />
           <div className="relative space-y-5 max-w-xl">
             <p className="hud-mono text-amber-400 tracking-widest text-[10px]">
@@ -255,7 +254,7 @@ export default function Home() {
             Interactive Celestial Registry
             Minimal glass panel — this IS an instrument
         ═══════════════════════════════════════════ */}
-        <section className="min-h-[155vh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
+        <section className="relative min-h-[155vh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
           <div className="space-y-6 bg-black/[0.65] p-6 md:p-10 rounded-2xl backdrop-blur-xl border border-white/[0.07] shadow-2xl pointer-events-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="space-y-3">
@@ -310,7 +309,7 @@ export default function Home() {
             L-08: 02:27 — THE VALLEY COMMONS
             Marketplace — minimal wrap, editorial
         ═══════════════════════════════════════════ */}
-        <section className="min-h-[120vh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
+        <section className="relative min-h-[120vh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
           <div className="space-y-4 bg-black/[0.70] p-8 md:p-12 rounded-2xl backdrop-blur-xl border border-white/[0.06] shadow-2xl">
             <p className="hud-mono text-amber-400 tracking-widest text-[10px]">
               L-08 · 02:27 · THE VALLEY COMMONS
@@ -329,7 +328,7 @@ export default function Home() {
             L-09: 06:05 — DAWN & INVITATION
             Full-bleed. No box. Text on first light.
         ═══════════════════════════════════════════ */}
-        <section className="h-[100vh] flex flex-col justify-center items-center px-8 text-center">
+        <section className="relative h-[100vh] flex flex-col justify-center items-center px-8 text-center">
           <div className="absolute inset-x-0 inset-y-0 bg-gradient-to-b from-black/70 via-black/25 to-black/80 pointer-events-none" />
           <div className="relative space-y-7 max-w-xl">
             <p className="hud-mono text-amber-300 tracking-widest text-[10px]">
@@ -345,13 +344,14 @@ export default function Home() {
               Eighteen wonders you will remember for the rest of your life.
             </p>
 
-            <button
-              onClick={() => setIsDrawerOpen(true)}
+            <Link
+              href="/book"
+              scroll={false}
               className="pointer-events-auto relative group overflow-hidden px-10 py-4 border border-amber-500/60 bg-black/70 backdrop-blur-xl text-white hud-mono text-xs uppercase tracking-widest hover:border-amber-400 transition-all duration-[600ms] inline-block shadow-2xl rounded-full"
             >
               <span className="relative z-10 transition-colors duration-[600ms] group-hover:text-black font-bold">Reserve The Stay</span>
               <div className="absolute inset-0 bg-amber-400 transform translate-y-full group-hover:translate-y-0 transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] z-0" />
-            </button>
+            </Link>
           </div>
         </section>
 
@@ -361,9 +361,6 @@ export default function Home() {
       {selectedStar && (
         <StarCard star={selectedStar} onClose={() => setSelectedStar(null)} />
       )}
-
-      {/* Reservation Drawer */}
-      {isDrawerOpen && <BookDrawer onClose={() => setIsDrawerOpen(false)} />}
     </main>
   )
 }
