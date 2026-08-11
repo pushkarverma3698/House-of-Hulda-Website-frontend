@@ -1,11 +1,7 @@
 'use client'
 
-import { BookDrawer } from '@/components/film/BookDrawer'
-import { useRouter } from 'next/navigation'
+import BookPage from '@/app/book/page'
 
 export default function BookingIntercept() {
-  const router = useRouter()
-  return (
-    <BookDrawer onClose={() => router.back()} />
-  )
+  return <BookPage />
 }

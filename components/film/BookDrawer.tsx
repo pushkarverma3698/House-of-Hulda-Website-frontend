@@ -39,12 +39,6 @@ export function BookDrawer({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     setMounted(true)
-    const lenis = getLenis()
-    lenis?.stop()
-
-    return () => {
-      lenis?.start()
-    }
   }, [])
 
   const handleBook = (packageTitle: string) => {

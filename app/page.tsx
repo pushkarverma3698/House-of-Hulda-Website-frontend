@@ -10,6 +10,7 @@ import { Soundscape } from '@/components/film/Soundscape'
 import { Navigation } from '@/components/film/Navigation'
 import { FilmReel } from '@/components/film/FilmReel'
 import { StarCard } from '@/components/sky/StarCard'
+import { DateDial } from '@/components/astro/DateDial'
 import { EIGHTEEN_GODS, CelestialGod } from '@/content/eighteen'
 import { useState } from 'react'
 
@@ -58,8 +59,6 @@ export default function Home() {
             A deep bottom gradient anchors it.
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120vh] flex flex-col justify-end pb-28 px-8 md:px-24">
-          {/* Directional gradient: reads at any light level */}
-          <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/60 via-black/30 to-transparent pointer-events-none" />
           <div className="relative space-y-5 max-w-2xl">
             <p className="hud-mono text-amber-400 tracking-widest text-[10px] flex items-center gap-2 hero-hint-enter"
               style={{ animationDelay: '0.4s' }}>
@@ -90,7 +89,6 @@ export default function Home() {
             Right-side alignment, no box
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120vh] flex flex-col justify-center px-8 md:px-24 items-end">
-          <div className="absolute inset-x-0 inset-y-0 bg-gradient-to-l from-black/75 via-black/30 to-transparent pointer-events-none" />
           <div className="relative space-y-4 max-w-lg text-right">
             <p className="hud-mono text-amber-400 tracking-widest text-[10px]">
               L-02 · 16:23 · GLACIAL SPRINGS
@@ -111,7 +109,6 @@ export default function Home() {
             Left-side, lower third placement
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120vh] flex flex-col justify-end pb-28 px-8 md:px-24">
-          <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-black/85 via-black/40 to-transparent pointer-events-none" />
           <div className="relative space-y-4 max-w-xl">
             <p className="hud-mono text-amber-400 tracking-widest text-[10px]">
               L-03 · 17:07 · KATH-KUNI ARCHITECTURE
@@ -136,7 +133,6 @@ export default function Home() {
             Center, upper-third — the golden hour shot
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120vh] flex flex-col justify-center items-center text-center px-8 md:px-24">
-          <div className="absolute inset-x-0 inset-y-0 bg-gradient-to-b from-black/60 via-transparent to-black/60 pointer-events-none" />
           <div className="relative space-y-4 max-w-2xl">
             <p className="hud-mono text-amber-300 tracking-widest text-[10px]">
               L-04 · 17:50 · GOLDEN HOUR
@@ -161,7 +157,6 @@ export default function Home() {
             Right-side panel, mid-section
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120vh] flex flex-col justify-center px-8 md:px-24 items-end">
-          <div className="absolute inset-x-0 inset-y-0 bg-gradient-to-l from-black/80 via-black/35 to-transparent pointer-events-none" />
           <div className="relative space-y-4 max-w-lg text-right">
             <p className="hud-mono text-amber-400 tracking-widest text-[10px]">
               L-05 · 18:29 · THE LOFT
@@ -186,7 +181,6 @@ export default function Home() {
             Center cinematic panel with amber warmth
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120vh] flex flex-col justify-center items-center text-center px-8 md:px-24">
-          <div className="absolute inset-x-0 inset-y-0 bg-gradient-to-b from-black/70 via-black/20 to-black/75 pointer-events-none" />
           <div className="relative space-y-5 max-w-xl">
             <p className="hud-mono text-amber-400 tracking-widest text-[10px]">
               L-06 · 19:07 · THE HEARTH
@@ -302,6 +296,9 @@ export default function Home() {
                 </button>
               ))}
             </div>
+
+            {/* Interactive Ephemeris Date Picker & Stargazing Planner */}
+            <DateDial />
           </div>
         </section>
 
@@ -329,7 +326,6 @@ export default function Home() {
             Full-bleed. No box. Text on first light.
         ═══════════════════════════════════════════ */}
         <section className="relative h-[100vh] flex flex-col justify-center items-center px-8 text-center">
-          <div className="absolute inset-x-0 inset-y-0 bg-gradient-to-b from-black/70 via-black/25 to-black/80 pointer-events-none" />
           <div className="relative space-y-7 max-w-xl">
             <p className="hud-mono text-amber-300 tracking-widest text-[10px]">
               L-09 · 06:05 · FIRST LIGHT
@@ -346,7 +342,6 @@ export default function Home() {
 
             <Link
               href="/book"
-              scroll={false}
               className="pointer-events-auto relative group overflow-hidden px-10 py-4 border border-amber-500/60 bg-black/70 backdrop-blur-xl text-white hud-mono text-xs uppercase tracking-widest hover:border-amber-400 transition-all duration-[600ms] inline-block shadow-2xl rounded-full"
             >
               <span className="relative z-10 transition-colors duration-[600ms] group-hover:text-black font-bold">Reserve The Stay</span>

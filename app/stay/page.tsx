@@ -92,6 +92,64 @@ export default function StayPage() {
         </div>
       </section>
 
+      {/* wonder */}
+      <section className="mx-auto mt-[clamp(60px,11vh,120px)] max-w-[1200px] px-[clamp(20px,5vw,56px)]">
+        <h2 className="kicker-rule font-display text-[clamp(26px,3.4vw,40px)] font-medium text-bark">Days are for wandering. Nights are for the stars.</h2>
+        <p className="mt-[18px] max-w-[44ch] text-[15px] font-light leading-[1.6] text-deodar">
+          Things to do in Naggar — the Roerich gallery, apple orchards, hidden waterfall trails and stargazing, all a short walk from the house.
+        </p>
+        <div className="mt-[40px] grid gap-[clamp(24px,4vw,36px)] sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { title: "Hidden waterfalls", desc: "Trails that end where the water does." },
+            { title: "Apple orchards", desc: "Pick straight from our own trees." },
+            { title: "The Roerich legacy", desc: "An artist's mountain, a short walk away." },
+            { title: "Bonfire nights", desc: "Wool blankets, embers, no hurry." },
+            { title: "Stargazing", desc: "The deck, the dark, the whole sky." }
+          ].map((item, i) => (
+            <div key={i} className="rounded-[16px] border border-bark/8 bg-sand/30 p-[24px] shadow-[0_10px_30px_-15px_rgba(46,33,23,0.1)] transition-transform hover:-translate-y-1">
+              <div className="mb-[12px] h-[6px] w-[6px] rounded-full bg-clay" />
+              <h3 className="font-display text-[20px] font-medium text-bark">{item.title}</h3>
+              <p className="mt-[8px] text-[14px] leading-[1.6] text-deodar">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* hosts & faq */}
+      <section className="mx-auto mt-[clamp(60px,11vh,120px)] max-w-[1200px] px-[clamp(20px,5vw,56px)]">
+        <div className="grid gap-[clamp(40px,6vw,80px)] md:grid-cols-2">
+          <div>
+            <h2 className="kicker-rule font-display text-[clamp(26px,3.4vw,40px)] font-medium text-bark">The people who keep the light on.</h2>
+            <p className="mt-[20px] text-[15px] font-light leading-[1.7] text-deodar">
+              We rebuilt a stone-and-deodar kathkuni home the way the valley always built them — by hand, no cement — and opened it up: a café in the attic, a table for everyone, the orchard for wandering. You arrive a guest and leave family.
+            </p>
+            <div className="mt-[24px] flex flex-wrap gap-[10px]">
+              <span className="rounded-full border border-bark/15 px-[14px] py-[6px] text-[11px] font-medium tracking-[0.08em] text-bark">★ 4.9 · Airbnb Superhost</span>
+              <span className="rounded-full border border-bark/15 px-[14px] py-[6px] text-[11px] font-medium tracking-[0.08em] text-bark">★ 4.9 · Google</span>
+            </div>
+          </div>
+          <div>
+            <h2 className="font-display text-[22px] font-medium text-bark mb-[24px]">Common Questions</h2>
+            <div className="space-y-[16px]">
+              {[
+                { q: "Is House of Hulda a private home or a shared stay?", a: "Both. You can book a private kathkuni room, a single bed in our shared attic-loft, or the whole house for your group." },
+                { q: "Do you serve food?", a: "Yes — our kitchen serves authentic Himachali home-cooked thalis, mountain breakfasts, and fresh coffee. The attic-loft café is open through the daytime." },
+                { q: "How is the WiFi speed for remote work?", a: "We have high-speed, stable fiber broadband that covers the entire property, including the private rooms, deck, and attic café. It's reliable for video calls and remote work." },
+                { q: "How do I reach Naggar from Manali?", a: "Naggar sits quietly above the Beas river, about 22 km from Manali (a 45-minute taxi drive) and 30 km from Bhuntar Airport. It's easily reachable by car or local taxi." }
+              ].map((faq, i) => (
+                <details key={i} className="group border-b border-bark/10 pb-[16px] [&_summary::-webkit-details-marker]:hidden">
+                  <summary className="flex cursor-pointer list-none items-center justify-between font-medium text-bark/90 hover:text-bark">
+                    <span>{faq.q}</span>
+                    <span className="text-[20px] font-light text-clay transition-transform duration-300 group-open:rotate-45">+</span>
+                  </summary>
+                  <p className="mt-[12px] text-[14.5px] font-light leading-[1.65] text-deodar/90">{faq.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="mx-auto mt-[clamp(64px,12vh,130px)] max-w-[1200px] px-[clamp(20px,5vw,56px)] pb-[clamp(40px,8vh,90px)] text-center">
         <h2 className="mx-auto max-w-[20ch] font-display text-[clamp(28px,4vw,52px)] font-medium leading-[1.08] text-bark">

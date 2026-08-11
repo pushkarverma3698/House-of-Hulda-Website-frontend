@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import Lenis from 'lenis'
 import { useNight, actFor } from '@/lib/store/night'
 import { getSolarState } from '@/lib/astro/sun'
@@ -12,6 +13,8 @@ export function getLenis() {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+
   useEffect(() => {
     const lenis = new Lenis({
       lerp: 0.08,
@@ -59,6 +62,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
       lenisInstance = null
     }
   }, [])
+
+  // Handle route changes: reset scroll and force resize
+  useEffect(() => {
+    if (lenisInstance) {
+      lenisInstance.scrollTo(0, { immediate: true })
+      // Delay resize slightly to allow Next.js to render the new DOM
+      setTimeout(() => {
+        lenisInstance?.resize()
+      }, 100)
+    }
+  }, [pathname])
 
   return <>{children}</>
 }

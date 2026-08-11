@@ -1,0 +1,7 @@
+# House of Hulda - Global Rules
+
+## 1. Code Is Not Complete Until Manually Verified in Preview
+- **Writing code and getting tests to pass is NOT 'Done'.** 
+- **Rule:** Before concluding any session or declaring a feature 'Done', you MUST manually verify the feature in the live browser preview. Do not rely solely on unit tests or type checks for visual/interactive features.
+- If the dev server hangs, restart it using host/bypass execution (e.g. `BypassSandbox: true` in run_command) to avoid sandbox throttling, and hit the endpoint to trigger Webpack's lazy compilation.
+- **Scroll Verification:** Pay special attention to global scroll locks (Lenis, standard overflow hidden, etc.). Never declare a routing task done without verifying scroll unlocks correctly on the destination route.
