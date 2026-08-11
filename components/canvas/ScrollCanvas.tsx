@@ -101,6 +101,11 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
 
     let animFrameId: number
     
+    // Eagerly load initial sequence on mount
+    cache.load(1)
+    cache.load(2)
+    cache.load(3)
+
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
       canvas.width = window.innerWidth * dpr
@@ -132,21 +137,25 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         targetFrameIdx = TOTAL_HERO_FRAMES
       }
 
-      // Preload window management
+      // Preload window management (mobile-optimized)
       if (targetFrameIdx !== lastTargetIdxRef.current) {
         lastTargetIdxRef.current = targetFrameIdx
         
         // Priority 1: Current frame
         cache.load(targetFrameIdx)
         
-        // Priority 2: Look ahead (we assume forward scroll is more likely)
-        for (let i = 1; i <= PRELOAD_WINDOW_AHEAD; i++) {
+        const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || ('ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)))
+        const aheadWindow = isMobile ? 6 : PRELOAD_WINDOW_AHEAD
+        const behindWindow = isMobile ? 3 : PRELOAD_WINDOW_BEHIND
+
+        // Priority 2: Look ahead
+        for (let i = 1; i <= aheadWindow; i++) {
           const idx = targetFrameIdx + i
           if (idx <= TOTAL_HERO_FRAMES) cache.load(idx)
         }
         
         // Priority 3: Look behind
-        for (let i = 1; i <= PRELOAD_WINDOW_BEHIND; i++) {
+        for (let i = 1; i <= behindWindow; i++) {
           const idx = targetFrameIdx - i
           if (idx >= 1) cache.load(idx)
         }

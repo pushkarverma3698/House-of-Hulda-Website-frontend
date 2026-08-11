@@ -8,6 +8,7 @@ frontend:
     build:
       commands:
         - npm run build
+        - cp -r public .next/public
   artifacts:
     baseDirectory: .next
     files:
