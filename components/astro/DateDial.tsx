@@ -167,6 +167,7 @@ export function DateDial() {
           <div className="flex items-center gap-3 self-end md:self-auto">
             <Link
               href="/book"
+              scroll={false}
               className="px-6 py-3 rounded-full bg-amber-400 text-black font-mono text-xs font-bold uppercase tracking-widest hover:bg-amber-300 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:scale-[1.03] active:scale-95 whitespace-nowrap flex items-center gap-2"
             >
               <span>Hold {activeData.dateStr}</span>

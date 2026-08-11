@@ -309,7 +309,7 @@ export function CinematicExperience() {
             L-09: 06:05 — DAWN & INVITATION
             Full-bleed. No box. Text on first light.
         ═══════════════════════════════════════════ */}
-        <section className="relative h-[100vh] flex flex-col justify-center items-center px-8 text-center">
+        <section id="the-invitation" className="relative h-[100vh] flex flex-col justify-center items-center px-8 text-center">
           <div className="relative space-y-7 max-w-xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-09 · 06:05 · FIRST LIGHT
@@ -324,6 +324,7 @@ export function CinematicExperience() {
 
             <Link
               href="/book"
+              scroll={false}
               className="pointer-events-auto relative group overflow-hidden px-10 py-4 border border-amber/60 bg-ink/70 backdrop-blur-xl text-cream hud-mono text-xs uppercase tracking-widest hover:border-amber transition-all duration-[600ms] inline-block shadow-2xl rounded-full"
             >
               <span className="relative z-10 transition-colors duration-[600ms] group-hover:text-ink font-bold">Reserve The Stay</span>
