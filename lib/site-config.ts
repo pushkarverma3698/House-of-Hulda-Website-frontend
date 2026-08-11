@@ -51,3 +51,26 @@ export function whatsappLink(message?: string): string {
   const base = `https://wa.me/${BUSINESS.whatsappNumber}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
+
+export const COMMON_FAQ = [
+  {
+    q: "Is House of Hulda a private home or a shared stay?",
+    a: "Both. You can book a private kathkuni room, a single bed in our shared attic-loft, or the whole house for your group.",
+  },
+  {
+    q: "Do you serve food?",
+    a: "Yes — our kitchen serves authentic Himachali home-cooked thalis, mountain breakfasts, and fresh coffee. The attic-loft café is open through the daytime.",
+  },
+  {
+    q: "How is the WiFi speed for remote work?",
+    a: "We have high-speed, stable fiber broadband that covers the entire property, including the private rooms, deck, and attic café. It's reliable for video calls and remote work.",
+  },
+  {
+    q: "How do I reach Naggar from Manali?",
+    a: "Naggar sits quietly above the Beas river, about 22 km from Manali (a 45-minute taxi drive) and 30 km from Bhuntar Airport. It's easily reachable by car or local taxi.",
+  },
+  {
+    q: "How do I book?",
+    a: "Book direct via WhatsApp or our website for the best rate and instant personal confirmation from your hosts.",
+  },
+];

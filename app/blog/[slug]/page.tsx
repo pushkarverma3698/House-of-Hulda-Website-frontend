@@ -51,8 +51,20 @@ export default async function BlogPostPage({ params }: Params) {
     headline: post.title,
     description: post.description,
     datePublished: post.date,
-    author: { "@type": "Organization", name: post.author },
-    publisher: { "@type": "Organization", name: SITE.name },
+    dateModified: post.date,
+    author: {
+      "@type": "Person",
+      name: post.author || "House of Hulda Host",
+      jobTitle: "Heritage Host & Resident",
+      worksFor: { "@type": "Organization", name: SITE.name, url: SITE.url },
+    },
+    publisher: {
+      "@type": "Organization",
+      name: SITE.name,
+      url: SITE.url,
+      logo: { "@type": "ImageObject", url: `${SITE.url}/og.jpg` },
+    },
+    image: `${SITE.url}/og.jpg`,
     mainEntityOfPage: `${SITE.url}/blog/${post.slug}`,
   };
 

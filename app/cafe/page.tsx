@@ -3,13 +3,25 @@ import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
 import { EditorialHero } from "@/components/editorial/EditorialHero";
 import { PhotoBand } from "@/components/editorial/PhotoBand";
-import { breadcrumbJsonLd } from "@/lib/schema";
+import { breadcrumbJsonLd, SITE } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "The Hulda Café & Table — Himachali Home Cooking in Naggar",
   description:
     "A daytime attic café and a communal table at House of Hulda, Naggar. Himachali home-cooked thalis, mountain breakfasts, fresh coffee and slow afternoons with a valley view.",
   alternates: { canonical: "/cafe" },
+  openGraph: {
+    title: "The Hulda Café & Table",
+    description: "Himachali home-cooked thalis, mountain breakfasts, and fresh coffee at House of Hulda, Naggar.",
+    url: `${SITE.url}/cafe`,
+    images: [{ url: "/images/cafe-attic.jpg", width: 1200, height: 630, alt: "The cozy attic loft café at House of Hulda" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Hulda Café & Table",
+    description: "Himachali home-cooked thalis, mountain breakfasts, and fresh coffee at House of Hulda, Naggar.",
+    images: ["/images/cafe-attic.jpg"],
+  },
 };
 
 const MENU = [

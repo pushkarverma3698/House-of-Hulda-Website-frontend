@@ -4,13 +4,26 @@ import Image from "next/image";
 import { PageShell } from "@/components/layout/PageShell";
 import { EditorialHero } from "@/components/editorial/EditorialHero";
 import { PACKAGES, MOOD_ORDER, formatINR } from "@/content/packages";
-import { breadcrumbJsonLd } from "@/lib/schema";
+import { breadcrumbJsonLd, SITE } from "@/lib/schema";
+import { COMMON_FAQ } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Where to Stay — Private Rooms, Attic Loft & Whole-Home in Naggar",
   description:
     "Stay at House of Hulda, a kathkuni stone-and-deodar heritage homestay in Naggar, near Manali. Choose a private room, a bed in the attic café-loft, the whole home, or a long creative residency.",
   alternates: { canonical: "/stay" },
+  openGraph: {
+    title: "Where to Stay — House of Hulda",
+    description: "Stay at House of Hulda, a kathkuni heritage homestay in Naggar, near Manali.",
+    url: `${SITE.url}/stay`,
+    images: [{ url: "/images/room-morning.jpg", width: 1200, height: 630, alt: "A quiet guest room at House of Hulda" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Where to Stay — House of Hulda",
+    description: "Stay at House of Hulda, a kathkuni heritage homestay in Naggar, near Manali.",
+    images: ["/images/room-morning.jpg"],
+  },
 };
 
 const GALLERY = [
@@ -119,24 +132,19 @@ export default function StayPage() {
       <section className="mx-auto mt-[clamp(60px,11vh,120px)] max-w-[1200px] px-[clamp(20px,5vw,56px)]">
         <div className="grid gap-[clamp(40px,6vw,80px)] md:grid-cols-2">
           <div>
-            <h2 className="kicker-rule font-display text-[clamp(26px,3.4vw,40px)] font-medium text-bark">The people who keep the light on.</h2>
+            <h2 className="kicker-rule font-display text-[clamp(26px,3.4vw,40px)] font-medium text-bark">The House of Hulda Family.</h2>
             <p className="mt-[20px] text-[15px] font-light leading-[1.7] text-deodar">
-              We rebuilt a stone-and-deodar kathkuni home the way the valley always built them — by hand, no cement — and opened it up: a café in the attic, a table for everyone, the orchard for wandering. You arrive a guest and leave family.
+              We rebuilt this stone-and-deodar kathkuni home in Naggar, Himachal Pradesh at 2,000m altitude. Built entirely by hand, with no cement, exactly the way the valley has always built them. We opened it up: a café in the attic, a table for everyone, the apple orchard for wandering. You arrive a guest and leave as family.
             </p>
             <div className="mt-[24px] flex flex-wrap gap-[10px]">
               <span className="rounded-full border border-bark/15 px-[14px] py-[6px] text-[11px] font-medium tracking-[0.08em] text-bark">★ 4.9 · Airbnb Superhost</span>
-              <span className="rounded-full border border-bark/15 px-[14px] py-[6px] text-[11px] font-medium tracking-[0.08em] text-bark">★ 4.9 · Google</span>
+              <span className="rounded-full border border-bark/15 px-[14px] py-[6px] text-[11px] font-medium tracking-[0.08em] text-bark">★ 4.9 · Google Reviews</span>
             </div>
           </div>
           <div>
             <h2 className="font-display text-[22px] font-medium text-bark mb-[24px]">Common Questions</h2>
             <div className="space-y-[16px]">
-              {[
-                { q: "Is House of Hulda a private home or a shared stay?", a: "Both. You can book a private kathkuni room, a single bed in our shared attic-loft, or the whole house for your group." },
-                { q: "Do you serve food?", a: "Yes — our kitchen serves authentic Himachali home-cooked thalis, mountain breakfasts, and fresh coffee. The attic-loft café is open through the daytime." },
-                { q: "How is the WiFi speed for remote work?", a: "We have high-speed, stable fiber broadband that covers the entire property, including the private rooms, deck, and attic café. It's reliable for video calls and remote work." },
-                { q: "How do I reach Naggar from Manali?", a: "Naggar sits quietly above the Beas river, about 22 km from Manali (a 45-minute taxi drive) and 30 km from Bhuntar Airport. It's easily reachable by car or local taxi." }
-              ].map((faq, i) => (
+              {COMMON_FAQ.map((faq, i) => (
                 <details key={i} className="group border-b border-bark/10 pb-[16px] [&_summary::-webkit-details-marker]:hidden">
                   <summary className="flex cursor-pointer list-none items-center justify-between font-medium text-bark/90 hover:text-bark">
                     <span>{faq.q}</span>

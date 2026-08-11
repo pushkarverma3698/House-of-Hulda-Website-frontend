@@ -3,13 +3,25 @@ import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
 import { EditorialHero } from "@/components/editorial/EditorialHero";
 import { PhotoBand } from "@/components/editorial/PhotoBand";
-import { breadcrumbJsonLd } from "@/lib/schema";
+import { breadcrumbJsonLd, SITE } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Naggar, Himachal — Things to Do Near Manali",
   description:
     "A quiet guide to Naggar, near Manali: the Roerich gallery, apple orchards, hidden waterfall trails, the Naggar Castle, stargazing and how to reach the valley at 2,000m.",
   alternates: { canonical: "/naggar" },
+  openGraph: {
+    title: "Naggar, Himachal — Things to Do",
+    description: "A quiet guide to Naggar, near Manali: the Roerich gallery, apple orchards, hidden waterfall trails, and the Naggar Castle.",
+    url: `${SITE.url}/naggar`,
+    images: [{ url: "/images/naggar-valley.jpg", width: 1200, height: 630, alt: "Deep green pine valleys and layered misty mountain ranges in Naggar" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Naggar, Himachal — Things to Do",
+    description: "A quiet guide to Naggar, near Manali: the Roerich gallery, apple orchards, hidden waterfall trails, and the Naggar Castle.",
+    images: ["/images/naggar-valley.jpg"],
+  },
 };
 
 const THINGS = [

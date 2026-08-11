@@ -3,13 +3,25 @@ import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
 import { EditorialHero } from "@/components/editorial/EditorialHero";
 import { getAllPosts } from "@/lib/blog";
-import { breadcrumbJsonLd } from "@/lib/schema";
+import { breadcrumbJsonLd, SITE } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Journal — Naggar, Kathkuni & Slow Mountain Living",
   description:
     "Stories from House of Hulda: kathkuni architecture, things to do in Naggar, Himachali food, and what a slow workation in the Himalayas actually feels like.",
   alternates: { canonical: "/blog" },
+  openGraph: {
+    title: "Journal — House of Hulda",
+    description: "Stories from House of Hulda: kathkuni architecture, things to do in Naggar, Himachali food.",
+    url: `${SITE.url}/blog`,
+    images: [{ url: "/images/journal-window.jpg", width: 1200, height: 630, alt: "A quiet window corner with a journal overlooking the misty valley" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Journal — House of Hulda",
+    description: "Stories from House of Hulda: kathkuni architecture, things to do in Naggar, Himachali food.",
+    images: ["/images/journal-window.jpg"],
+  },
 };
 
 function formatDate(iso: string): string {
