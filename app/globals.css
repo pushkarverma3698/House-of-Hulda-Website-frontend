@@ -115,6 +115,11 @@ body {
   animation: heroTitleRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.7s both;
 }
 
+/* Global Cinematic Text Glow (for headings and critical typography) */
+.text-glow-amber {
+  text-shadow: 0 4px 40px rgba(0,0,0,0.7), 0 1px 4px rgba(0,0,0,0.9), 0 0 60px rgba(217, 154, 78, 0.15);
+}
+
 /* Film chapter heading — slides up from 12px below and fades in */
 @keyframes chapterReveal {
   0%   { opacity: 0; transform: translateY(12px); }

@@ -43,26 +43,22 @@ export function EditorialHero({
       {/* warm cinematic scrim — deep at the base for legibility, clear up top */}
       <div
         aria-hidden
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(46,33,23,0.34) 0%, rgba(46,33,23,0) 34%, rgba(46,33,23,0.18) 60%, rgba(28,20,13,0.78) 100%)",
-        }}
+        className="absolute inset-0 bg-gradient-to-b from-bark/30 via-transparent to-bark/80"
       />
       <div className="relative z-[1] mx-auto flex h-full max-w-[1200px] flex-col justify-end px-[clamp(20px,5vw,56px)] pb-[clamp(34px,7vh,72px)]">
         {meta && (
-          <div className="reveal mb-[14px] text-[11px] uppercase tracking-[0.24em] text-[rgba(255,238,214,0.82)]">
+          <div className="reveal mb-[14px] text-[11px] uppercase tracking-[0.24em] text-sand/80">
             {meta}
           </div>
         )}
         <div className="reveal text-[11px] uppercase tracking-[0.34em] text-amber [text-shadow:0_2px_18px_rgba(0,0,0,0.5)]">
           {eyebrow}
         </div>
-        <h1 className="reveal m-0 mt-[16px] max-w-[18ch] font-display text-[clamp(40px,7.4vw,104px)] font-medium leading-[0.98] tracking-[-0.02em] text-[#FBF7EF] [text-shadow:0_6px_44px_rgba(0,0,0,0.45)]">
+        <h1 className="reveal m-0 mt-[16px] max-w-[18ch] font-display text-[clamp(40px,7.4vw,104px)] font-medium leading-[0.98] tracking-[-0.02em] text-parchment [text-shadow:0_6px_44px_rgba(0,0,0,0.45)]">
           {title}
         </h1>
         {intro && (
-          <p className="reveal mt-[22px] max-w-[58ch] text-[clamp(15px,1.8vw,19px)] font-light leading-[1.7] text-[rgba(251,247,239,0.9)] [text-shadow:0_2px_20px_rgba(0,0,0,0.45)]">
+          <p className="reveal mt-[22px] max-w-[58ch] text-[clamp(15px,1.8vw,19px)] font-light leading-[1.7] text-parchment/90 [text-shadow:0_2px_20px_rgba(0,0,0,0.45)]">
             {intro}
           </p>
         )}

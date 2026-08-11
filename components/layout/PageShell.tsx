@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BUSINESS, whatsappLink } from "@/lib/site-config";
+import { PageHeader } from "./PageHeader";
 
 const NAV = [
   { href: "/stay", label: "Stay" },
@@ -23,31 +24,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
       <div aria-hidden className="paper-vignette" />
       <div aria-hidden className="paper-grain" />
 
-      <header className="sticky top-0 z-40 border-b border-bark/8 bg-[rgba(246,241,231,0.82)] backdrop-blur-[12px]">
-        <div className="mx-auto flex max-w-[1200px] items-center justify-between px-[clamp(20px,5vw,56px)] py-[15px]">
-          <Link href="/" className="block no-underline">
-            <div className="font-display text-[21px] font-semibold leading-none tracking-[0.01em] text-bark">
-              House&nbsp;of&nbsp;Hulda
-            </div>
-            <div className="mt-[5px] text-[9px] uppercase tracking-[0.34em] text-deodar/70">
-              Naggar · Manali
-            </div>
-          </Link>
-          <nav className="flex items-center gap-[clamp(14px,2vw,28px)] text-[11px] uppercase tracking-[0.16em] text-deodar">
-            {NAV.map((n) => (
-              <Link key={n.href} href={n.href} className="hidden transition-colors hover:text-clay sm:inline">
-                {n.label}
-              </Link>
-            ))}
-            <Link
-              href="/#the-invitation"
-              className="rounded-full bg-clay px-[17px] py-[9px] text-[10px] font-bold tracking-[0.16em] text-parchment transition-transform hover:scale-[1.04]"
-            >
-              Reserve
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PageHeader />
 
       <main className="relative z-[3]">{children}</main>
 
