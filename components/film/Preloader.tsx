@@ -7,22 +7,63 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    // Simulate initial asset & WebGL compilation loading
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setTimeout(() => {
-            setIsLoaded(true)
-            onComplete?.()
-          }, 400)
-          return 100
-        }
-        return prev + Math.floor(Math.random() * 15) + 5
-      })
-    }, 120)
+    // We want to preload the first 60 frames (critical initial sequence)
+    // plus every 10th frame (skeleton sequence for fast scrolling)
+    const framesToPreload: number[] = []
+    
+    // Critical initial sequence
+    for (let i = 1; i <= 60; i++) {
+      framesToPreload.push(i)
+    }
+    // Skeleton frames for the rest
+    for (let i = 70; i <= 240; i += 10) {
+      framesToPreload.push(i)
+    }
 
-    return () => clearInterval(interval)
+    const totalToLoad = framesToPreload.length
+    let loadedCount = 0
+    let hasCompleted = false
+
+    const completePreloader = () => {
+      if (hasCompleted) return
+      hasCompleted = true
+      setProgress(100)
+      setTimeout(() => {
+        setIsLoaded(true)
+        onComplete?.()
+      }, 400)
+    }
+
+    // Safety timeout: If connection is too slow, force entry after 6 seconds
+    const safetyTimeout = setTimeout(() => {
+      completePreloader()
+    }, 6000)
+
+    // Load each frame
+    framesToPreload.forEach((frameIdx) => {
+      const img = new Image()
+      
+      const onImageLoad = () => {
+        if (hasCompleted) return
+        loadedCount++
+        // Calculate progress (cap at 99% until fully complete)
+        const pct = Math.floor((loadedCount / totalToLoad) * 99)
+        setProgress(pct)
+
+        if (loadedCount === totalToLoad) {
+          clearTimeout(safetyTimeout)
+          completePreloader()
+        }
+      }
+
+      img.onload = onImageLoad
+      img.onerror = onImageLoad // If it fails, treat it as "done" so we don't hang
+      
+      const paddedIdx = String(frameIdx).padStart(3, '0')
+      img.src = `/frames/hero/frame_${paddedIdx}.jpg`
+    })
+
+    return () => clearTimeout(safetyTimeout)
   }, [onComplete])
 
   if (isLoaded) return null
