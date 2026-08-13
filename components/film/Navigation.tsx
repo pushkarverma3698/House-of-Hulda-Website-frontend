@@ -67,7 +67,7 @@ export const Navigation = memo(function Navigation({
         <Link
           href="/book"
           scroll={false}
-          className="px-[24px] py-[10px] rounded-full bg-amber/90 text-[11.5px] font-medium uppercase tracking-[0.1em] text-ink shadow-[0_4px_20px_rgba(217,154,78,0.3)] transition-all duration-300 ease-exhale hover:bg-amber hover:shadow-[0_0_30px_rgba(217,154,78,0.5)] active:scale-95 active:shadow-[0_0_10px_rgba(217,154,78,0.3)] backdrop-blur-md"
+          className="px-5 py-2 rounded-full bg-amber/10 border border-amber/30 text-amber hover:bg-amber/20 hover:border-amber/60 hud-mono tracking-widest transition-all backdrop-blur-md shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:shadow-[0_0_20px_rgba(217,154,78,0.3)] active:scale-95 cursor-pointer"
         >
           Reserve
         </Link>

@@ -195,7 +195,7 @@ export function BookingPanel() {
               </div>
               <button
                 onClick={requestDates}
-                className="rounded-full bg-amber/90 px-[28px] py-[15px] text-[12px] font-medium uppercase tracking-[0.1em] text-ink shadow-[0_4px_20px_rgba(217,154,78,0.3)] transition-all duration-300 ease-exhale hover:bg-amber hover:shadow-[0_0_30px_rgba(217,154,78,0.5)] active:scale-95 active:shadow-[0_0_10px_rgba(217,154,78,0.3)]"
+                className="rounded-full bg-amber px-[28px] py-[15px] text-[12px] font-bold uppercase tracking-[0.14em] text-ink shadow-[0_10px_30px_rgba(217,154,78,0.3)] transition-transform hover:scale-[1.03]"
               >
                 Request these dates
               </button>
@@ -232,7 +232,7 @@ export function BookingPanel() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => track("whatsapp_click", { source: "confirmation", mood })}
-              className="rounded-full bg-amber/90 px-[22px] py-[12px] text-[11.5px] font-medium uppercase tracking-[0.1em] text-ink shadow-[0_4px_20px_rgba(217,154,78,0.3)] transition-all duration-300 ease-exhale hover:bg-amber hover:shadow-[0_0_30px_rgba(217,154,78,0.5)] active:scale-95 active:shadow-[0_0_10px_rgba(217,154,78,0.3)]"
+              className="rounded-full bg-amber px-[22px] py-[12px] text-[11.5px] font-bold uppercase tracking-[0.12em] text-ink"
             >
               Message us on WhatsApp
             </a>
