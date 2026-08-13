@@ -165,7 +165,7 @@ export default function StayPage() {
         </h2>
         <Link
           href="/#the-invitation"
-          className="mt-[28px] inline-block rounded-full bg-clay px-[32px] py-[16px] text-[12px] font-bold uppercase tracking-[0.16em] text-parchment shadow-[0_10px_30px_rgba(176,92,54,0.22)] transition-transform hover:scale-[1.03] hover:bg-clay/90"
+          className="mt-[28px] inline-block rounded-full bg-amber/90 px-[32px] py-[16px] text-[12px] font-medium uppercase tracking-[0.1em] text-ink shadow-[0_4px_20px_rgba(217,154,78,0.3)] transition-all duration-300 ease-exhale hover:bg-amber hover:shadow-[0_0_30px_rgba(217,154,78,0.5)] active:scale-95 active:shadow-[0_0_10px_rgba(217,154,78,0.3)]"
         >
           Check dates &amp; reserve
         </Link>

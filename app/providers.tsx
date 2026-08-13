@@ -16,10 +16,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   useEffect(() => {
+    const isHome = pathname === '/'
     const lenis = new Lenis({
       lerp: 0.08,
       wheelMultiplier: 0.85,
-      syncTouch: true,
+      syncTouch: isHome,
     })
     lenisInstance = lenis
 
@@ -61,7 +62,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       lenis.destroy()
       lenisInstance = null
     }
-  }, [])
+  }, [pathname])
 
   // Handle route changes: reset scroll and force resize
   useEffect(() => {
