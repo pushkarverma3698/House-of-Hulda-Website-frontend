@@ -4,7 +4,7 @@ import { useEffect, useRef, memo } from 'react'
 import { useNight } from '@/lib/store/night'
 
 const TOTAL_HERO_FRAMES = 240
-const CACHE_SIZE = 60
+const CACHE_SIZE = 40
 const PRELOAD_WINDOW_AHEAD = 20
 const PRELOAD_WINDOW_BEHIND = 5
 
@@ -115,12 +115,12 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
     resize()
     window.addEventListener('resize', resize)
 
-    let lastDrawnImg: HTMLImageElement | null = null
-
     const render = () => {
       const t = useNight.getState().t
       const width = canvas.width
       const height = canvas.height
+
+      ctx.clearRect(0, 0, width, height)
 
       let targetFrameIdx = 1
       let alpha = 1.0
@@ -145,7 +145,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         cache.load(targetFrameIdx)
         
         const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || ('ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)))
-        const aheadWindow = isMobile ? 12 : PRELOAD_WINDOW_AHEAD
+        const aheadWindow = isMobile ? 6 : PRELOAD_WINDOW_AHEAD
         const behindWindow = isMobile ? 3 : PRELOAD_WINDOW_BEHIND
 
         // Priority 2: Look ahead
@@ -162,12 +162,8 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       }
 
       const drawImg = cache.getNearestLoaded(targetFrameIdx)
-      const imgToDraw = (drawImg && drawImg.complete && drawImg.naturalWidth > 0) ? drawImg : lastDrawnImg
 
-      if (imgToDraw) {
-        lastDrawnImg = imgToDraw
-        ctx.clearRect(0, 0, width, height)
-
+      if (drawImg && drawImg.complete && drawImg.naturalWidth > 0) {
         if (t > 0.40 && t <= 0.85) {
           const twilightProgress = Math.min(1, (t - 0.40) / 0.40)
           const brightness = 1.0 - twilightProgress * 0.35
@@ -180,7 +176,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
 
         ctx.globalAlpha = alpha
 
-        const imgRatio = imgToDraw.naturalWidth / imgToDraw.naturalHeight
+        const imgRatio = drawImg.naturalWidth / drawImg.naturalHeight
         const canvasRatio = width / height
         let drawWidth = width
         let drawHeight = height
@@ -197,7 +193,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
           offsetX = (width - drawWidth) / 2
         }
 
-        ctx.drawImage(imgToDraw, offsetX, offsetY, drawWidth, drawHeight)
+        ctx.drawImage(drawImg, offsetX, offsetY, drawWidth, drawHeight)
       }
 
       animFrameId = requestAnimationFrame(render)

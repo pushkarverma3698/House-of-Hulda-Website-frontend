@@ -19,7 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const lenis = new Lenis({
       lerp: 0.08,
       wheelMultiplier: 0.85,
-      syncTouch: false, // Fix: Restores native scrolling on mobile for all content pages
+      syncTouch: true,
     })
     lenisInstance = lenis
 
