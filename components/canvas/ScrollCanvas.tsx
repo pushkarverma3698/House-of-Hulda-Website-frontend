@@ -4,7 +4,9 @@ import { useEffect, useRef, memo } from 'react'
 import { useNight } from '@/lib/store/night'
 
 const TOTAL_HERO_FRAMES = 240
-const CACHE_SIZE = 60
+// Hard limits for memory management
+const MAX_MOBILE_CACHE_SIZE = 15
+const MAX_DESKTOP_CACHE_SIZE = 60
 const PRELOAD_WINDOW_AHEAD = 20
 const PRELOAD_WINDOW_BEHIND = 5
 
@@ -38,6 +40,9 @@ class FrameCache {
 
   public async load(index: number, onDecode?: () => void) {
     if (this.cache.has(index) || this.inFlight.has(index)) return
+    
+    const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || ('ontouchstart' in window))
+    const CACHE_SIZE = isMobile ? MAX_MOBILE_CACHE_SIZE : MAX_DESKTOP_CACHE_SIZE
     
     // Evict oldest if we exceed capacity
     if (this.cache.size >= CACHE_SIZE) {
@@ -120,12 +125,22 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = window.innerWidth * dpr
-      canvas.height = window.innerHeight * dpr
+      const newWidth = window.innerWidth * dpr
+      const newHeight = window.innerHeight * dpr
+      
+      const isMobile = window.innerWidth < 768 || ('ontouchstart' in window)
+      // Critical Mobile Perf: Ignore height-only resize events (caused by URL bar hiding/showing).
+      // Reallocating a 2D canvas backing store during scroll causes massive stutter.
+      if (isMobile && canvas.width === newWidth && canvas.width > 0) {
+        return 
+      }
+
+      canvas.width = newWidth
+      canvas.height = newHeight
     }
 
     resize()
-    window.addEventListener('resize', resize)
+    window.addEventListener('resize', resize, { passive: true })
 
     const render = () => {
       const t = useNight.getState().t
@@ -209,7 +224,14 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
           offsetX = (width - drawWidth) / 2
         }
 
-        ctx.drawImage(drawImg, offsetX, offsetY, drawWidth, drawHeight)
+        // Critical Perf: Force integer coordinates to avoid expensive GPU sub-pixel interpolation on mobile
+        ctx.drawImage(
+          drawImg, 
+          Math.floor(offsetX), 
+          Math.floor(offsetY), 
+          Math.floor(drawWidth), 
+          Math.floor(drawHeight)
+        )
       }
 
       animFrameId = requestAnimationFrame(render)
