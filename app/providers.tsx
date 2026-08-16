@@ -16,16 +16,37 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   useEffect(() => {
-    const isHome = pathname === '/'
     const lenis = new Lenis({
       lerp: 0.08,
       wheelMultiplier: 0.85,
-      syncTouch: isHome,
+      // syncTouch hijacks touchmove and re-drives the page from JS. On iOS that
+      // fights Safari's own momentum + dynamic URL bar and is the single largest
+      // source of touch-scroll jank. Native touch scrolling is already
+      // interpolated by the OS at 120Hz — we sample it, we do not replace it.
+      syncTouch: false,
     })
     lenisInstance = lenis
 
-    const updateStore = (progress: number) => {
-      const p = Math.max(0, Math.min(1, progress))
+    // scrollHeight forces a layout flush, so it is measured on resize only,
+    // never inside the frame loop.
+    let maxScroll = 1
+    const measure = () => {
+      maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+    }
+    measure()
+    window.addEventListener('resize', measure, { passive: true })
+
+    // Single writer, sampled once per frame. Scroll events fire at unpredictable
+    // rates (and in bursts during momentum); rAF sampling decouples store writes
+    // — and therefore every downstream render — from event timing.
+    const EPSILON = 1 / 4096
+    let lastP = -1
+
+    const sample = () => {
+      const p = Math.max(0, Math.min(1, window.scrollY / maxScroll))
+      if (Math.abs(p - lastP) < EPSILON) return
+      lastP = p
+
       const solar = getSolarState(p)
       useNight.setState({
         t: p,
@@ -35,30 +56,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
     }
 
-    lenis.on('scroll', ({ progress }: { progress: number }) => {
-      updateStore(progress)
-    })
-
-    // Native scroll fallback listener
-    const onNativeScroll = () => {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
-      if (maxScroll > 0) {
-        const progress = window.scrollY / maxScroll
-        updateStore(progress)
-      }
-    }
-    window.addEventListener('scroll', onNativeScroll, { passive: true })
-
     let rafId: number
     function raf(time: number) {
       lenis.raf(time)
+      sample()
       rafId = requestAnimationFrame(raf)
     }
     rafId = requestAnimationFrame(raf)
 
     return () => {
       cancelAnimationFrame(rafId)
-      window.removeEventListener('scroll', onNativeScroll)
+      window.removeEventListener('resize', measure)
       lenis.destroy()
       lenisInstance = null
     }

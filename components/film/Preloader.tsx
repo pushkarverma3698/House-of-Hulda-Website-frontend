@@ -2,40 +2,67 @@
 
 import { useEffect, useState } from 'react'
 
+/** Frames that must be in the HTTP cache before the curtain lifts. Enough to
+ *  cover the opening beat; everything past this streams in behind the user. */
+const CRITICAL_FRAME_COUNT = 20
+/** Coarse skeleton warmed AFTER entry so a fast flick always lands near a hit. */
+const SKELETON_STRIDE = 4
+const TOTAL_FRAMES = 240
+/** Browsers multiplex freely over HTTP/2, so an unbounded fan-out does not
+ *  queue — it splits the same pipe 78 ways and every frame arrives late. */
+const CRITICAL_CONCURRENCY = 6
+const BACKGROUND_CONCURRENCY = 3
+const SAFETY_TIMEOUT_MS = 4000
+
+const frameUrl = (index: number) =>
+  `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
+
+/** Warms the HTTP cache. The bitmap cache in ScrollCanvas decodes from here. */
+async function warmFrame(index: number, signal: AbortSignal): Promise<void> {
+  try {
+    const response = await fetch(frameUrl(index), { signal })
+    await response.arrayBuffer() // must drain or the connection stays open
+  } catch {
+    // Aborted or offline — ScrollCanvas re-requests on demand.
+  }
+}
+
+/** Runs `task` over `items` with at most `limit` in flight. */
+async function runPool(
+  items: readonly number[],
+  limit: number,
+  signal: AbortSignal,
+  onEach?: () => void
+): Promise<void> {
+  let cursor = 0
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length && !signal.aborted) {
+      const index = items[cursor++]
+      await warmFrame(index, signal)
+      onEach?.()
+    }
+  })
+  await Promise.all(workers)
+}
+
 export function Preloader({ onComplete }: { onComplete?: () => void }) {
   const [progress, setProgress] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    // We want to preload the first 60 frames (critical initial sequence)
-    // plus every 10th frame (skeleton sequence for fast scrolling)
-    const framesToPreload: number[] = []
-    
-    // Critical initial sequence
-    for (let i = 1; i <= 60; i++) {
-      framesToPreload.push(i)
-    }
-    // Skeleton frames for the rest
-    for (let i = 70; i <= 240; i += 10) {
-      framesToPreload.push(i)
-    }
-
-    const totalToLoad = framesToPreload.length
-    let loadedCount = 0
+    const controller = new AbortController()
+    const { signal } = controller
     let hasCompleted = false
 
-    const pendingImages = new Set<HTMLImageElement>()
+    const critical = Array.from({ length: CRITICAL_FRAME_COUNT }, (_, i) => i + 1)
+    const skeleton: number[] = []
+    for (let i = CRITICAL_FRAME_COUNT + 1; i <= TOTAL_FRAMES; i += SKELETON_STRIDE) {
+      skeleton.push(i)
+    }
 
     const completePreloader = () => {
       if (hasCompleted) return
       hasCompleted = true
-      
-      // Cancel all pending image loads immediately to free the network queue for ScrollCanvas
-      pendingImages.forEach(img => {
-        img.src = ''
-      })
-      pendingImages.clear()
-      
       setProgress(100)
       setTimeout(() => {
         setIsLoaded(true)
@@ -43,43 +70,31 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
       }, 400)
     }
 
-    // Safety timeout: If connection is too slow, force entry after 6 seconds
-    const safetyTimeout = setTimeout(() => {
-      completePreloader()
-    }, 6000)
+    // Slow connection: enter anyway. ScrollCanvas degrades to nearest-cached.
+    const safetyTimeout = setTimeout(completePreloader, SAFETY_TIMEOUT_MS)
 
-    // Load each frame
-    framesToPreload.forEach((frameIdx) => {
-      const img = new Image()
-      pendingImages.add(img)
-      
-      const onImageLoad = () => {
-        pendingImages.delete(img)
-        if (hasCompleted) return
-        loadedCount++
-        // Calculate progress (cap at 99% until fully complete)
-        const pct = Math.floor((loadedCount / totalToLoad) * 99)
-        setProgress(pct)
-
-        if (loadedCount === totalToLoad) {
-          clearTimeout(safetyTimeout)
-          completePreloader()
-        }
+    let loadedCount = 0
+    const onCriticalFrame = () => {
+      loadedCount++
+      if (!hasCompleted) {
+        setProgress(Math.floor((loadedCount / critical.length) * 99))
       }
+    }
 
-      img.onload = onImageLoad
-      img.onerror = onImageLoad // If it fails, treat it as "done" so we don't hang
-      
-      const paddedIdx = String(frameIdx).padStart(3, '0')
-      img.src = `/frames/hero/frame_${paddedIdx}.jpg`
-    })
+    runPool(critical, CRITICAL_CONCURRENCY, signal, onCriticalFrame)
+      .then(() => {
+        if (signal.aborted) return
+        clearTimeout(safetyTimeout)
+        completePreloader()
+        // Skeleton warms behind the curtain, at low concurrency, so it never
+        // competes with the frames the playhead actually needs.
+        return runPool(skeleton, BACKGROUND_CONCURRENCY, signal)
+      })
+      .catch(() => {})
 
     return () => {
       clearTimeout(safetyTimeout)
-      pendingImages.forEach(img => {
-        img.src = ''
-      })
-      pendingImages.clear()
+      controller.abort()
     }
   }, [onComplete])
 

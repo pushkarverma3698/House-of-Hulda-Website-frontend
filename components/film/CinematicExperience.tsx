@@ -233,7 +233,7 @@ export function CinematicExperience() {
             Minimal glass panel — this IS an instrument
         ═══════════════════════════════════════════ */}
         <section className="relative min-h-[155vh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
-          <div className="space-y-6 bg-ink/[0.65] p-6 md:p-10 rounded-2xl backdrop-blur-xl border border-white/[0.07] shadow-2xl pointer-events-auto">
+          <div className="space-y-6 bg-ink/[0.88] md:bg-ink/[0.65] p-6 md:p-10 rounded-2xl md:backdrop-blur-xl border border-white/[0.07] shadow-2xl pointer-events-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="space-y-3">
                 <p className="hud-mono text-amber tracking-widest text-[10px] flex items-center gap-2">
@@ -291,7 +291,7 @@ export function CinematicExperience() {
             Marketplace — minimal wrap, editorial
         ═══════════════════════════════════════════ */}
         <section className="relative min-h-[120vh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
-          <div className="space-y-4 bg-ink/[0.70] p-8 md:p-12 rounded-2xl backdrop-blur-xl border border-white/[0.06] shadow-2xl">
+          <div className="space-y-4 bg-ink/[0.90] md:bg-ink/[0.70] p-8 md:p-12 rounded-2xl md:backdrop-blur-xl border border-white/[0.06] shadow-2xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-08 · 02:27 · THE VALLEY COMMONS
             </p>

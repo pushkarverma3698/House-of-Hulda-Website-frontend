@@ -8,11 +8,16 @@ import { StarField } from './StarField'
 import { Embers } from './Embers'
 import { Atmosphere } from './Atmosphere'
 import { PostProcessing } from './PostProcessing'
-import { Suspense } from 'react'
+import { Suspense, memo, useState } from 'react'
 
-import { memo } from 'react'
+const detectCoarsePointer = (): boolean => {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
+}
 
 export const SceneRoot = memo(function SceneRoot() {
+  const [isCoarsePointer] = useState(detectCoarsePointer)
+
   return (
     <div className="fixed inset-0 z-0 pointer-events-none bg-transparent">
       <Canvas
@@ -21,7 +26,12 @@ export const SceneRoot = memo(function SceneRoot() {
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0)
         }}
-        dpr={[1, 2]}
+        // This canvas composites on top of an already-fullscreen 2D frame
+        // canvas. At dpr 2 on a 390pt phone that is a second 1.3M-pixel
+        // transparent layer rasterised every frame. Its content is stars, faint
+        // particles and a gradient — none of which resolve detail worth 4x the
+        // fragment cost.
+        dpr={isCoarsePointer ? 1 : [1, 2]}
       >
         <Suspense fallback={null}>
           {/* Camera Director Spline & Inversion Controls */}

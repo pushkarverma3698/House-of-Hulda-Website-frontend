@@ -28,20 +28,43 @@ export function getDateAtT(t: number): Date {
   return new Date(start.getTime() + offsetMinutes * 60 * 1000)
 }
 
+export interface SolarState {
+  readonly altitude: number
+  readonly azimuth: number
+  readonly date: Date
+  readonly isDaylight: boolean
+  readonly isCivilTwilight: boolean
+  readonly isNauticalTwilight: boolean
+  readonly isAstroDark: boolean
+}
+
+// Single-entry memo keyed on t. Every consumer in a given frame (the scroll
+// sampler, EphemerisLight x2, SkyBox, StarField, PostProcessing) passes the same
+// t, so without this the render loop allocates 18 Date objects and runs SunCalc
+// six times per frame — pure GC pressure on mobile.
+let cachedT = Number.NaN
+let cachedState: SolarState | null = null
+const SOLAR_MEMO_EPSILON = 1e-4
+
 /**
  * Given a normalized scroll progress t (0→1),
  * returns the exact solar state at Rumsu for that moment.
  *
- * NOTE: suncalc returns altitude and azimuth in DEGREES directly.
+ * The returned object is shared and must be treated as read-only.
  */
-export function getSolarState(t: number) {
+export function getSolarState(t: number): SolarState {
+  if (cachedState !== null && Math.abs(t - cachedT) < SOLAR_MEMO_EPSILON) {
+    return cachedState
+  }
+
   const dateAtT = getDateAtT(t)
   const sunPos = SunCalc.getPosition(dateAtT, LAT, LNG)
 
   const altDeg = sunPos.altitude
   const azDeg = (sunPos.azimuth + 360) % 360
 
-  return {
+  cachedT = t
+  cachedState = {
     altitude: altDeg,
     azimuth: azDeg,
     date: dateAtT,
@@ -50,6 +73,8 @@ export function getSolarState(t: number) {
     isNauticalTwilight:   altDeg <= -6 && altDeg > -12,
     isAstroDark:          altDeg <= -12,
   }
+
+  return cachedState
 }
 
 

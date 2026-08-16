@@ -46,14 +46,14 @@ export const TimeRail = memo(function TimeRail() {
       aria-label="Observatory Telemetry"
       className="fixed right-6 top-1/2 -translate-y-1/2 z-20 flex flex-col items-end gap-3 pointer-events-none font-mono text-xs select-none"
     >
-      <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 shadow-lg">
+      <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/70 md:bg-black/50 md:backdrop-blur-md border border-white/10 shadow-lg">
         <span ref={actRef} className="text-amber-400 font-bold tracking-widest">
           L-01
         </span>
         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
       </div>
 
-      <div className="text-right space-y-0.5 px-3 py-2 rounded-xl bg-black/50 backdrop-blur-md border border-white/10 shadow-lg">
+      <div className="text-right space-y-0.5 px-3 py-2 rounded-xl bg-black/70 md:bg-black/50 md:backdrop-blur-md border border-white/10 shadow-lg">
         <p ref={timeRef} className="text-sm font-semibold text-neutral-100 tracking-widest">
           15:40
         </p>

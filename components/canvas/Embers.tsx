@@ -31,7 +31,29 @@ export function Embers() {
   useFrame((state, _dt) => {
     const t = useNight.getState().t
 
+    // Only visible in the hearth + night window: t=0.48 to t=0.88
+    let opacity = 0
+    if (t > 0.48 && t <= 0.60) {
+      opacity = (t - 0.48) / 0.12
+    } else if (t > 0.60 && t <= 0.80) {
+      opacity = 1.0
+    } else if (t > 0.80 && t <= 0.88) {
+      opacity = 1.0 - (t - 0.80) / 0.08
+    }
+
+    if (materialRef.current) {
+      materialRef.current.opacity = Math.max(0, Math.min(0.75, opacity * 0.75))
+    }
+
+    // Skip the CPU integration and the full position-buffer re-upload while
+    // invisible — that is ~60% of the scroll spent animating nothing.
+    if (opacity <= 0) {
+      if (pointsRef.current) pointsRef.current.visible = false
+      return
+    }
+
     if (pointsRef.current) {
+      pointsRef.current.visible = true
       const pos = pointsRef.current.geometry.attributes.position.array as Float32Array
       const elapsed = state.clock.elapsedTime
 
@@ -46,19 +68,6 @@ export function Embers() {
       }
 
       pointsRef.current.geometry.attributes.position.needsUpdate = true
-    }
-
-    // Only visible in the hearth + night window: t=0.48 to t=0.88
-    if (materialRef.current) {
-      let opacity = 0
-      if (t > 0.48 && t <= 0.60) {
-        opacity = (t - 0.48) / 0.12
-      } else if (t > 0.60 && t <= 0.80) {
-        opacity = 1.0
-      } else if (t > 0.80 && t <= 0.88) {
-        opacity = 1.0 - (t - 0.80) / 0.08
-      }
-      materialRef.current.opacity = Math.max(0, Math.min(0.75, opacity * 0.75))
     }
   })
 

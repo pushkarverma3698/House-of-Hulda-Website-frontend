@@ -4,249 +4,326 @@ import { useEffect, useRef, memo } from 'react'
 import { useNight } from '@/lib/store/night'
 
 const TOTAL_HERO_FRAMES = 240
-// Hard limits for memory management
-const MAX_MOBILE_CACHE_SIZE = 15
-const MAX_DESKTOP_CACHE_SIZE = 60
-const PRELOAD_WINDOW_AHEAD = 20
-const PRELOAD_WINDOW_BEHIND = 5
+const frameUrl = (index: number) =>
+  `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
 
-function padFrame(num: number): string {
-  return String(num).padStart(3, '0')
+/**
+ * Decoded ImageBitmaps are GPU-backed and are NOT bounded by a frame count.
+ * A 720x1280 RGBA bitmap is 3.7MB, so a 45-frame mobile cap is a ~166MB
+ * allocation — iOS Safari discards the tab well before that. Budget in BYTES
+ * and measure each bitmap, so the budget stays correct if the frame ladder
+ * is ever re-encoded at a different resolution.
+ */
+const MOBILE_BITMAP_BUDGET = 48 * 1024 * 1024
+const DESKTOP_BITMAP_BUDGET = 192 * 1024 * 1024
+
+const PRELOAD_AHEAD_MOBILE = 8
+const PRELOAD_BEHIND_MOBILE = 2
+const PRELOAD_AHEAD_DESKTOP = 24
+const PRELOAD_BEHIND_DESKTOP = 6
+
+/** Bounded fallback search — an unbounded radiating scan costs up to 480 Map
+ *  probes per rAF while the cache is cold, which is exactly when we are slow. */
+const NEAREST_SEARCH_RADIUS = 40
+
+/** The colour grade is a compositor filter on a fullscreen layer. Quantising it
+ *  re-rasterises that layer ~16 times across the whole scroll instead of once
+ *  per frame. */
+const GRADE_STEPS = 16
+const ALPHA_STEPS = 32
+
+const detectCoarsePointer = (): boolean => {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
 }
 
+interface CachedFrame {
+  bitmap: ImageBitmap
+  bytes: number
+}
+
+/**
+ * Byte-budgeted LRU of decoded frames.
+ *
+ * Fetch + Blob + createImageBitmap rather than HTMLImageElement because it is
+ * the only path with real cancellation (AbortController actually tears down the
+ * request; `img.src = ''` does not) and because it never leaves a second
+ * decoded copy alive inside an <img> the browser is free to retain.
+ */
 class FrameCache {
-  private cache = new Map<number, HTMLImageElement>()
-  private inFlight = new Map<number, HTMLImageElement>()
-  
-  public cancelOutsideWindow(targetIndex: number, windowAhead: number, windowBehind: number) {
-    for (const [idx, img] of this.inFlight.entries()) {
-      if (idx < targetIndex - windowBehind || idx > targetIndex + windowAhead) {
-        img.src = '' // Cancel network load immediately
-        this.inFlight.delete(idx)
+  private cache = new Map<number, CachedFrame>()
+  private inFlight = new Map<number, AbortController>()
+  private bytes = 0
+  private budget = DESKTOP_BITMAP_BUDGET
+
+  public setBudget(bytes: number): void {
+    this.budget = bytes
+    this.evictToBudget(-1)
+  }
+
+  public cancelOutsideWindow(targetIndex: number, ahead: number, behind: number): void {
+    for (const [index, controller] of this.inFlight) {
+      if (index < targetIndex - behind || index > targetIndex + ahead) {
+        controller.abort()
+        this.inFlight.delete(index)
       }
     }
   }
 
-  public get(index: number): HTMLImageElement | undefined {
-    // LRU trick: delete and re-insert to move to back of Map (most recently used)
-    if (this.cache.has(index)) {
-      const img = this.cache.get(index)!
-      this.cache.delete(index)
-      this.cache.set(index, img)
-      return img
-    }
-    return undefined
+  /** LRU touch: delete + re-insert moves the entry to the back of the Map. */
+  public get(index: number): CachedFrame | undefined {
+    const frame = this.cache.get(index)
+    if (!frame) return undefined
+    this.cache.delete(index)
+    this.cache.set(index, frame)
+    return frame
   }
 
-  public async load(index: number, onDecode?: () => void) {
+  public async load(index: number, onDecode?: () => void): Promise<void> {
     if (this.cache.has(index) || this.inFlight.has(index)) return
-    
-    const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || ('ontouchstart' in window))
-    const CACHE_SIZE = isMobile ? MAX_MOBILE_CACHE_SIZE : MAX_DESKTOP_CACHE_SIZE
 
-    const img = new Image()
-    this.inFlight.set(index, img)
-    
+    const controller = new AbortController()
+    this.inFlight.set(index, controller)
+
     try {
-      // Wait for network load first
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve()
-        img.onerror = () => reject(new Error(`Failed to load frame ${index}`))
-        img.src = `/frames/hero/frame_${padFrame(index)}.jpg`
-      })
+      const response = await fetch(frameUrl(index), { signal: controller.signal })
+      if (!response.ok) return
 
-      // If we cancelled this frame while it was loading over network, abort decode
-      if (!this.inFlight.has(index)) return
+      const blob = await response.blob()
+      if (controller.signal.aborted) return
 
-      // Try background decode, but don't block if it fails
-      try {
-        await img.decode()
-      } catch (e) {}
-      
-      // Check again just in case it was cancelled during decode
-      if (!this.inFlight.has(index)) return
-
-      this.cache.set(index, img)
-
-      // Evict oldest only AFTER we have successfully loaded a new frame.
-      // This prevents the cache from becoming empty during fast scrolls.
-      while (this.cache.size > CACHE_SIZE) {
-        const oldestKey = this.cache.keys().next().value
-        if (oldestKey !== undefined) {
-          const oldImg = this.cache.get(oldestKey)
-          if (oldImg) oldImg.src = ''
-          this.cache.delete(oldestKey)
-        }
+      // Decodes off the main thread. This is the whole point of the pipeline —
+      // never hand a raw <img> to drawImage and let it decode during paint.
+      const bitmap = await createImageBitmap(blob)
+      if (controller.signal.aborted) {
+        bitmap.close()
+        return
       }
 
+      const bytes = bitmap.width * bitmap.height * 4
+      this.cache.set(index, { bitmap, bytes })
+      this.bytes += bytes
+
+      // Evict AFTER insert so the cache is never momentarily empty mid-scroll.
+      this.evictToBudget(index)
       onDecode?.()
-    } catch (e) {
-      // Load failed
+    } catch {
+      // Aborted or network failure — the render loop falls back to the nearest
+      // cached frame, so a miss is never fatal.
     } finally {
       this.inFlight.delete(index)
     }
   }
 
-  public getNearestLoaded(targetIndex: number): HTMLImageElement | null {
-    const exact = this.get(targetIndex)
-    if (exact) return exact
-    
-    // Search radiating outwards unbounded until a frame is found
-    for (let offset = 1; offset < TOTAL_HERO_FRAMES; offset++) {
-      const imgMinus = this.get(targetIndex - offset)
-      if (imgMinus) return imgMinus
-      
-      const imgPlus = this.get(targetIndex + offset)
-      if (imgPlus) return imgPlus
+  private evictToBudget(protectedIndex: number): void {
+    for (const index of this.cache.keys()) {
+      if (this.bytes <= this.budget) return
+      if (index === protectedIndex) continue
+
+      const frame = this.cache.get(index)
+      if (frame) {
+        frame.bitmap.close() // deterministic VRAM release, no GC wait
+        this.bytes -= frame.bytes
+      }
+      this.cache.delete(index)
     }
-    
+  }
+
+  public getNearestLoaded(targetIndex: number): { bitmap: ImageBitmap; index: number } | null {
+    const exact = this.get(targetIndex)
+    if (exact) return { bitmap: exact.bitmap, index: targetIndex }
+
+    for (let offset = 1; offset <= NEAREST_SEARCH_RADIUS; offset++) {
+      const behind = this.get(targetIndex - offset)
+      if (behind) return { bitmap: behind.bitmap, index: targetIndex - offset }
+
+      const ahead = this.get(targetIndex + offset)
+      if (ahead) return { bitmap: ahead.bitmap, index: targetIndex + offset }
+    }
+
     return null
   }
 }
+
 export const globalFrameCache = new FrameCache()
 
 export const ScrollCanvas = memo(function ScrollCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const lastTargetIdxRef = useRef<number>(-1)
+  const lastDrawnKeyRef = useRef<string>('')
+  const lastDrawnFilterRef = useRef<string>('')
+  const isRenderingRef = useRef<boolean>(false)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    // Optimizations: alpha:false removes compositing overhead, desynchronized:true reduces latency
+
+    // alpha:false removes per-frame compositing of a transparent fullscreen
+    // layer; desynchronized:true lets the compositor skip a vsync round-trip.
     const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true })
     if (!ctx) return
     ctx.imageSmoothingQuality = 'low'
-    const cache = globalFrameCache
 
-    let animFrameId: number
-    
-    // Eagerly load initial sequence on mount
-    cache.load(1)
-    cache.load(2)
-    cache.load(3)
+    const cache = globalFrameCache
+    const isCoarsePointer = detectCoarsePointer()
+    const aheadWindow = isCoarsePointer ? PRELOAD_AHEAD_MOBILE : PRELOAD_AHEAD_DESKTOP
+    const behindWindow = isCoarsePointer ? PRELOAD_BEHIND_MOBILE : PRELOAD_BEHIND_DESKTOP
+
+    cache.setBudget(isCoarsePointer ? MOBILE_BITMAP_BUDGET : DESKTOP_BITMAP_BUDGET)
+
+    let animFrameId = 0
+
+    const startRender = () => {
+      if (!isRenderingRef.current) {
+        isRenderingRef.current = true
+        animFrameId = requestAnimationFrame(render)
+      }
+    }
+
+    const onFrameDecoded = () => startRender()
+
+    const unsubNight = useNight.subscribe((state, prevState) => {
+      if (state.t !== prevState.t) startRender()
+    })
+
+    cache.load(1, onFrameDecoded)
+    cache.load(2, onFrameDecoded)
+    cache.load(3, onFrameDecoded)
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      const newWidth = window.innerWidth * dpr
-      const newHeight = window.innerHeight * dpr
-      
-      const isMobile = window.innerWidth < 768 || ('ontouchstart' in window)
-      // Critical Mobile Perf: Ignore height-only resize events (caused by URL bar hiding/showing).
-      // Reallocating a 2D canvas backing store during scroll causes massive stutter.
-      if (isMobile && canvas.width === newWidth && canvas.width > 0) {
-        return 
-      }
+      const dpr = Math.min(window.devicePixelRatio || 1, isCoarsePointer ? 1.5 : 2)
+      const newWidth = Math.round(window.innerWidth * dpr)
+      const newHeight = Math.round(window.innerHeight * dpr)
+
+      // Height-only resizes on mobile are the URL bar hiding/showing. Realloc of
+      // a fullscreen 2D backing store mid-scroll is a multi-frame stall.
+      if (isCoarsePointer && canvas.width === newWidth && canvas.width > 0) return
+      if (canvas.width === newWidth && canvas.height === newHeight) return
 
       canvas.width = newWidth
       canvas.height = newHeight
-    }
 
-    resize()
-    window.addEventListener('resize', resize, { passive: true })
+      // Resizing wipes the backing store — invalidate the draw key or the canvas
+      // stays black until the next frame index change.
+      lastDrawnKeyRef.current = ''
+      startRender()
+    }
 
     const render = () => {
       const t = useNight.getState().t
       const width = canvas.width
       const height = canvas.height
 
-      ctx.clearRect(0, 0, width, height)
-
       let targetFrameIdx = 1
       let alpha = 1.0
 
-      if (t < 0.70) {
-        const localT = Math.max(0, Math.min(1, t / 0.70))
+      if (t < 0.7) {
+        const localT = Math.max(0, Math.min(1, t / 0.7))
         targetFrameIdx = 1 + Math.floor(localT * (TOTAL_HERO_FRAMES - 1))
       } else if (t < 0.85) {
         targetFrameIdx = TOTAL_HERO_FRAMES
-        alpha = 1.0
       } else {
-        const fadeProgress = (t - 0.85) / 0.15
-        alpha = Math.max(0, 1.0 - fadeProgress)
+        alpha = Math.max(0, 1.0 - (t - 0.85) / 0.15)
         targetFrameIdx = TOTAL_HERO_FRAMES
       }
 
-      // Preload window management (mobile-optimized)
       if (targetFrameIdx !== lastTargetIdxRef.current) {
-        const delta = Math.abs(targetFrameIdx - (lastTargetIdxRef.current === -1 ? targetFrameIdx : lastTargetIdxRef.current))
+        const previousIdx = lastTargetIdxRef.current
+        const delta = previousIdx === -1 ? 1 : Math.abs(targetFrameIdx - previousIdx)
         lastTargetIdxRef.current = targetFrameIdx
-        
-        // Priority 1: Current frame
-        cache.load(targetFrameIdx)
-        
-        const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || ('ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)))
-        const aheadWindow = isMobile ? 6 : PRELOAD_WINDOW_AHEAD
-        const behindWindow = isMobile ? 3 : PRELOAD_WINDOW_BEHIND
 
-        // Immediately cancel any in-flight requests that are outside our new active window
-        cache.cancelOutsideWindow(targetFrameIdx, aheadWindow, behindWindow)
+        cache.load(targetFrameIdx, onFrameDecoded)
+        cache.cancelOutsideWindow(targetFrameIdx, aheadWindow * Math.max(1, delta), behindWindow)
 
-        // VELOCITY THROTTLING: If scrolling extremely fast (delta > 2), skip lookahead network spam.
-        // This prevents the main thread from freezing while allocating and aborting hundreds of fetch requests per second.
-        if (delta <= 2) {
-          // Priority 2: Look ahead
-          for (let i = 1; i <= aheadWindow; i++) {
-            const idx = targetFrameIdx + i
-            if (idx <= TOTAL_HERO_FRAMES) cache.load(idx)
-          }
-          
-          // Priority 3: Look behind
-          for (let i = 1; i <= behindWindow; i++) {
-            const idx = targetFrameIdx - i
-            if (idx >= 1) cache.load(idx)
-          }
+        // Velocity-aware stride. At speed the frames between here and the next
+        // rAF will never be shown, so requesting them only starves the frames
+        // that will be. Stride the lookahead by the observed frame velocity
+        // instead of dropping it entirely.
+        const stride = Math.max(1, Math.min(delta, 8))
+        const direction = previousIdx === -1 || targetFrameIdx >= previousIdx ? 1 : -1
+
+        for (let i = 1; i <= aheadWindow; i++) {
+          const idx = targetFrameIdx + direction * i * stride
+          if (idx >= 1 && idx <= TOTAL_HERO_FRAMES) cache.load(idx, onFrameDecoded)
+        }
+        for (let i = 1; i <= behindWindow; i++) {
+          const idx = targetFrameIdx - direction * i
+          if (idx >= 1 && idx <= TOTAL_HERO_FRAMES) cache.load(idx, onFrameDecoded)
         }
       }
 
-      const drawImg = cache.getNearestLoaded(targetFrameIdx)
+      const cachedFrame = cache.getNearestLoaded(targetFrameIdx)
 
-      if (drawImg && drawImg.complete && drawImg.naturalWidth > 0) {
-        if (t > 0.40 && t <= 0.85) {
-          const twilightProgress = Math.min(1, (t - 0.40) / 0.40)
-          const brightness = 1.0 - twilightProgress * 0.35
-          const contrast = 1.0 + twilightProgress * 0.15
-          const saturate = 1.0 - twilightProgress * 0.20
-          // Use hardware-accelerated CSS filter on the DOM element instead of slow ctx.filter
-          canvas.style.filter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturate})`
-        } else {
-          canvas.style.filter = 'none'
+      if (cachedFrame) {
+        const { bitmap } = cachedFrame
+
+        let targetFilter = 'none'
+        if (t > 0.4 && t <= 0.85) {
+          const raw = Math.min(1, (t - 0.4) / 0.4)
+          const step = Math.round(raw * GRADE_STEPS) / GRADE_STEPS
+          const brightness = 1.0 - step * 0.35
+          const contrast = 1.0 + step * 0.15
+          const saturate = 1.0 - step * 0.2
+          targetFilter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturate})`
         }
 
-        ctx.globalAlpha = alpha
-
-        const imgRatio = drawImg.naturalWidth / drawImg.naturalHeight
-        const canvasRatio = width / height
-        let drawWidth = width
-        let drawHeight = height
-        let offsetX = 0
-        let offsetY = 0
-
-        // Phase 2 Safe Area Contract: 
-        // Force cover-fit keeping center subject intact
-        if (canvasRatio > imgRatio) {
-          drawHeight = width / imgRatio
-          offsetY = (height - drawHeight) / 2
-        } else {
-          drawWidth = height * imgRatio
-          offsetX = (width - drawWidth) / 2
+        if (lastDrawnFilterRef.current !== targetFilter) {
+          canvas.style.filter = targetFilter
+          lastDrawnFilterRef.current = targetFilter
         }
 
-        // Critical Perf: Force integer coordinates to avoid expensive GPU sub-pixel interpolation on mobile
-        ctx.drawImage(
-          drawImg, 
-          Math.floor(offsetX), 
-          Math.floor(offsetY), 
-          Math.floor(drawWidth), 
-          Math.floor(drawHeight)
-        )
+        const steppedAlpha = Math.round(alpha * ALPHA_STEPS) / ALPHA_STEPS
+        const drawKey = `${cachedFrame.index}_${steppedAlpha}_${width}`
+
+        if (lastDrawnKeyRef.current !== drawKey) {
+          ctx.clearRect(0, 0, width, height)
+          ctx.globalAlpha = steppedAlpha
+
+          const imgRatio = bitmap.width / bitmap.height
+          const canvasRatio = width / height
+          let drawWidth = width
+          let drawHeight = height
+          let offsetX = 0
+          let offsetY = 0
+
+          if (canvasRatio > imgRatio) {
+            drawHeight = width / imgRatio
+            offsetY = (height - drawHeight) / 2
+          } else {
+            drawWidth = height * imgRatio
+            offsetX = (width - drawWidth) / 2
+          }
+
+          ctx.drawImage(
+            bitmap,
+            Math.floor(offsetX),
+            Math.floor(offsetY),
+            Math.floor(drawWidth),
+            Math.floor(drawHeight)
+          )
+
+          lastDrawnKeyRef.current = drawKey
+        }
+
+        // Self-terminate once the exact target frame is on screen. Nothing can
+        // change the output until either t moves or a decode lands, and both
+        // restart the loop.
+        if (cachedFrame.index === targetFrameIdx) {
+          isRenderingRef.current = false
+          return
+        }
       }
 
       animFrameId = requestAnimationFrame(render)
     }
 
-    render()
+    // Sized after `render` exists — resize() restarts the loop on its own.
+    resize()
+    window.addEventListener('resize', resize, { passive: true })
+    startRender()
 
     return () => {
+      unsubNight()
       cancelAnimationFrame(animFrameId)
       window.removeEventListener('resize', resize)
     }
