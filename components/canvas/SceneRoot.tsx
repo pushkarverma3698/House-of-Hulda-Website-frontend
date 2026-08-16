@@ -17,7 +17,7 @@ export const SceneRoot = memo(function SceneRoot() {
     <div className="fixed inset-0 z-0 pointer-events-none bg-transparent">
       <Canvas
         camera={{ position: [0, 2, 10], fov: 28 }}
-        gl={{ antialias: false, powerPreference: 'high-performance', alpha: true, preserveDrawingBuffer: true }}
+        gl={{ antialias: false, powerPreference: 'high-performance', alpha: true }}
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0)
         }}

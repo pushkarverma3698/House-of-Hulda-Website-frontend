@@ -95,8 +95,10 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d', { alpha: true })
+    // Optimizations: alpha:false removes compositing overhead, desynchronized:true reduces latency
+    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true })
     if (!ctx) return
+    ctx.imageSmoothingQuality = 'low'
     const cache = cacheRef.current
 
     let animFrameId: number
@@ -169,9 +171,10 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
           const brightness = 1.0 - twilightProgress * 0.35
           const contrast = 1.0 + twilightProgress * 0.15
           const saturate = 1.0 - twilightProgress * 0.20
-          ctx.filter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturate})`
+          // Use hardware-accelerated CSS filter on the DOM element instead of slow ctx.filter
+          canvas.style.filter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturate})`
         } else {
-          ctx.filter = 'none'
+          canvas.style.filter = 'none'
         }
 
         ctx.globalAlpha = alpha
