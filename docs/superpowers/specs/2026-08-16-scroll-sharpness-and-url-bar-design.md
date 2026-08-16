@@ -178,3 +178,53 @@ Two changes, ~15 minutes combined:
 
 ~2 hours total. Part 2 (URL bar) is ~20 minutes and independently shippable
 before Part 1 if needed.
+
+## Verification results (2026-08-16)
+
+Shipped in `ce2a9fb`. Mid tier encoded at 320x568: 240 frames, 5.2 MB on disk,
+20.3 KB each, 710 KB decoded each.
+
+**Verified — local dev, 375x812 mobile viewport, real wheel input**
+
+| check | result |
+|---|---|
+| mid tier engages on slow scroll | yes — grew to 13f/9.0 MB then 21f/14.6 MB |
+| settle -> hires | yes — tier `hires`, 3.5-7.0 MB resident |
+| delivery | 100% throughout |
+| evictions | 0-2 (hires tier only, expected at its 2-frame budget) |
+| target vs drawn | matched at every sample (25/25, 59/59, 94/94) |
+| `next build` | clean, no type errors |
+
+**Verified — URL-bar fix, height-only resize 812->725px at a fixed scroll
+position.** This is the decisive measurement; baseline was re-tested by
+stashing only the `providers.tsx` guard:
+
+| | frame index |
+|---|---|
+| without guard (baseline) | 54 -> **58** (4-frame jump) |
+| with guard (shipped) | 94 -> **94** (no jump) |
+
+**Verified — production (www.houseofhuldamanali.com)**
+
+- all three tiers serve 200: hero 151.9 KB, hero-mid 22.7 KB, hero-proxy 7.3 KB
+- new build live (overlay renders the `idx vel` and `mid mem` rows)
+- no console errors
+- cold start unchanged: ~1.76 MB proxy tier, zero `hero-mid` references in the
+  initial HTML — the mid tier is on-demand only, as designed
+
+**NOT verified — needs the real phone**
+
+1. `FAST_FLICK_THRESHOLD = 0.05` frames/ms never fired in testing. Desktop
+   wheel input through Lenis (`lerp: 0.08`) peaked at 0.019 frames/ms — a
+   genuinely moderate scroll (~770 px/s), so the gate correctly stayed on the
+   mid tier. The threshold corresponds to ~2,000 px/s, which only a real touch
+   momentum flick reaches. **Watch `idx vel` on the phone during a hard flick:
+   if it never exceeds 0.05 the gate is dead code and the value must come
+   down; if delivery drops below ~95% during a flick it is too high.**
+2. Live scrubbing on production. The browser automation could not inject
+   trusted scroll events into the production tab (synthetic `wheel` events do
+   not drive Lenis), so scrubbing was only confirmed against local dev running
+   identical code.
+3. The actual URL-bar animation. Desktop Chrome has no dynamic toolbar; the
+   fix was verified through the resize event it produces, not the toolbar
+   itself.
