@@ -12,12 +12,19 @@ export interface ScrubStats {
   /** Frame index actually on screen. Diverges from targetIdx on a cache miss. */
   drawnIdx: number
   /** Which ladder rung is on screen. */
-  tier: 'proxy' | 'hires' | 'none'
+  tier: 'proxy' | 'mid' | 'hires' | 'none'
 
   proxyResident: number
   proxyBytes: number
+  midResident: number
+  midBytes: number
   hiresResident: number
   hiresBytes: number
+
+  /** Smoothed frame indices crossed per ms. Above FAST_FLICK_THRESHOLD the mid
+   *  tier is skipped — this is the number that says whether the gate is firing
+   *  where it should. */
+  idxVelocity: number
 
   /** Cumulative since the last reset. */
   decodes: number
@@ -48,8 +55,11 @@ export const scrubStats: ScrubStats = {
   tier: 'none',
   proxyResident: 0,
   proxyBytes: 0,
+  midResident: 0,
+  midBytes: 0,
   hiresResident: 0,
   hiresBytes: 0,
+  idxVelocity: 0,
   decodes: 0,
   evictions: 0,
   paintedIdx: new Set<number>(),

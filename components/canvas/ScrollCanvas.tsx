@@ -7,7 +7,7 @@ import { scrubStats } from '@/lib/perf/scrubStats'
 export const TOTAL_HERO_FRAMES = 240
 
 /**
- * TWO-TIER FRAME LADDER
+ * THREE-TIER FRAME LADDER
  *
  * A decoded 720x1280 RGBA frame costs 3.52 MiB. The 48 MB mobile budget holds
  * 13 of them — 370 px of scroll — while one momentum flick travels ~1,900 px.
@@ -18,13 +18,27 @@ export const TOTAL_HERO_FRAMES = 240
  * No eviction policy fixes a 5x capacity deficit, so the per-frame cost comes
  * down instead. The 160x284 proxy tier is 177 KB decoded, which puts ALL 240
  * frames resident in 41.7 MB. Nothing is ever evicted and nothing is ever
- * missed, so motion is always smooth. The full-resolution frame is faded back
- * in whenever the scroll settles, which is the only time the eye can resolve it.
+ * missed, so motion is always smooth.
  *
- * Regenerate the proxy tier with ./scripts/encode-proxy-frames.sh
+ * But the proxy is what the viewer looks at for the WHOLE scroll, upscaled
+ * ~3.7x to the backing store, and it reads as soft. The tier is chosen by how
+ * fast the playhead is moving, not by stillness alone:
+ *
+ *   fast flick   -> proxy  (160x284, all 240 resident, 3.7x upscale)
+ *   slow scroll  -> mid    (320x568, ~33-frame LRU window, 1.9x upscale)
+ *   settled      -> hires  (720x1280, 2 frames, 1.2x upscale)
+ *
+ * The mid tier does not reintroduce the thrash because the deficit that caused
+ * it is gone: a slow scroll demands roughly one frame per tick and a 320px JPEG
+ * decodes in low single-digit ms, where a 720px one costs 10-15 ms.
+ *
+ * Regenerate the lower tiers with ./scripts/encode-proxy-frames.sh and
+ * ./scripts/encode-mid-frames.sh
  */
 export const proxyFrameUrl = (index: number) =>
   `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.jpg`
+const midFrameUrl = (index: number) =>
+  `/frames/hero-mid/frame_${String(index).padStart(3, '0')}.jpg`
 const hiresFrameUrl = (index: number) =>
   `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
 
@@ -36,6 +50,22 @@ const PROXY_BUDGET = 44 * 1024 * 1024
  *  so the mobile tier needs room for the current one and the one before it. */
 const HIRES_BUDGET_MOBILE = 8 * 1024 * 1024
 const HIRES_BUDGET_DESKTOP = 96 * 1024 * 1024
+
+/** A 320x568 frame is 710 KB decoded, so this is a ~33-frame trailing window.
+ *  No mobile/desktop split: 24 MB on top of the proxy tier's 42 MB and two
+ *  full-resolution frames is ~73 MB, which the weakest target device holds. */
+const MID_BUDGET = 24 * 1024 * 1024
+
+/** Frames per ms, above which the mid tier is skipped entirely and the proxy
+ *  carries the scroll unchanged. ~0.05 is 50 frames/sec — past that the eye
+ *  cannot resolve the extra detail anyway, and requesting it is what starts a
+ *  cache thrashing. Tuned against the ?debug=perf `tier` readout on device. */
+const FAST_FLICK_THRESHOLD = 0.05
+
+/** Smoothing for the frame-velocity estimate. A single slow tick between two
+ *  fast ones must not flip the tier and trigger a request the flick will
+ *  outrun. */
+const VELOCITY_EMA_ALPHA = 0.3
 
 /** Concurrency for the background sweep that makes the proxy tier resident.
  *  Browsers multiplex over HTTP/2, so an unbounded fan-out does not queue — it
@@ -217,6 +247,7 @@ class BitmapCache {
 }
 
 export const proxyCache = new BitmapCache(proxyFrameUrl, PROXY_BUDGET)
+export const midCache = new BitmapCache(midFrameUrl, MID_BUDGET)
 export const hiresCache = new BitmapCache(hiresFrameUrl, HIRES_BUDGET_DESKTOP)
 
 /**
@@ -250,7 +281,10 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
     // layer; desynchronized:true lets the compositor skip a vsync round-trip.
     const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true })
     if (!ctx) return
-    ctx.imageSmoothingQuality = 'low'
+    // 'low' picks a cheaper, blurrier resampling kernel. Every tier is upscaled
+    // to the backing store, so that filter was compounding the softness — and
+    // the draw is one fullscreen blit, not the frame budget's bottleneck.
+    ctx.imageSmoothingQuality = 'high'
 
     const isCoarsePointer = detectCoarsePointer()
     hiresCache.setBudget(isCoarsePointer ? HIRES_BUDGET_MOBILE : HIRES_BUDGET_DESKTOP)
@@ -260,6 +294,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
     let isDisposed = false
     let idxChangedAt = performance.now()
     let hiresShownAt = 0
+    let idxVelocityEma = 0
 
     const startRender = () => {
       if (isDisposed || isRenderingRef.current) return
@@ -368,17 +403,38 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
           scrubStats.activeMs += heldMs
           if (heldMs > scrubStats.worstFreezeMs) scrubStats.worstFreezeMs = heldMs
           if (heldMs > 100) scrubStats.freezesOver100ms++
+
+          // Frames crossed per ms. An idle gap is the user not scrolling, so it
+          // must not be averaged in as "very slow" — a resumed flick would then
+          // be served the mid tier for the first few frames and miss them.
+          const crossed = Math.abs(targetFrameIdx - lastTargetIdxRef.current)
+          idxVelocityEma =
+            idxVelocityEma * (1 - VELOCITY_EMA_ALPHA) +
+            (crossed / Math.max(1, heldMs)) * VELOCITY_EMA_ALPHA
+        } else if (heldMs >= IDLE_GAP_MS) {
+          // Coming back from a rest: assume slow until proven otherwise, so the
+          // first deliberate frame after a pause is sharp.
+          idxVelocityEma = 0
         }
         lastTargetIdxRef.current = targetFrameIdx
         idxChangedAt = now
         hiresShownAt = 0
         clearTimeout(settleTimerId)
-        // The playhead moved, so a full-resolution frame for the old position is
-        // dead weight — free the pipe for the proxy sweep.
+        // The playhead moved, so frames for the old position are dead weight —
+        // free the pipe for the tier the playhead actually needs now.
         hiresCache.abortAllExcept(-1)
+        midCache.abortAllExcept(targetFrameIdx)
         // Proxy frames are tiny and the sweep is already fetching them in order;
         // asking directly only matters when the user has outrun the sweep.
         void proxyCache.load(targetFrameIdx, onFrameDecoded)
+
+        // Below flick speed the eye can resolve detail, and a 320px decode is
+        // cheap enough to land within the frame. Above it, the proxy carries
+        // the scroll exactly as it does today — requesting anything larger is
+        // what starts the thrash this ladder exists to prevent.
+        if (idxVelocityEma <= FAST_FLICK_THRESHOLD && !midCache.has(targetFrameIdx)) {
+          void midCache.load(targetFrameIdx, onFrameDecoded)
+        }
       }
 
       scrubStats.targetIdx = targetFrameIdx
@@ -391,10 +447,15 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       }
 
       const hires = isSettled ? hiresCache.get(targetFrameIdx) : null
-      const frame: FrameRef | null = hires ?? proxyCache.getNearest(targetFrameIdx)
+      // Only the exact frame: a stale mid frame from elsewhere in the sequence
+      // is worse than the correct proxy one, which getNearest already handles.
+      const mid = hires ? null : midCache.get(targetFrameIdx)
+      const frame: FrameRef | null =
+        hires ?? mid ?? proxyCache.getNearest(targetFrameIdx)
 
       if (frame) {
         const isHires = hires !== null
+        const isMid = mid !== null
         if (isHires && hiresShownAt === 0) hiresShownAt = now
 
         // Quantise on the NUMBER, not the string — building the template literal
@@ -420,7 +481,8 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
           : 1
         const steppedAlpha = Math.round(alpha * ALPHA_STEPS) / ALPHA_STEPS
         const steppedFade = Math.round(fade * ALPHA_STEPS) / ALPHA_STEPS
-        const drawKey = `${isHires ? 'h' : 'p'}_${frame.index}_${steppedAlpha}_${steppedFade}_${width}`
+        const tierKey = isHires ? 'h' : isMid ? 'm' : 'p'
+        const drawKey = `${tierKey}_${frame.index}_${steppedAlpha}_${steppedFade}_${width}`
 
         if (lastDrawnKeyRef.current !== drawKey) {
           // The cover math always covers the full canvas, so at full alpha the
@@ -430,12 +492,17 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
           if (isTranslucent) ctx.clearRect(0, 0, width, height)
 
           // Mid-fade, lay the sharp frame over the soft one so no black shows
-          // through while the two are blended.
+          // through while the two are blended. Prefer the mid tier underneath —
+          // it is what was on screen a moment ago, so the fade reads as the
+          // image sharpening rather than as a resolution pop.
           if (isHires && steppedFade < 1) {
-            const proxy = proxyCache.get(frame.index) ?? proxyCache.getNearest(frame.index)
-            if (proxy) {
+            const under =
+              midCache.get(frame.index) ??
+              proxyCache.get(frame.index) ??
+              proxyCache.getNearest(frame.index)
+            if (under) {
               ctx.globalAlpha = steppedAlpha
-              drawCover(proxy.bitmap, width, height)
+              drawCover(under.bitmap, width, height)
             }
           }
 
@@ -449,11 +516,14 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         }
 
         scrubStats.drawnIdx = frame.index
-        scrubStats.tier = isHires ? 'hires' : 'proxy'
+        scrubStats.tier = isHires ? 'hires' : isMid ? 'mid' : 'proxy'
         scrubStats.proxyResident = proxyCache.residentCount
         scrubStats.proxyBytes = proxyCache.residentBytes
+        scrubStats.midResident = midCache.residentCount
+        scrubStats.midBytes = midCache.residentBytes
         scrubStats.hiresResident = hiresCache.residentCount
         scrubStats.hiresBytes = hiresCache.residentBytes
+        scrubStats.idxVelocity = idxVelocityEma
 
         if (scrubStats.lastTickAt > 0) {
           const dt = now - scrubStats.lastTickAt
@@ -497,6 +567,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       clearTimeout(settleTimerId)
       window.removeEventListener('resize', resize)
       proxyCache.dispose()
+      midCache.dispose()
       hiresCache.dispose()
     }
   }, [])

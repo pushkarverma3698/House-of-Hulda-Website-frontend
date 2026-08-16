@@ -30,7 +30,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // scrollHeight forces a layout flush, so it is measured on resize only,
     // never inside the frame loop.
     let maxScroll = 1
+    let lastMeasuredWidth = -1
     const measure = () => {
+      // Safari fires `resize` every time the dynamic URL bar animates, and BOTH
+      // terms below move with it. Re-deriving maxScroll mid-scroll therefore
+      // remaps `p` discontinuously, which the film shows as the frame index
+      // jumping — exactly in sync with the toolbar sliding. Width is the only
+      // thing that changes on a real resize or an orientation change, so gate
+      // on it. (The layout is sized in `svh` for the same reason: svh is fixed
+      // at the small-viewport size and does not track the toolbar.)
+      if (window.innerWidth === lastMeasuredWidth) return
+      lastMeasuredWidth = window.innerWidth
       maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
     }
     measure()

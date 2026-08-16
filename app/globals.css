@@ -16,6 +16,10 @@ body {
   padding: 0;
   background: #0a0f17;
   overflow-x: clip;
+  /* Rubber-banding past either end is one of the things that makes mobile
+     Safari animate its URL bar, and every toolbar animation is a resize event
+     the scroll-progress math has to defend against (see app/providers.tsx). */
+  overscroll-behavior-y: none;
 }
 
 body {

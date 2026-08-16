@@ -25,7 +25,10 @@ interface Snapshot {
   tier: string
   proxyResident: number
   proxyMB: number
+  midResident: number
+  midMB: number
   hiresMB: number
+  idxVelocity: number
   decodes: number
   evictions: number
   worstFreezeMs: number
@@ -63,7 +66,10 @@ export function ScrubDebugOverlay() {
           tier: scrubStats.tier,
           proxyResident: scrubStats.proxyResident,
           proxyMB: scrubStats.proxyBytes / 1048576,
+          midResident: scrubStats.midResident,
+          midMB: scrubStats.midBytes / 1048576,
           hiresMB: scrubStats.hiresBytes / 1048576,
+          idxVelocity: scrubStats.idxVelocity,
           decodes: scrubStats.decodes,
           evictions: scrubStats.evictions,
           worstFreezeMs: scrubStats.worstFreezeMs,
@@ -118,10 +124,22 @@ export function ScrubDebugOverlay() {
       <Row
         label="tier"
         value={snap.tier}
-        className={snap.tier === 'hires' ? 'text-emerald-400' : 'text-white/70'}
+        className={
+          snap.tier === 'hires'
+            ? 'text-emerald-400'
+            : snap.tier === 'mid'
+              ? 'text-sky-400'
+              : 'text-white/70'
+        }
+      />
+      <Row
+        label="idx vel"
+        value={`${snap.idxVelocity.toFixed(3)}/ms`}
+        className={snap.idxVelocity > 0.05 ? 'text-amber-400' : 'text-white/70'}
       />
       <Row label="proxy resident" value={`${snap.proxyResident}/240`} />
       <Row label="proxy mem" value={`${snap.proxyMB.toFixed(1)}MB`} />
+      <Row label="mid mem" value={`${snap.midResident}f · ${snap.midMB.toFixed(1)}MB`} />
       <Row label="hires mem" value={`${snap.hiresMB.toFixed(1)}MB`} />
 
       <div className="h-px bg-white/10 my-1.5" />

@@ -28,7 +28,7 @@ export function CinematicExperience() {
   const [isHearthMenuOpen, setIsHearthMenuOpen] = useState(false)
 
   return (
-    <main className="relative min-h-[950vh] bg-transparent text-cream font-body selection:bg-amber selection:text-ink">
+    <main className="relative min-h-[950svh] bg-transparent text-cream font-body selection:bg-amber selection:text-ink">
       {/* 2D Master Drone Frame Scrubber Canvas */}
       <ScrollCanvas />
 
@@ -62,7 +62,7 @@ export function CinematicExperience() {
             Text lives on the ground — no box.
             A deep bottom gradient anchors it.
         ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-end pb-28 px-8 md:px-24">
+        <section className="relative h-[120svh] flex flex-col justify-end pb-28 px-8 md:px-24">
           <div className="relative space-y-5 max-w-2xl">
             <p className="hud-mono text-amber tracking-widest text-[10px] flex items-center gap-2 hero-hint-enter"
               style={{ animationDelay: '0.4s' }}>
@@ -90,7 +90,7 @@ export function CinematicExperience() {
             L-02: 16:23 — THE WATER
             Right-side alignment, no box
         ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-center px-8 md:px-24 items-end">
+        <section className="relative h-[120svh] flex flex-col justify-center px-8 md:px-24 items-end">
           <div className="relative space-y-4 max-w-lg text-right">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-02 · 16:23 · GLACIAL SPRINGS
@@ -108,7 +108,7 @@ export function CinematicExperience() {
             L-03: 17:07 — DEODAR AND STONE
             Left-side, lower third placement
         ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-end pb-28 px-8 md:px-24">
+        <section className="relative h-[120svh] flex flex-col justify-end pb-28 px-8 md:px-24">
           <div className="relative space-y-4 max-w-xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-03 · 17:07 · KATH-KUNI ARCHITECTURE
@@ -129,7 +129,7 @@ export function CinematicExperience() {
             L-04: 17:50 — THE ORCHARD TURNS
             Center, upper-third — the golden hour shot
         ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-center items-center text-center px-8 md:px-24">
+        <section className="relative h-[120svh] flex flex-col justify-center items-center text-center px-8 md:px-24">
           <div className="relative space-y-4 max-w-2xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-04 · 17:50 · GOLDEN HOUR
@@ -150,7 +150,7 @@ export function CinematicExperience() {
             L-05: 18:29 — THE LOFT
             Right-side panel, mid-section
         ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-center px-8 md:px-24 items-end">
+        <section className="relative h-[120svh] flex flex-col justify-center px-8 md:px-24 items-end">
           <div className="relative space-y-4 max-w-lg text-right">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-05 · 18:29 · THE LOFT
@@ -171,7 +171,7 @@ export function CinematicExperience() {
             L-06: 19:07 — THE HEARTH
             Center cinematic panel with amber warmth
         ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-center items-center text-center px-8 md:px-24">
+        <section className="relative h-[120svh] flex flex-col justify-center items-center text-center px-8 md:px-24">
           <div className="relative space-y-5 max-w-xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-06 · 19:07 · THE HEARTH
@@ -236,7 +236,7 @@ export function CinematicExperience() {
             Interactive Celestial Registry
             Minimal glass panel — this IS an instrument
         ═══════════════════════════════════════════ */}
-        <section className="relative min-h-[155vh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
+        <section className="relative min-h-[155svh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
           <div className="space-y-6 bg-ink/[0.88] md:bg-ink/[0.65] p-6 md:p-10 rounded-2xl md:backdrop-blur-xl border border-white/[0.07] shadow-2xl pointer-events-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="space-y-3">
@@ -294,7 +294,7 @@ export function CinematicExperience() {
             L-08: 02:27 — THE VALLEY COMMONS
             Marketplace — minimal wrap, editorial
         ═══════════════════════════════════════════ */}
-        <section className="relative min-h-[120vh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
+        <section className="relative min-h-[120svh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
           <div className="space-y-4 bg-ink/[0.90] md:bg-ink/[0.70] p-8 md:p-12 rounded-2xl md:backdrop-blur-xl border border-white/[0.06] shadow-2xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-08 · 02:27 · THE VALLEY COMMONS
@@ -313,7 +313,7 @@ export function CinematicExperience() {
             L-09: 06:05 — DAWN & INVITATION
             Full-bleed. No box. Text on first light.
         ═══════════════════════════════════════════ */}
-        <section id="the-invitation" className="relative h-[100vh] flex flex-col justify-center items-center px-8 text-center">
+        <section id="the-invitation" className="relative h-[100svh] flex flex-col justify-center items-center px-8 text-center">
           <div className="relative space-y-7 max-w-xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-09 · 06:05 · FIRST LIGHT
