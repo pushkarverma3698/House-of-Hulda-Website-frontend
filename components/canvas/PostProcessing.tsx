@@ -23,7 +23,7 @@ export function PostProcessing() {
       setIsMobile(
         window.innerWidth < 768 || 
         ('ontouchstart' in window) || 
-        (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)
+        Boolean(navigator.maxTouchPoints && navigator.maxTouchPoints > 0)
       )
     }
     checkMobile()
@@ -42,9 +42,8 @@ export function PostProcessing() {
   })
 
   return (
-    // @ts-expect-error — disableNormalPass is correct in v3 runtime but types lag
-    <EffectComposer disableNormalPass autoClear={false}>
-      {isMobile ? null : (
+    <EffectComposer {...({ disableNormalPass: true } as any)} autoClear={false}>
+      {isMobile ? (null as any) : (
         <Bloom
           ref={bloomRef}
           intensity={2.8}
@@ -53,7 +52,7 @@ export function PostProcessing() {
           mipmapBlur
         />
       )}
-      {isMobile ? null : (
+      {isMobile ? (null as any) : (
         <ChromaticAberration
           offset={new THREE.Vector2(0.0012, 0.0012)}
           radialModulation={true}
