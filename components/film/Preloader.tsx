@@ -24,9 +24,18 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
     let loadedCount = 0
     let hasCompleted = false
 
+    const pendingImages = new Set<HTMLImageElement>()
+
     const completePreloader = () => {
       if (hasCompleted) return
       hasCompleted = true
+      
+      // Cancel all pending image loads immediately to free the network queue for ScrollCanvas
+      pendingImages.forEach(img => {
+        img.src = ''
+      })
+      pendingImages.clear()
+      
       setProgress(100)
       setTimeout(() => {
         setIsLoaded(true)
@@ -42,8 +51,10 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
     // Load each frame
     framesToPreload.forEach((frameIdx) => {
       const img = new Image()
+      pendingImages.add(img)
       
       const onImageLoad = () => {
+        pendingImages.delete(img)
         if (hasCompleted) return
         loadedCount++
         // Calculate progress (cap at 99% until fully complete)
@@ -63,7 +74,13 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
       img.src = `/frames/hero/frame_${paddedIdx}.jpg`
     })
 
-    return () => clearTimeout(safetyTimeout)
+    return () => {
+      clearTimeout(safetyTimeout)
+      pendingImages.forEach(img => {
+        img.src = ''
+      })
+      pendingImages.clear()
+    }
   }, [onComplete])
 
   if (isLoaded) return null

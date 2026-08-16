@@ -14,8 +14,17 @@ function padFrame(num: number): string {
 
 class FrameCache {
   private cache = new Map<number, HTMLImageElement>()
-  private inFlight = new Set<number>()
+  private inFlight = new Map<number, HTMLImageElement>()
   
+  public cancelOutsideWindow(targetIndex: number, windowAhead: number, windowBehind: number) {
+    for (const [idx, img] of this.inFlight.entries()) {
+      if (idx < targetIndex - windowBehind || idx > targetIndex + windowAhead) {
+        img.src = '' // Cancel network load immediately
+        this.inFlight.delete(idx)
+      }
+    }
+  }
+
   public get(index: number): HTMLImageElement | undefined {
     // LRU trick: delete and re-insert to move to back of Map (most recently used)
     if (this.cache.has(index)) {
@@ -35,32 +44,33 @@ class FrameCache {
       const oldestKey = this.cache.keys().next().value
       if (oldestKey !== undefined) {
         const img = this.cache.get(oldestKey)
-        if (img) {
-          img.src = '' // Free memory aggressively
-        }
+        if (img) img.src = ''
         this.cache.delete(oldestKey)
       }
     }
 
-    this.inFlight.add(index)
+    const img = new Image()
+    this.inFlight.set(index, img)
     
     try {
-      const img = new Image()
-      
-      // Wait for network load first, then attempt decode
+      // Wait for network load first
       await new Promise<void>((resolve, reject) => {
         img.onload = () => resolve()
         img.onerror = () => reject(new Error(`Failed to load frame ${index}`))
         img.src = `/frames/hero/frame_${padFrame(index)}.jpg`
       })
 
+      // If we cancelled this frame while it was loading over network, abort decode
+      if (!this.inFlight.has(index)) return
+
       // Try background decode, but don't block if it fails
       try {
         await img.decode()
-      } catch (e) {
-        // ignore decode error, the image is loaded anyway
-      }
+      } catch (e) {}
       
+      // Check again just in case it was cancelled during decode
+      if (!this.inFlight.has(index)) return
+
       this.cache.set(index, img)
       onDecode?.()
     } catch (e) {
@@ -86,10 +96,10 @@ class FrameCache {
     return null
   }
 }
+export const globalFrameCache = new FrameCache()
 
 export const ScrollCanvas = memo(function ScrollCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const cacheRef = useRef(new FrameCache())
   const lastTargetIdxRef = useRef<number>(-1)
 
   useEffect(() => {
@@ -99,7 +109,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
     const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true })
     if (!ctx) return
     ctx.imageSmoothingQuality = 'low'
-    const cache = cacheRef.current
+    const cache = globalFrameCache
 
     let animFrameId: number
     
@@ -149,6 +159,9 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || ('ontouchstart' in window || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)))
         const aheadWindow = isMobile ? 6 : PRELOAD_WINDOW_AHEAD
         const behindWindow = isMobile ? 3 : PRELOAD_WINDOW_BEHIND
+
+        // Immediately cancel any in-flight requests that are outside our new active window
+        cache.cancelOutsideWindow(targetFrameIdx, aheadWindow, behindWindow)
 
         // Priority 2: Look ahead
         for (let i = 1; i <= aheadWindow; i++) {
