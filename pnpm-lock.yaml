@@ -20,6 +20,9 @@ importers:
       lenis:
         specifier: 1.1.18
         version: 1.1.18(react@19.0.0)
+      maath:
+        specifier: ^0.10.8
+        version: 0.10.8(@types/three@0.185.4)(three@0.185.1)
       next:
         specifier: ^15.5.19
         version: 15.5.23(react-dom@19.0.0(react@19.0.0))(react@19.0.0)

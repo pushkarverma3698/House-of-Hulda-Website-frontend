@@ -325,10 +325,9 @@ export function CinematicExperience() {
             <Link
               href="/book"
               scroll={false}
-              className="pointer-events-auto relative group overflow-hidden px-10 py-4 border border-amber/60 bg-ink/70 backdrop-blur-xl text-cream hud-mono text-xs uppercase tracking-widest hover:border-amber transition-all duration-[600ms] inline-block shadow-2xl rounded-full"
+              className="pointer-events-auto px-10 py-4 rounded-full bg-amber/10 border border-amber/30 text-amber hover:bg-amber/20 hover:border-amber/60 hud-mono tracking-widest transition-all backdrop-blur-md shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:shadow-[0_0_20px_rgba(217,154,78,0.3)] active:scale-95 cursor-pointer text-xs uppercase font-bold text-center inline-block"
             >
-              <span className="relative z-10 transition-colors duration-[600ms] group-hover:text-ink font-bold">Reserve The Stay</span>
-              <div className="absolute inset-0 bg-amber transform translate-y-full group-hover:translate-y-0 transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] z-0" />
+              Reserve The Stay
             </Link>
           </div>
         </section>

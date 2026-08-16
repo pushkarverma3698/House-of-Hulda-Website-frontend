@@ -82,7 +82,7 @@ export function PageShell({ children }: { children: React.ReactNode }) {
             </div>
             <Link
               href="/#the-invitation"
-              className="mt-[6px] rounded-full bg-amber px-[22px] py-[12px] text-[11px] font-bold uppercase tracking-[0.14em] text-ink transition-transform hover:scale-[1.04]"
+              className="mt-[6px] rounded-full bg-amber/10 border border-amber/30 px-[22px] py-[12px] text-[11px] font-bold uppercase tracking-[0.1em] text-amber transition-all shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:bg-amber/20 hover:border-amber/60 hover:shadow-[0_0_20px_rgba(217,154,78,0.4)] active:scale-95"
             >
               Reserve your stay
             </Link>

@@ -4,7 +4,7 @@ import { useEffect, useRef, memo } from 'react'
 import { useNight } from '@/lib/store/night'
 
 const TOTAL_HERO_FRAMES = 240
-const CACHE_SIZE = 40
+const CACHE_SIZE = 60
 const PRELOAD_WINDOW_AHEAD = 20
 const PRELOAD_WINDOW_BEHIND = 5
 
@@ -74,8 +74,8 @@ class FrameCache {
     const exact = this.get(targetIndex)
     if (exact) return exact
     
-    // Search radiating outwards
-    for (let offset = 1; offset < CACHE_SIZE / 2; offset++) {
+    // Search radiating outwards unbounded until a frame is found
+    for (let offset = 1; offset < TOTAL_HERO_FRAMES; offset++) {
       const imgMinus = this.get(targetIndex - offset)
       if (imgMinus) return imgMinus
       

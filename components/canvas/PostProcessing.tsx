@@ -1,7 +1,7 @@
 'use client'
 
 import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import {
   EffectComposer,
   Bloom,
@@ -16,6 +16,20 @@ import * as THREE from 'three'
 
 export function PostProcessing() {
   const bloomRef = useRef<BloomEffect>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(
+        window.innerWidth < 768 || 
+        ('ontouchstart' in window) || 
+        (navigator.maxTouchPoints && navigator.maxTouchPoints > 0)
+      )
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useFrame(() => {
     const t = useNight.getState().t
@@ -30,18 +44,22 @@ export function PostProcessing() {
   return (
     // @ts-expect-error — disableNormalPass is correct in v3 runtime but types lag
     <EffectComposer disableNormalPass autoClear={false}>
-      <Bloom
-        ref={bloomRef}
-        intensity={2.8}
-        luminanceThreshold={0.85}
-        luminanceSmoothing={0.15}
-        mipmapBlur
-      />
-      <ChromaticAberration
-        offset={new THREE.Vector2(0.0012, 0.0012)}
-        radialModulation={true}
-        modulationOffset={0.15}
-      />
+      {!isMobile && (
+        <>
+          <Bloom
+            ref={bloomRef}
+            intensity={2.8}
+            luminanceThreshold={0.85}
+            luminanceSmoothing={0.15}
+            mipmapBlur
+          />
+          <ChromaticAberration
+            offset={new THREE.Vector2(0.0012, 0.0012)}
+            radialModulation={true}
+            modulationOffset={0.15}
+          />
+        </>
+      )}
       <Vignette eskil={false} offset={0.3} darkness={0.85} />
       <Noise opacity={0.085} />
     </EffectComposer>
