@@ -43,16 +43,6 @@ class FrameCache {
     
     const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || ('ontouchstart' in window))
     const CACHE_SIZE = isMobile ? MAX_MOBILE_CACHE_SIZE : MAX_DESKTOP_CACHE_SIZE
-    
-    // Evict oldest if we exceed capacity
-    if (this.cache.size >= CACHE_SIZE) {
-      const oldestKey = this.cache.keys().next().value
-      if (oldestKey !== undefined) {
-        const img = this.cache.get(oldestKey)
-        if (img) img.src = ''
-        this.cache.delete(oldestKey)
-      }
-    }
 
     const img = new Image()
     this.inFlight.set(index, img)
@@ -77,6 +67,18 @@ class FrameCache {
       if (!this.inFlight.has(index)) return
 
       this.cache.set(index, img)
+
+      // Evict oldest only AFTER we have successfully loaded a new frame.
+      // This prevents the cache from becoming empty during fast scrolls.
+      while (this.cache.size > CACHE_SIZE) {
+        const oldestKey = this.cache.keys().next().value
+        if (oldestKey !== undefined) {
+          const oldImg = this.cache.get(oldestKey)
+          if (oldImg) oldImg.src = ''
+          this.cache.delete(oldestKey)
+        }
+      }
+
       onDecode?.()
     } catch (e) {
       // Load failed
