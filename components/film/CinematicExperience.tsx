@@ -4,6 +4,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { ScrollCanvas } from '@/components/canvas/ScrollCanvas'
 import { Preloader } from '@/components/film/Preloader'
+import { ScrubDebugOverlay } from '@/components/film/ScrubDebugOverlay'
 import { TimeRail } from '@/components/film/TimeRail'
 import { Marketplace } from '@/components/film/Marketplace'
 import { Soundscape } from '@/components/film/Soundscape'
@@ -46,6 +47,9 @@ export function CinematicExperience() {
 
       {/* z-50 Initial Atmospheric Loader */}
       <Preloader />
+
+      {/* Scrub telemetry — renders only with ?debug=perf in the URL */}
+      <ScrubDebugOverlay />
 
       {/* Cinematic overlay: vignette + film grain tied to every act */}
       <div className="cine-overlay" aria-hidden="true" />

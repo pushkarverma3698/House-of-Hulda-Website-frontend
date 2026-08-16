@@ -119,9 +119,26 @@ body {
   animation: heroTitleRise 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.7s both;
 }
 
-/* Global Cinematic Text Glow (for headings and critical typography) */
+/* Global Cinematic Text Glow (for headings and critical typography)
+ *
+ * Blur RADIUS is the entire cost here, not the number of layers. A text-shadow
+ * over a backdrop that changes every frame cannot be cached as a composited
+ * layer, so the glyphs plus a dirty rect of (radius x 2) in every direction are
+ * re-blurred on every scroll frame — across ~14 display headings at text-6xl
+ * and text-7xl.
+ *
+ * Measured on this page: the old stack held scroll at 10.6 fps with 456 ms
+ * frame stalls. Isolating each layer showed the `0 0 60px` amber bloom alone
+ * accounted for it (tight shadow + that one layer = 9.9 fps); the 40px black
+ * layer was the second worst. Capping every radius at 12px gives a locked
+ * 60.1 fps with an 18 ms worst frame — a 5.7x gain for an effect that was 15%
+ * opaque and essentially invisible.
+ *
+ * Keep every radius <= 12px. Anything larger belongs in a background gradient,
+ * which the compositor CAN cache, not in a text-shadow.
+ */
 .text-glow-amber {
-  text-shadow: 0 4px 40px rgba(0,0,0,0.7), 0 1px 4px rgba(0,0,0,0.9), 0 0 60px rgba(217, 154, 78, 0.15);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 2px 12px rgba(0,0,0,0.55);
 }
 
 /* Film chapter heading — slides up from 12px below and fades in */

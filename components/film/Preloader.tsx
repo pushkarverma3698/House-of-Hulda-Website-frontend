@@ -3,19 +3,22 @@
 import { useEffect, useState } from 'react'
 
 /** Frames that must be in the HTTP cache before the curtain lifts. Enough to
- *  cover the opening beat; everything past this streams in behind the user. */
-const CRITICAL_FRAME_COUNT = 20
-/** Coarse skeleton warmed AFTER entry so a fast flick always lands near a hit. */
-const SKELETON_STRIDE = 4
-const TOTAL_FRAMES = 240
+ *  cover the opening beat; ScrollCanvas sweeps the remaining proxy frames
+ *  resident behind the user. */
+const CRITICAL_FRAME_COUNT = 32
 /** Browsers multiplex freely over HTTP/2, so an unbounded fan-out does not
- *  queue — it splits the same pipe 78 ways and every frame arrives late. */
+ *  queue — it splits the same pipe and every frame arrives late. */
 const CRITICAL_CONCURRENCY = 6
-const BACKGROUND_CONCURRENCY = 3
 const SAFETY_TIMEOUT_MS = 4000
 
+/**
+ * The PROXY tier, not the full-resolution one. Entry used to pull 20 frames at
+ * ~110 KB — 2.2 MB before the curtain could lift — of images the bitmap cache
+ * could not keep anyway. Proxy frames are 7.3 KB, so the same opening beat is
+ * 230 KB and lands on 4G instead of timing out into an empty cache.
+ */
 const frameUrl = (index: number) =>
-  `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
+  `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.jpg`
 
 /** Warms the HTTP cache. The bitmap cache in ScrollCanvas decodes from here. */
 async function warmFrame(index: number, signal: AbortSignal): Promise<void> {
@@ -55,10 +58,6 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
     let hasCompleted = false
 
     const critical = Array.from({ length: CRITICAL_FRAME_COUNT }, (_, i) => i + 1)
-    const skeleton: number[] = []
-    for (let i = CRITICAL_FRAME_COUNT + 1; i <= TOTAL_FRAMES; i += SKELETON_STRIDE) {
-      skeleton.push(i)
-    }
 
     const completePreloader = () => {
       if (hasCompleted) return
@@ -86,9 +85,9 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
         if (signal.aborted) return
         clearTimeout(safetyTimeout)
         completePreloader()
-        // Skeleton warms behind the curtain, at low concurrency, so it never
-        // competes with the frames the playhead actually needs.
-        return runPool(skeleton, BACKGROUND_CONCURRENCY, signal)
+        // The rest of the sequence is swept resident by ScrollCanvas, which
+        // decodes as it goes — warming it twice here would only compete for the
+        // same pipe.
       })
       .catch(() => {})
 
