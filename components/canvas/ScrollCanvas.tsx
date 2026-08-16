@@ -168,6 +168,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
 
       // Preload window management (mobile-optimized)
       if (targetFrameIdx !== lastTargetIdxRef.current) {
+        const delta = Math.abs(targetFrameIdx - (lastTargetIdxRef.current === -1 ? targetFrameIdx : lastTargetIdxRef.current))
         lastTargetIdxRef.current = targetFrameIdx
         
         // Priority 1: Current frame
@@ -180,16 +181,20 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         // Immediately cancel any in-flight requests that are outside our new active window
         cache.cancelOutsideWindow(targetFrameIdx, aheadWindow, behindWindow)
 
-        // Priority 2: Look ahead
-        for (let i = 1; i <= aheadWindow; i++) {
-          const idx = targetFrameIdx + i
-          if (idx <= TOTAL_HERO_FRAMES) cache.load(idx)
-        }
-        
-        // Priority 3: Look behind
-        for (let i = 1; i <= behindWindow; i++) {
-          const idx = targetFrameIdx - i
-          if (idx >= 1) cache.load(idx)
+        // VELOCITY THROTTLING: If scrolling extremely fast (delta > 2), skip lookahead network spam.
+        // This prevents the main thread from freezing while allocating and aborting hundreds of fetch requests per second.
+        if (delta <= 2) {
+          // Priority 2: Look ahead
+          for (let i = 1; i <= aheadWindow; i++) {
+            const idx = targetFrameIdx + i
+            if (idx <= TOTAL_HERO_FRAMES) cache.load(idx)
+          }
+          
+          // Priority 3: Look behind
+          for (let i = 1; i <= behindWindow; i++) {
+            const idx = targetFrameIdx - i
+            if (idx >= 1) cache.load(idx)
+          }
         }
       }
 
