@@ -44,21 +44,21 @@ export function PostProcessing() {
   return (
     // @ts-expect-error — disableNormalPass is correct in v3 runtime but types lag
     <EffectComposer disableNormalPass autoClear={false}>
-      {!isMobile && (
-        <>
-          <Bloom
-            ref={bloomRef}
-            intensity={2.8}
-            luminanceThreshold={0.85}
-            luminanceSmoothing={0.15}
-            mipmapBlur
-          />
-          <ChromaticAberration
-            offset={new THREE.Vector2(0.0012, 0.0012)}
-            radialModulation={true}
-            modulationOffset={0.15}
-          />
-        </>
+      {isMobile ? null : (
+        <Bloom
+          ref={bloomRef}
+          intensity={2.8}
+          luminanceThreshold={0.85}
+          luminanceSmoothing={0.15}
+          mipmapBlur
+        />
+      )}
+      {isMobile ? null : (
+        <ChromaticAberration
+          offset={new THREE.Vector2(0.0012, 0.0012)}
+          radialModulation={true}
+          modulationOffset={0.15}
+        />
       )}
       <Vignette eskil={false} offset={0.3} darkness={0.85} />
       <Noise opacity={0.085} />
