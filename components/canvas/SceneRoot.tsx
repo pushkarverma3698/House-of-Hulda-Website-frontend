@@ -23,6 +23,15 @@ export const SceneRoot = memo(function SceneRoot() {
       <Canvas
         camera={{ position: [0, 2, 10], fov: 28 }}
         gl={{ antialias: false, powerPreference: 'high-performance', alpha: true }}
+        // R3F defaults its own root div to pointer-events:auto — spread after
+        // the wrapper div's pointer-events-none above, so it wins the cascade
+        // and silently re-enables hit-testing on this element, regardless of
+        // the Tailwind class stating the opposite intent. Nothing in this
+        // scene (stars, sky, embers, atmosphere, camera) is interactive, so
+        // the button/link underneath should always win the hit test; without
+        // this it intermittently doesn't, and a real tap on Reserve or the
+        // audio toggle can land on the sky instead of the control.
+        style={{ pointerEvents: 'none' }}
         onCreated={({ gl }) => {
           gl.setClearColor(0x000000, 0)
         }}

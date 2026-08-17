@@ -84,14 +84,20 @@ export function Soundscape() {
       crackleSource.start()
     }
 
-    if (audioCtxRef.current.state === 'suspended') {
-      await audioCtxRef.current.resume()
-      setIsPlaying(true)
-    } else if (audioCtxRef.current.state === 'running') {
-      await audioCtxRef.current.suspend()
-      setIsPlaying(false)
-    } else {
-      setIsPlaying(true)
+    // Optimistic, not awaited-then-set: resume()/suspend() are a real audio
+    // thread handshake and can take a moment (or, on a locked-down device,
+    // never resolve at all). The old code only flipped isPlaying — the one
+    // signal the equalizer glyph reacts to — after that promise settled, so a
+    // slow or failed handshake left a tap with zero visible response. The
+    // glyph now answers the tap immediately and only reverts if the audio
+    // genuinely couldn't follow through.
+    const ctx = audioCtxRef.current
+    const turningOn = ctx.state !== 'running'
+    setIsPlaying(turningOn)
+    try {
+      await (turningOn ? ctx.resume() : ctx.suspend())
+    } catch {
+      setIsPlaying(ctx.state === 'running')
     }
   }
 
