@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { whatsappLink } from '@/lib/site-config'
 import Image from 'next/image'
 
 const PRODUCTS = [
@@ -30,9 +31,13 @@ const PRODUCTS = [
 export function Marketplace() {
   const [activeProduct, setActiveProduct] = useState<typeof PRODUCTS[0] | null>(null)
 
+  // Was hard-coded to wa.me/919876543210 — a placeholder. Every other WhatsApp
+  // entry point on the site already routes through site-config, which is where
+  // the real number lives; this path and the booking drawer were the two that
+  // did not, so both dead-ended. whatsappLink encodes the message itself.
   const handleOrder = (product: typeof PRODUCTS[0]) => {
-    const text = encodeURIComponent(`Hi, I'm interested in purchasing the ${product.name} (${product.price}) from the House of Hulda marketplace.`)
-    window.open(`https://wa.me/919876543210?text=${text}`, '_blank')
+    const message = `Hi, I'm interested in purchasing the ${product.name} (${product.price}) from the House of Hulda marketplace.`
+    window.open(whatsappLink(message), '_blank', 'noopener,noreferrer')
   }
 
   return (

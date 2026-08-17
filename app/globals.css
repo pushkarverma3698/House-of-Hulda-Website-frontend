@@ -145,6 +145,76 @@ body {
   text-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 2px 12px rgba(0,0,0,0.55);
 }
 
+/* Story-copy scrim.
+ *
+ * The 12px shadow above is all that separates the copy from the film, and
+ * against a bright frame that is not enough: measured at the phone's own pixel
+ * grid, "The road stops at Rumsu." ran at 2.19:1 against the frame behind it,
+ * the L-02 eyebrow at 1.08:1 and the hero's payoff line at 1.07:1 — the same
+ * luminance as its background. WCAG asks 3:1 for display type and 4.5:1 for
+ * body.
+ *
+ * The fix has to be a scrim rather than a heavier shadow, for the reason the
+ * comment above already establishes: a text-shadow over a backdrop that changes
+ * every frame is re-blurred on every scroll frame, and that is what cost 5.7x
+ * of the framerate. A static gradient on its own element is rasterised once and
+ * then only composited, so it is nearly free no matter what the film does
+ * underneath it.
+ *
+ * Sized generously past the text box so it reads as the light falling off, not
+ * as a panel behind the words.
+ */
+.story-scrim {
+  position: relative;
+  isolation: isolate;
+}
+.story-scrim > * {
+  position: relative;
+  z-index: 1;
+}
+.story-scrim::before {
+  content: "";
+  position: absolute;
+  /* Generous bleed. A tight box terminates the gradient while it still has
+     opacity left, which draws a visible horizontal seam across the frame — the
+     scrim then reads as a panel sitting on the film instead of as the light
+     falling away. The falloff has to finish before the box does. */
+  inset: -7rem -6rem -8rem;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 78% 62% at 50% 50%,
+    rgba(6, 10, 16, 0.86) 0%,
+    rgba(6, 10, 16, 0.74) 34%,
+    rgba(6, 10, 16, 0.46) 58%,
+    rgba(6, 10, 16, 0.18) 78%,
+    rgba(6, 10, 16, 0) 100%
+  );
+}
+/* Text set against the right or left edge gets its scrim weighted that way, so
+   the falloff still reads as light rather than as a rectangle clipped by the
+   viewport. */
+.story-scrim-right::before {
+  background: radial-gradient(
+    ellipse 82% 62% at 78% 50%,
+    rgba(6, 10, 16, 0.88) 0%,
+    rgba(6, 10, 16, 0.74) 34%,
+    rgba(6, 10, 16, 0.46) 58%,
+    rgba(6, 10, 16, 0.18) 78%,
+    rgba(6, 10, 16, 0) 100%
+  );
+}
+.story-scrim-left::before {
+  background: radial-gradient(
+    ellipse 82% 62% at 22% 50%,
+    rgba(6, 10, 16, 0.88) 0%,
+    rgba(6, 10, 16, 0.74) 34%,
+    rgba(6, 10, 16, 0.46) 58%,
+    rgba(6, 10, 16, 0.18) 78%,
+    rgba(6, 10, 16, 0) 100%
+  );
+}
+
 /* Film chapter heading — slides up from 12px below and fades in */
 @keyframes chapterReveal {
   0%   { opacity: 0; transform: translateY(12px); }

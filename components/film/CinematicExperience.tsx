@@ -62,8 +62,8 @@ export function CinematicExperience() {
             Text lives on the ground — no box.
             A deep bottom gradient anchors it.
         ═══════════════════════════════════════════ */}
-        <section className="relative h-[120svh] flex flex-col justify-end pb-28 px-8 md:px-24">
-          <div className="relative space-y-5 max-w-2xl">
+        <section className="relative h-[120svh] flex flex-col justify-end pb-44 sm:pb-36 px-8 md:px-24">
+          <div className="story-scrim story-scrim-left relative space-y-5 max-w-2xl">
             <p className="hud-mono text-amber tracking-widest text-[10px] flex items-center gap-2 hero-hint-enter"
               style={{ animationDelay: '0.4s' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-amber animate-ping" />
@@ -91,7 +91,7 @@ export function CinematicExperience() {
             Right-side alignment, no box
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-center px-8 md:px-24 items-end">
-          <div className="relative space-y-4 max-w-lg text-right">
+          <div className="story-scrim story-scrim-right relative space-y-4 max-w-lg text-right">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-02 · 16:23 · GLACIAL SPRINGS
             </p>
@@ -109,7 +109,7 @@ export function CinematicExperience() {
             Left-side, lower third placement
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-end pb-28 px-8 md:px-24">
-          <div className="relative space-y-4 max-w-xl">
+          <div className="story-scrim story-scrim-left relative space-y-4 max-w-xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-03 · 17:07 · KATH-KUNI ARCHITECTURE
             </p>
@@ -130,7 +130,7 @@ export function CinematicExperience() {
             Center, upper-third — the golden hour shot
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-center items-center text-center px-8 md:px-24">
-          <div className="relative space-y-4 max-w-2xl">
+          <div className="story-scrim relative space-y-4 max-w-2xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-04 · 17:50 · GOLDEN HOUR
             </p>
@@ -151,7 +151,7 @@ export function CinematicExperience() {
             Right-side panel, mid-section
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-center px-8 md:px-24 items-end">
-          <div className="relative space-y-4 max-w-lg text-right">
+          <div className="story-scrim story-scrim-right relative space-y-4 max-w-lg text-right">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-05 · 18:29 · THE LOFT
             </p>
@@ -172,7 +172,7 @@ export function CinematicExperience() {
             Center cinematic panel with amber warmth
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-center items-center text-center px-8 md:px-24">
-          <div className="relative space-y-5 max-w-xl">
+          <div className="story-scrim relative space-y-5 max-w-xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-06 · 19:07 · THE HEARTH
             </p>
@@ -189,7 +189,7 @@ export function CinematicExperience() {
               {!isHearthMenuOpen ? (
                 <button
                   onClick={() => setIsHearthMenuOpen(true)}
-                  className="px-5 py-2.5 rounded-full border border-amber/30 bg-ink/40 backdrop-blur-md text-amber hud-mono text-xs uppercase tracking-widest hover:border-amber hover:bg-amber/10 transition-all flex items-center justify-center gap-2 mx-auto shadow-lg hover:shadow-[0_0_20px_rgba(217,154,78,0.2)]"
+                  className="inline-flex min-h-11 items-center px-5 py-2.5 rounded-full border border-amber/30 bg-ink/40 backdrop-blur-md text-amber hud-mono text-xs uppercase tracking-widest hover:border-amber hover:bg-amber/10 transition-all flex items-center justify-center gap-2 mx-auto shadow-lg hover:shadow-[0_0_20px_rgba(217,154,78,0.2)]"
                 >
                   <span className="w-1 h-1 rounded-full bg-amber animate-ping" />
                   + In the Hearth
@@ -236,7 +236,7 @@ export function CinematicExperience() {
             Interactive Celestial Registry
             Minimal glass panel — this IS an instrument
         ═══════════════════════════════════════════ */}
-        <section className="relative min-h-[155svh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
+        <section className="relative min-h-[155svh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto pt-36 pb-24">
           <div className="space-y-6 bg-ink/[0.88] md:bg-ink/[0.65] p-6 md:p-10 rounded-2xl md:backdrop-blur-xl border border-white/[0.07] shadow-2xl pointer-events-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="space-y-3">
@@ -257,12 +257,12 @@ export function CinematicExperience() {
             </div>
 
             {/* Interactive Grid of Eighteen Deities — staggered cascade */}
-            <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-2">
               {EIGHTEEN_GODS.map((god, idx) => (
                 <button
                   key={god.id}
                   onClick={() => setSelectedStar(god)}
-                  className="p-3 rounded-xl bg-white/[0.03] hover:bg-amber/[0.08] border border-white/[0.06] hover:border-amber/30 text-left transition-all group flex flex-col justify-between h-24 shadow-sm hover:shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:scale-[1.02] active:scale-95"
+                  className="p-3 rounded-xl bg-white/[0.03] hover:bg-amber/[0.08] border border-white/[0.06] hover:border-amber/30 text-left transition-all group flex flex-col justify-between min-h-24 shadow-sm hover:shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:scale-[1.02] active:scale-95"
                   style={{ animationDelay: `${STAGGER_MS[idx] || idx * 40}ms` }}
                 >
                   <div className="flex justify-between items-start w-full">
@@ -274,11 +274,11 @@ export function CinematicExperience() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-display text-sm text-cream/90 group-hover:text-amber/90 transition-colors leading-tight line-clamp-1">
+                    <h3 className="font-display text-sm text-cream/90 group-hover:text-amber/90 transition-colors leading-tight">
                       {god.deity}
                     </h3>
                     <p className="hud-mono text-[9px] text-cream/50 truncate mt-0.5">
-                      {god.designation.split(' ')[0]}
+                      {god.designation.split(' ').slice(0, 2).join(' ')}
                     </p>
                   </div>
                 </button>
@@ -294,7 +294,7 @@ export function CinematicExperience() {
             L-08: 02:27 — THE VALLEY COMMONS
             Marketplace — minimal wrap, editorial
         ═══════════════════════════════════════════ */}
-        <section className="relative min-h-[120svh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
+        <section className="relative min-h-[120svh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto pt-36 pb-24">
           <div className="space-y-4 bg-ink/[0.90] md:bg-ink/[0.70] p-8 md:p-12 rounded-2xl md:backdrop-blur-xl border border-white/[0.06] shadow-2xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-08 · 02:27 · THE VALLEY COMMONS
@@ -314,7 +314,7 @@ export function CinematicExperience() {
             Full-bleed. No box. Text on first light.
         ═══════════════════════════════════════════ */}
         <section id="the-invitation" className="relative h-[100svh] flex flex-col justify-center items-center px-8 text-center">
-          <div className="relative space-y-7 max-w-xl">
+          <div className="story-scrim relative space-y-7 max-w-xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-09 · 06:05 · FIRST LIGHT
             </p>

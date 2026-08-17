@@ -1,5 +1,7 @@
 'use client'
 
+import { whatsappLink } from '@/lib/site-config'
+
 import { useEffect, useState } from 'react'
 import { getLenis } from '@/app/providers'
 
@@ -41,9 +43,11 @@ export function BookDrawer({ onClose }: { onClose: () => void }) {
     setMounted(true)
   }, [])
 
+  // See Marketplace: this was the second path still pointing at the placeholder
+  // number rather than at site-config.
   const handleBook = (packageTitle: string) => {
-    const text = encodeURIComponent(`Hi, I would like to reserve the ${packageTitle} at House of Hulda. Could you check dates for me?`)
-    window.open(`https://wa.me/919876543210?text=${text}`, '_blank')
+    const message = `Hi, I would like to reserve the ${packageTitle} at House of Hulda. Could you check dates for me?`
+    window.open(whatsappLink(message), '_blank', 'noopener,noreferrer')
   }
 
   return (

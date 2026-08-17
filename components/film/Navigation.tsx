@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, memo } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 
 export const Navigation = memo(function Navigation({
   onOpenBooking,
@@ -9,14 +9,66 @@ export const Navigation = memo(function Navigation({
   onOpenBooking?: () => void
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [hidden, setHidden] = useState(false)
+  const lastYRef = useRef(0)
+
+  /**
+   * Yield while reading, return on the way back up.
+   *
+   * The header is fixed over a film whose copy moves through the whole
+   * viewport, so there is no position for it that the story text never reaches.
+   * Measured across the scroll, it was covering the eyebrow of act after act —
+   * including "SCROLL TO DESCEND INTO THE VALLEY", the one instruction a
+   * first-time visitor needs, and "L-04 · 17:50 · GOLDEN HOUR". Getting out of
+   * the way while the viewer is moving forward is the only thing that fixes
+   * that for every act at once, and it is the behaviour people already expect.
+   */
+  useEffect(() => {
+    lastYRef.current = window.scrollY
+    let ticking = false
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const y = window.scrollY
+        const dy = y - lastYRef.current
+        // Ignore sub-pixel jitter and the rubber-band at the very top; only a
+        // deliberate 12px of travel changes the state.
+        if (Math.abs(dy) > 12) {
+          setHidden(y > 220 && dy > 0)
+          lastYRef.current = y
+        }
+        ticking = false
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Never leave the menu open behind a hidden header.
+  useEffect(() => {
+    if (hidden && menuOpen) setMenuOpen(false)
+  }, [hidden, menuOpen])
 
   return (
-    <header className="fixed top-0 inset-x-0 z-40 flex items-center justify-between px-6 md:px-12 py-5 pointer-events-none">
+    <header
+      className={`fixed top-0 inset-x-0 z-40 flex items-center justify-between px-6 md:px-12 py-5 pointer-events-none transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        hidden ? '-translate-y-full' : 'translate-y-0'
+      }`}
+    >
+      {/* Header scrim. The bar floats directly on the film, and over a bright
+          frame — the opening cloud-and-snowline shot especially — the amber
+          "Reserve" measured close to its background. A gradient is composited,
+          not re-blurred per frame, so it costs nothing while scrolling. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-32 -z-10 pointer-events-none bg-gradient-to-b from-ink/75 via-ink/35 to-transparent"
+      />
       {/* Brand Stamp */}
       <div className="flex items-center gap-3 pointer-events-auto">
         <Link
           href="/"
-          className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/5 hover:border-amber/30 transition-colors shadow-lg group"
+          className="flex min-h-11 items-center gap-2.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/5 hover:border-amber/30 transition-colors shadow-lg group"
         >
           <span className="font-display italic font-light text-xl text-cream group-hover:text-amber transition-colors">
             H
@@ -64,19 +116,22 @@ export const Navigation = memo(function Navigation({
         </div>
 
         {/* Primary Reserve CTA */}
+        {/* min-h-11 is the 44px floor: this was a 95x33 target, and it is the
+            primary conversion control on the page. */}
         <Link
           href="/book"
           scroll={false}
-          className="px-5 py-2 rounded-full bg-amber/10 border border-amber/30 text-amber hover:bg-amber/20 hover:border-amber/60 hud-mono tracking-widest transition-all backdrop-blur-md shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:shadow-[0_0_20px_rgba(217,154,78,0.3)] active:scale-95 cursor-pointer"
+          className="inline-flex items-center min-h-11 px-5 py-2 rounded-full bg-amber/15 border border-amber/40 text-amber hover:bg-amber/25 hover:border-amber/60 hud-mono tracking-widest transition-all backdrop-blur-md shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:shadow-[0_0_20px_rgba(217,154,78,0.3)] active:scale-95 cursor-pointer"
         >
           Reserve
         </Link>
 
-        {/* Mobile Menu Trigger */}
+        {/* Mobile Menu Trigger — was 34x34, under the 44px minimum for the
+            page's primary navigation control. */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle navigation menu"
-          className="md:hidden p-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/5 text-cream/90"
+          className="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/40 backdrop-blur-md border border-white/5 text-cream/90"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {menuOpen ? (

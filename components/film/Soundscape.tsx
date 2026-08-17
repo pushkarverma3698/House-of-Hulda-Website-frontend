@@ -116,18 +116,31 @@ export function Soundscape() {
   }, [])
 
   return (
+    /* Icon-only on a phone.
+     *
+     * As a 137x29 text pill this was both under the 44px tap minimum and the
+     * single worst occluder on the page: fixed at bottom-left, it sat exactly
+     * where the bottom-aligned acts put their closing line, and it was landing
+     * on the copy in seven of the nine acts — taking 28% of the hero's payoff
+     * line and 32% of "500 years of mountain engineering in every beam."
+     *
+     * A 44px circle is a correct target and occupies roughly a fifth of the
+     * area, so what remains of the overlap no longer swallows a sentence. The
+     * label returns at md, where there is room for it. */
     <div className="fixed bottom-6 left-6 z-30 flex items-center gap-3 select-none">
       <button
         onClick={toggleSound}
-        className="pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/15 bg-black/60 backdrop-blur-xl text-white font-mono text-[10px] hover:border-amber-400 hover:bg-black/80 transition-all duration-300 shadow-xl group"
+        aria-label={isPlaying ? 'Turn atmospheric audio off' : 'Turn atmospheric audio on'}
+        aria-pressed={isPlaying}
+        className="pointer-events-auto flex items-center justify-center md:justify-start gap-0 md:gap-2 w-11 h-11 md:w-auto md:h-auto md:px-3 md:py-1.5 rounded-full border border-white/15 bg-black/60 backdrop-blur-xl text-white font-mono text-[10px] hover:border-amber-400 hover:bg-black/80 transition-all duration-300 shadow-xl group"
         title="Toggle Himalayan Atmospheric Audio"
       >
-        <span className="flex items-end gap-[2px] h-3 w-3">
-          <span className={`w-[2px] bg-amber-400 rounded-full transition-all duration-300 ${isPlaying ? 'h-3 animate-pulse' : 'h-1 opacity-40'}`} />
-          <span className={`w-[2px] bg-amber-400 rounded-full transition-all duration-300 ${isPlaying ? 'h-2 animate-[pulse_0.8s_ease-in-out_infinite]' : 'h-1.5 opacity-40'}`} />
-          <span className={`w-[2px] bg-amber-400 rounded-full transition-all duration-300 ${isPlaying ? 'h-2.5 animate-[pulse_1.2s_ease-in-out_infinite]' : 'h-1 opacity-40'}`} />
+        <span className="flex items-end justify-center gap-[3px] h-4 w-4 md:h-3 md:w-3">
+          <span className={`w-[2.5px] md:w-[2px] bg-amber-400 rounded-full transition-all duration-300 ${isPlaying ? 'h-4 md:h-3 animate-pulse' : 'h-2 md:h-1 opacity-80'}`} />
+          <span className={`w-[2.5px] md:w-[2px] bg-amber-400 rounded-full transition-all duration-300 ${isPlaying ? 'h-2.5 md:h-2 animate-[pulse_0.8s_ease-in-out_infinite]' : 'h-4 md:h-1.5 opacity-80'}`} />
+          <span className={`w-[2.5px] md:w-[2px] bg-amber-400 rounded-full transition-all duration-300 ${isPlaying ? 'h-3 md:h-2.5 animate-[pulse_1.2s_ease-in-out_infinite]' : 'h-2.5 md:h-1 opacity-80'}`} />
         </span>
-        <span className="text-neutral-300 group-hover:text-white transition-colors tracking-widest uppercase">
+        <span className="hidden md:inline text-neutral-300 group-hover:text-white transition-colors tracking-widest uppercase">
           {isPlaying ? 'ATMOSPHERE ON' : 'SPATIAL AUDIO'}
         </span>
       </button>
