@@ -742,7 +742,7 @@
     <span class="sev minor">Minor</span>
   </div>
   <div class="col">
-    <h2>99&nbsp;MB of unused 4K landscape frames are shipping in the repo</h2>
+    <h2>65&nbsp;MB of unused 4K landscape frames are shipping in the repo</h2>
     <p>
       <code>public/frames/phase1</code> (3840×2160), <code>phase2</code> and
       <code>phase3</code> (2560×1440) hold 300 landscape frames that no component
@@ -787,7 +787,7 @@
       <li><b>Cut the WebGL post-processing on desktop, or drop it to DPR 1 (F-03).</b> Bloom, noise and chromatic aberration over an already-graded film are buying very little and costing the sharp tier.</li>
       <li><b>Raise the proxy tier.</b> 160&nbsp;px was sized for a 585&nbsp;px phone backing store. Desktop needs its own rung — the memory budget maths in <code>ScrollCanvas</code> assumes mobile constraints throughout.</li>
       <li><b>Extend or re-time the film past <code>t = 0.7</code> (F-05)</b>, so the closing sections have live footage behind them.</li>
-      <li><b>Drop <code>phase1–3</code> from the deploy (F-06)</b> — 99&nbsp;MB for nothing.</li>
+      <li><b>Drop <code>phase1–3</code> from the deploy (F-06)</b> — 65&nbsp;MB for nothing.</li>
     </ul>
   </div>
 
