@@ -63,7 +63,7 @@ export function CinematicExperience() {
             A deep bottom gradient anchors it.
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-end pb-44 sm:pb-36 px-8 md:px-24">
-          <div className="story-scrim story-scrim-left relative space-y-5 max-w-2xl">
+          <div data-beat="left" className="story-scrim story-scrim-left relative space-y-5 max-w-2xl">
             <p className="hud-mono text-amber tracking-widest text-[10px] flex items-center gap-2 hero-hint-enter"
               style={{ animationDelay: '0.4s' }}>
               <span className="w-1.5 h-1.5 rounded-full bg-amber animate-ping" />
@@ -91,7 +91,7 @@ export function CinematicExperience() {
             Right-side alignment, no box
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-center px-8 md:px-24 items-end">
-          <div className="story-scrim story-scrim-right relative space-y-4 max-w-lg text-right">
+          <div data-beat="right" className="story-scrim story-scrim-right relative space-y-4 max-w-lg text-right">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-02 · 16:23 · GLACIAL SPRINGS
             </p>
@@ -109,7 +109,7 @@ export function CinematicExperience() {
             Left-side, lower third placement
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-end pb-28 px-8 md:px-24">
-          <div className="story-scrim story-scrim-left relative space-y-4 max-w-xl">
+          <div data-beat="left" className="story-scrim story-scrim-left relative space-y-4 max-w-xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-03 · 17:07 · KATH-KUNI ARCHITECTURE
             </p>
@@ -130,7 +130,7 @@ export function CinematicExperience() {
             Center, upper-third — the golden hour shot
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-center items-center text-center px-8 md:px-24">
-          <div className="story-scrim relative space-y-4 max-w-2xl">
+          <div data-beat="right" className="story-scrim relative space-y-4 max-w-2xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-04 · 17:50 · GOLDEN HOUR
             </p>
@@ -151,7 +151,7 @@ export function CinematicExperience() {
             Right-side panel, mid-section
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-center px-8 md:px-24 items-end">
-          <div className="story-scrim story-scrim-right relative space-y-4 max-w-lg text-right">
+          <div data-beat="left" className="story-scrim story-scrim-right relative space-y-4 max-w-lg text-right">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-05 · 18:29 · THE LOFT
             </p>
@@ -172,7 +172,7 @@ export function CinematicExperience() {
             Center cinematic panel with amber warmth
         ═══════════════════════════════════════════ */}
         <section className="relative h-[120svh] flex flex-col justify-center items-center text-center px-8 md:px-24">
-          <div className="story-scrim relative space-y-5 max-w-xl">
+          <div data-beat="right" className="story-scrim relative space-y-5 max-w-xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-06 · 19:07 · THE HEARTH
             </p>

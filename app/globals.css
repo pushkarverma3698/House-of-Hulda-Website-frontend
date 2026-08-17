@@ -167,6 +167,12 @@ body {
 .story-scrim {
   position: relative;
   isolation: isolate;
+  /* The focus of the falloff. Only this moves between the three variants, so it
+     is a variable rather than three near-identical gradient declarations — and
+     it lets the aperture layout reset all of them to centred in one rule. */
+  --scrim-x: 50%;
+  --scrim-spread: 78%;
+  --scrim-peak: 0.86;
 }
 .story-scrim > * {
   position: relative;
@@ -183,8 +189,8 @@ body {
   z-index: 0;
   pointer-events: none;
   background: radial-gradient(
-    ellipse 78% 62% at 50% 50%,
-    rgba(6, 10, 16, 0.86) 0%,
+    ellipse var(--scrim-spread) 62% at var(--scrim-x) 50%,
+    rgba(6, 10, 16, var(--scrim-peak)) 0%,
     rgba(6, 10, 16, 0.74) 34%,
     rgba(6, 10, 16, 0.46) 58%,
     rgba(6, 10, 16, 0.18) 78%,
@@ -194,25 +200,90 @@ body {
 /* Text set against the right or left edge gets its scrim weighted that way, so
    the falloff still reads as light rather than as a rectangle clipped by the
    viewport. */
-.story-scrim-right::before {
-  background: radial-gradient(
-    ellipse 82% 62% at 78% 50%,
-    rgba(6, 10, 16, 0.88) 0%,
-    rgba(6, 10, 16, 0.74) 34%,
-    rgba(6, 10, 16, 0.46) 58%,
-    rgba(6, 10, 16, 0.18) 78%,
-    rgba(6, 10, 16, 0) 100%
-  );
+.story-scrim-right {
+  --scrim-x: 78%;
+  --scrim-spread: 82%;
+  --scrim-peak: 0.88;
 }
-.story-scrim-left::before {
-  background: radial-gradient(
-    ellipse 82% 62% at 22% 50%,
-    rgba(6, 10, 16, 0.88) 0%,
-    rgba(6, 10, 16, 0.74) 34%,
-    rgba(6, 10, 16, 0.46) 58%,
-    rgba(6, 10, 16, 0.18) 78%,
-    rgba(6, 10, 16, 0) 100%
-  );
+.story-scrim-left {
+  --scrim-x: 22%;
+  --scrim-spread: 82%;
+  --scrim-peak: 0.88;
+}
+
+/* ---- THE APERTURE LAYOUT ----
+ *
+ * When the film is presented as a centred vertical aperture rather than
+ * full-bleed (see components/canvas/ScrollCanvas.tsx), the widest part of the
+ * screen is no longer picture — it is the two fields either side of it. The
+ * story copy belongs there: off the image, on a quiet ground, where it can be
+ * read without fighting the frame it is describing.
+ *
+ * The switch is owned by the canvas, which measures whether there is room and
+ * writes the answer to [data-film-fit] on <html>. Keying off that rather than
+ * off a media query here means the copy and the film can never disagree about
+ * which layout is running.
+ *
+ * The aperture's width is derived from the same two constants the canvas uses:
+ * 86% of viewport height, at the master's 720:1280 aspect.
+ */
+[data-film-fit='aperture'] {
+  --aperture-w: calc(86vh * 0.5625);
+  --film-field-w: calc((100vw - var(--aperture-w)) / 2);
+}
+
+/* Each beat is centred in its own field, so consecutive beats sit one full
+   section apart and the film always has exactly one thing being said about it.
+   The asymmetric inline padding is not a style choice: the TimeRail HUD is
+   fixed against the right edge, and a right-hand beat runs straight into it
+   without the extra gutter. */
+[data-film-fit='aperture'] section:has([data-beat]) {
+  justify-content: center;
+  padding-block: 0;
+  padding-inline: 5rem 9rem;
+}
+
+[data-film-fit='aperture'] [data-beat] {
+  /* align-self beats the section's own align-items, so the beat can be placed
+     into a field without touching the section's mobile layout. */
+  align-self: flex-start;
+  text-align: left;
+  /* Sit inside the field with a real gutter on both sides: clear of the
+     viewport edge, and clear of the aperture's edge. */
+  max-width: min(24rem, calc(var(--film-field-w) - 10rem));
+}
+
+[data-film-fit='aperture'] [data-beat='right'] {
+  align-self: flex-end;
+  text-align: right;
+}
+
+/* The display sizes were set for headings running across a full-bleed frame.
+   In a ~380 px column, text-7xl breaks "The orchard turns amber." into three
+   ragged lines. Scaled to the column instead of to the viewport. */
+[data-film-fit='aperture'] [data-beat] h1 {
+  font-size: clamp(2.25rem, 2.9vw, 3.25rem);
+}
+[data-film-fit='aperture'] [data-beat] h2 {
+  font-size: clamp(1.75rem, 2.2vw, 2.5rem);
+}
+
+/* The copy is no longer over the picture, so the scrim's job shrinks from
+   "make this legible against a bright drone frame" to "settle it onto the
+   ambient field". Lightened rather than removed — the field tracks the film's
+   own colour, so it is quiet but not uniform.
+ *
+ * The directional weighting also goes: it existed so a block pushed against the
+ * viewport edge would not have its falloff clipped into a visible rectangle. In
+ * the field the block is inset on both sides, so centred is correct — and it
+ * frees a beat to sit on either side regardless of which modifier it carries. */
+[data-film-fit='aperture'] .story-scrim {
+  --scrim-x: 50%;
+  --scrim-spread: 78%;
+  --scrim-peak: 0.86;
+}
+[data-film-fit='aperture'] .story-scrim::before {
+  opacity: 0.5;
 }
 
 /* Film chapter heading — slides up from 12px below and fades in */

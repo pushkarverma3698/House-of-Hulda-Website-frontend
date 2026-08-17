@@ -183,10 +183,104 @@ const NEAREST_SEARCH_RADIUS = 48
 const GRADE_STEPS = 16
 const ALPHA_STEPS = 32
 
+/**
+ * WHERE THE FILM ENDS AND THE SKY BEGINS
+ *
+ * The film is a descent: valley, orchard, the house, then inside it. Its last
+ * frame is a lit interior. The story told over it goes the other way — it opens
+ * out, from the hearth at 19:07 to a Bortle Class 1 sky at 19:45, the eighteen
+ * deities, and dawn.
+ *
+ * These used to be 0.7 / 0.85 / 1.0: the film reached its last frame at t=0.7
+ * and then HELD that frame, fully opaque, until 0.85. Measured against the
+ * layout, the sections land at
+ *
+ *     L-06 The Hearth      centred at t = 0.602
+ *     L-07 The Eighteen Gods  enters at t = 0.711, centred at 0.747
+ *     L-08 The Valley Commons enters at t = 0.882
+ *
+ * so the stargazing centrepiece — telescope telemetry, eighteen gods, the whole
+ * reason the site exists — was composited on top of a frozen photograph of a
+ * bed with the lights on, and so was the marketplace, and so was half the
+ * closing call to action. The WebGL sky underneath it was already good; it was
+ * simply never visible.
+ *
+ * Re-timed against those measurements: the film now plays its full 240 frames
+ * by the time L-06 is centred, holds only long enough to read that beat, and
+ * has dissolved before L-07 enters. Everything from 0.70 on belongs to the sky.
+ */
+const FILM_END_T = 0.6
+const DISSOLVE_START_T = 0.64
+const DISSOLVE_END_T = 0.7
+
+/** Where the night grade starts closing down the picture. */
+const GRADE_START_T = 0.4
+
+/**
+ * THE APERTURE — how a 9:16 film is presented on a landscape screen.
+ *
+ * The master is 720x1280, shot vertical. Cover-fitting it to a desktop viewport
+ * does two things, and both of them are why the film reads soft:
+ *
+ *   - It scales 720 px of source across a 3024 px backing store (1512 CSS px at
+ *     dpr 2) — a 4.2x upscale, before the tier ladder has made a single
+ *     decision. No scheduling change reaches it, because the pixels do not
+ *     exist.
+ *   - It crops the frame to the middle 32% of its height. The snowline, the
+ *     cloud break, the whole sense of altitude the copy is describing sits
+ *     above the crop. Desktop visitors have never seen the peaks.
+ *
+ * So on a landscape screen the film is drawn CONTAINED, in a tall centred
+ * aperture at close to its native resolution — 871 device px wide at
+ * 1512x900 dpr 2, a 1.21x upscale instead of 4.2x — with the full composition
+ * intact. The surround is the same frame drawn 32 px wide and blown back up:
+ * the upscale is the blur, so an ambient field that tracks the film's own
+ * colour costs one extra drawImage and no filter.
+ *
+ * Phones are untouched. A 390x844 phone lands the film at 0.99x with the full
+ * frame already visible — cover is exactly right there and always was.
+ */
+const APERTURE_HEIGHT_RATIO = 0.86
+
+/** The master's aspect. Needed before any bitmap has decoded, to size the
+ *  aperture for the layout on the very first resize. */
+const FRAME_ASPECT_W = 720
+const FRAME_ASPECT_H = 1280
+
+/** Below this much CSS-pixel field on each side there is nowhere for the story
+ *  copy to go, so a small desktop window keeps the full-bleed treatment. */
+const APERTURE_MIN_FIELD_PX = 300
+
+/** Width of the ambient downsample. Small enough that blowing it back up to the
+ *  full canvas is a smooth field rather than a second, competing picture. */
+const AMBIENT_W = 32
+
+/** How far the ambient field is sunk behind the aperture. Under ~0.5 it reads
+ *  as a blurry duplicate of the frame competing with the sharp one; past ~0.72
+ *  it goes to flat black and the screen reads as empty rather than as a lit
+ *  room around a window. The night grade multiplies this later in the film, so
+ *  it is set from how the daylight acts look. */
+const AMBIENT_SINK = 0.58
+
+/**
+ * The dissolve is a CSS opacity on the canvas ELEMENT, not a globalAlpha on its
+ * contents. Two reasons: the context is `alpha: false`, so compositing the
+ * frame translucently against its own backing store fades towards black rather
+ * than towards what is behind the canvas; and an element opacity is a
+ * compositor property, so the whole handoff costs no redraws at all — the
+ * render loop stays asleep through it.
+ */
+const DISSOLVE_STEPS = 32
+
 const detectCoarsePointer = (): boolean => {
   if (typeof window === 'undefined') return false
   return window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
 }
+
+/** Anything the cover/aperture math can measure and drawImage can take. The
+ *  ambient surround is an HTMLCanvasElement; every film frame is an
+ *  ImageBitmap. */
+type Drawable = ImageBitmap | HTMLCanvasElement
 
 interface CachedFrame {
   bitmap: ImageBitmap
@@ -395,21 +489,37 @@ export const proxyCache = new BitmapCache(proxyFrameUrl, PROXY_BUDGET)
 export const midCache = new BitmapCache(midFrameUrl, MID_BUDGET)
 export const hiresCache = new BitmapCache(hiresFrameUrl, HIRES_BUDGET_DESKTOP)
 
+/** The frame the playhead is asking for at this scroll position. */
+const frameIndexFor = (t: number): number => {
+  if (t >= FILM_END_T) return TOTAL_HERO_FRAMES
+  const localT = Math.max(0, Math.min(1, t / FILM_END_T))
+  return 1 + Math.floor(localT * (TOTAL_HERO_FRAMES - 1))
+}
+
+/**
+ * The film's opacity at this scroll position, quantised.
+ *
+ * Applied to the canvas element rather than to its contents — see
+ * DISSOLVE_STEPS. Past DISSOLVE_END_T this is 0 and the sky owns the screen.
+ */
+const dissolveFor = (t: number): number => {
+  if (t <= DISSOLVE_START_T) return 1
+  if (t >= DISSOLVE_END_T) return 0
+  const remaining = 1 - (t - DISSOLVE_START_T) / (DISSOLVE_END_T - DISSOLVE_START_T)
+  return Math.round(remaining * DISSOLVE_STEPS) / DISSOLVE_STEPS
+}
+
 /**
  * Everything the canvas can display, collapsed to one integer. `t` is written
  * ~17x more often than the output can change (EPSILON is 1/4096 of the scroll,
- * one frame is 1/240 of 70% of it), and every one of those writes used to wake
+ * one frame is 1/240 of 60% of it), and every one of those writes used to wake
  * the render loop for a frame it would discard.
+ *
+ * The dissolve is deliberately NOT part of this key: it is an element opacity
+ * set straight from the subscription, so it needs no repaint and must not wake
+ * the loop.
  */
-const visualKeyFor = (t: number): number => {
-  if (t < 0.7) {
-    const localT = Math.max(0, Math.min(1, t / 0.7))
-    return 1 + Math.floor(localT * (TOTAL_HERO_FRAMES - 1))
-  }
-  if (t < 0.85) return TOTAL_HERO_FRAMES
-  const alpha = Math.max(0, 1.0 - (t - 0.85) / 0.15)
-  return TOTAL_HERO_FRAMES + 1 + Math.round(alpha * ALPHA_STEPS)
-}
+const visualKeyFor = (t: number): number => frameIndexFor(t)
 
 export const ScrollCanvas = memo(function ScrollCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -455,8 +565,21 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
     const onFrameDecoded = () => startRender()
 
     let lastVisualKey = -1
+    let lastDissolve = -1
+    const applyDissolve = (t: number) => {
+      const next = dissolveFor(t)
+      if (next === lastDissolve) return
+      lastDissolve = next
+      canvas.style.opacity = String(next)
+      // Once the film is gone it must not keep eating the sky's fill rate, and
+      // it must not be a compositing layer the browser still blends every frame.
+      canvas.style.visibility = next === 0 ? 'hidden' : 'visible'
+    }
+    applyDissolve(useNight.getState().t)
+
     const unsubNight = useNight.subscribe((state, prevState) => {
       if (state.t === prevState.t) return
+      applyDissolve(state.t)
       const key = visualKeyFor(state.t)
       if (key === lastVisualKey) return
       lastVisualKey = key
@@ -503,6 +626,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
 
       canvas.width = newWidth
       canvas.height = newHeight
+      applyFit()
 
       // Resizing wipes the backing store — invalidate the draw key or the canvas
       // stays black until the next frame index change.
@@ -510,7 +634,23 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       startRender()
     }
 
-    const drawCover = (bitmap: ImageBitmap, width: number, height: number) => {
+    /**
+     * Decide between the aperture and full-bleed cover, and publish the answer
+     * on <html> so the story layout can key off the same decision.
+     *
+     * One source of truth on purpose. The copy is placed in the field beside
+     * the aperture, so a CSS media query guessing independently at when the
+     * aperture is active would put the copy in a column that is not there.
+     */
+    const applyFit = () => {
+      const apertureCssWidth =
+        window.innerHeight * APERTURE_HEIGHT_RATIO * (FRAME_ASPECT_W / FRAME_ASPECT_H)
+      const fieldPx = (window.innerWidth - apertureCssWidth) / 2
+      fit = !isCoarsePointer && fieldPx >= APERTURE_MIN_FIELD_PX ? 'aperture' : 'cover'
+      document.documentElement.dataset.filmFit = fit
+    }
+
+    const drawCover = (bitmap: Drawable, width: number, height: number) => {
       const imgRatio = bitmap.width / bitmap.height
       const canvasRatio = width / height
       let drawWidth = width
@@ -535,24 +675,81 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       )
     }
 
+    // The ambient surround. Reused across draws — allocating a canvas per frame
+    // would put a fresh backing store into the GC path 60 times a second.
+    const ambient = document.createElement('canvas')
+    const ambientCtx = ambient.getContext('2d', { alpha: false })
+
+    const apertureRect = (bitmap: Drawable, width: number, height: number) => {
+      const drawHeight = Math.floor(height * APERTURE_HEIGHT_RATIO)
+      const drawWidth = Math.floor(drawHeight * (bitmap.width / bitmap.height))
+      return {
+        x: Math.floor((width - drawWidth) / 2),
+        y: Math.floor((height - drawHeight) / 2),
+        w: drawWidth,
+        h: drawHeight,
+      }
+    }
+
+    /**
+     * Everything behind the aperture: the ambient field and the frame's edge.
+     *
+     * Separate from the frame draw because it is drawn once per paint at full
+     * opacity, while the frame itself may be drawn twice — the outgoing tier
+     * then the incoming one — under a cross-fade alpha. Painting the backdrop
+     * inside that would apply the fade to the surround as well, and the field
+     * would pulse darker on every focus-in.
+     */
+    const drawBackdrop = (bitmap: Drawable, width: number, height: number) => {
+      // The frame drawn tiny, then blown back up to fill: the upscale is the
+      // blur, so this is a colour field that tracks the film for the cost of
+      // two drawImage calls and no filter.
+      if (ambientCtx) {
+        const ah = Math.max(1, Math.round((AMBIENT_W * bitmap.height) / bitmap.width))
+        if (ambient.width !== AMBIENT_W || ambient.height !== ah) {
+          ambient.width = AMBIENT_W
+          ambient.height = ah
+        }
+        ambientCtx.drawImage(bitmap, 0, 0, AMBIENT_W, ah)
+        drawCover(ambient, width, height)
+      } else {
+        ctx.fillStyle = '#060a10'
+        ctx.fillRect(0, 0, width, height)
+      }
+
+      // Sink it, so it reads as the light spilling off the frame rather than as
+      // a second, softer copy of the picture competing with the sharp one.
+      ctx.fillStyle = `rgba(6, 10, 16, ${AMBIENT_SINK})`
+      ctx.fillRect(0, 0, width, height)
+
+      // A hairline, so the aperture terminates as an edge rather than as the
+      // point where the picture happens to stop.
+      const r = apertureRect(bitmap, width, height)
+      ctx.strokeStyle = 'rgba(243, 236, 225, 0.10)'
+      ctx.lineWidth = Math.max(1, Math.round(height / 900))
+      ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1)
+    }
+
+    /** 'aperture' on a landscape desktop window with room for the copy beside
+     *  the film; 'cover' everywhere else, which is every phone. */
+    let fit: 'cover' | 'aperture' = 'cover'
+
+    const drawFrame = (bitmap: Drawable, width: number, height: number) => {
+      if (fit === 'cover') {
+        drawCover(bitmap, width, height)
+        return
+      }
+      const r = apertureRect(bitmap, width, height)
+      ctx.drawImage(bitmap, r.x, r.y, r.w, r.h)
+    }
+
     const render = () => {
       const now = performance.now()
       const t = useNight.getState().t
       const width = canvas.width
       const height = canvas.height
 
-      let targetFrameIdx = 1
-      let alpha = 1.0
-
-      if (t < 0.7) {
-        const localT = Math.max(0, Math.min(1, t / 0.7))
-        targetFrameIdx = 1 + Math.floor(localT * (TOTAL_HERO_FRAMES - 1))
-      } else if (t < 0.85) {
-        targetFrameIdx = TOTAL_HERO_FRAMES
-      } else {
-        alpha = Math.max(0, 1.0 - (t - 0.85) / 0.15)
-        targetFrameIdx = TOTAL_HERO_FRAMES
-      }
+      const targetFrameIdx = frameIndexFor(t)
 
       if (targetFrameIdx !== lastTargetIdxRef.current) {
         // How long the outgoing frame held the screen. Measured here rather than
@@ -714,8 +911,15 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         // Quantise on the NUMBER, not the string — building the template literal
         // every rAF allocated ~60 short-lived strings a second for a value that
         // only takes 16 distinct states across the whole scroll.
+        // Reaches full grade as the dissolve starts, so the film is at its
+        // darkest at the moment it hands over to the sky rather than snapping
+        // back to an ungraded frame partway through.
         const gradeStep =
-          t > 0.4 && t <= 0.85 ? Math.round(Math.min(1, (t - 0.4) / 0.4) * GRADE_STEPS) : -1
+          t > GRADE_START_T
+            ? Math.round(
+                Math.min(1, (t - GRADE_START_T) / (DISSOLVE_START_T - GRADE_START_T)) * GRADE_STEPS
+              )
+            : -1
 
         if (gradeStep !== lastGradeStepRef.current) {
           lastGradeStepRef.current = gradeStep
@@ -732,17 +936,19 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         const fade = isHires
           ? Math.min(1, (now - hiresShownAt) / HIRES_FADE_MS)
           : 1
-        const steppedAlpha = Math.round(alpha * ALPHA_STEPS) / ALPHA_STEPS
         const steppedFade = Math.round(fade * ALPHA_STEPS) / ALPHA_STEPS
         const tierKey = isHires ? 'h' : isMid ? 'm' : 'p'
-        const drawKey = `${tierKey}_${frame.index}_${steppedAlpha}_${steppedFade}_${width}`
+        const drawKey = `${tierKey}_${frame.index}_${steppedFade}_${width}_${fit}`
 
         if (lastDrawnKeyRef.current !== drawKey) {
-          // The cover math always covers the full canvas, so at full alpha the
-          // clear is a second fullscreen fill for no reason. It is only needed
-          // when the frame is composited translucently over the last one.
-          const isTranslucent = steppedAlpha < 1 || (isHires && steppedFade < 1)
-          if (isTranslucent) ctx.clearRect(0, 0, width, height)
+          // In aperture mode the frame does not cover the canvas, so the
+          // surround is repainted on every paint. In cover mode the draw fills
+          // everything and the clear is only needed while two tiers blend.
+          if (fit === 'aperture') {
+            drawBackdrop(frame.bitmap, width, height)
+          } else if (isHires && steppedFade < 1) {
+            ctx.clearRect(0, 0, width, height)
+          }
 
           // Mid-fade, lay the sharp frame over the soft one so no black shows
           // through while the two are blended. Prefer the mid tier underneath —
@@ -753,14 +959,11 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
               midCache.get(frame.index) ??
               proxyCache.get(frame.index) ??
               proxyCache.getNearest(frame.index)
-            if (under) {
-              ctx.globalAlpha = steppedAlpha
-              drawCover(under.bitmap, width, height)
-            }
+            if (under) drawFrame(under.bitmap, width, height)
           }
 
-          ctx.globalAlpha = steppedAlpha * (isHires ? steppedFade : 1)
-          drawCover(frame.bitmap, width, height)
+          ctx.globalAlpha = isHires ? steppedFade : 1
+          drawFrame(frame.bitmap, width, height)
           ctx.globalAlpha = 1
 
           lastDrawnKeyRef.current = drawKey
@@ -819,6 +1022,9 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       cancelAnimationFrame(animFrameId)
       clearTimeout(settleTimerId)
       window.removeEventListener('resize', resize)
+      // The story layout keys off this. Leaving it set on a route where no film
+      // canvas exists would place that route's copy in a column beside nothing.
+      delete document.documentElement.dataset.filmFit
       proxyCache.dispose()
       midCache.dispose()
       hiresCache.dispose()
