@@ -228,3 +228,66 @@ stashing only the `providers.tsx` guard:
 3. The actual URL-bar animation. Desktop Chrome has no dynamic toolbar; the
    fix was verified through the resize event it produces, not the toolbar
    itself.
+
+## Addendum (2026-08-18) — the remaining softness was the source, not the schedule
+
+A manual review after the above shipped still read the film as soft — on
+both mobile and desktop, confirmed with `?debug=perf` showing 100% delivery
+and `tier: hires` at the moment of the screenshot, so this was not a
+tier-selection regression. Root cause: the master at `public/frames/hero`
+is 720x1280, and there is no higher-resolution source anywhere in the repo —
+it is the master, not a downsample of one. A phone's canvas backing store
+asks for ~1,150-1,440px wide (390-480pt at 3x dpr); a 1080p desktop asks for
+~1,920px. Even the fully-settled, 100%-delivered hires tier is therefore a
+1.6x-2.7x real-time upscale done by the browser's canvas compositor — the
+note at the top of this file already flagged this ("even the sharp tier is a
+~2x upscale. Closing that last step needs a re-master, not a scheduling
+change") but it had not yet been addressed.
+
+**What a true fix requires and why it wasn't done here:** more source pixels,
+i.e. regenerating the Veo output at a higher resolution or re-encoding from a
+higher-resolution export if one exists outside this repo. Neither is
+available in this environment (no Veo/Fal credentials, no higher-res master
+on disk). Bumping `public/frames/hero`'s own resolution was considered and
+rejected for this pass: `hero`/`hero-mid`/`hero-proxy` are the same files
+served to both device classes, so raising resolution raises decoded bytes
+(`width * height * 4`) for every device including the iPhone-11-class target
+this whole frame ladder was budgeted around — risking exactly the cache
+thrash the proxy tier exists to prevent, unverifiable here without the
+physical device.
+
+**What was shipped instead — recovers perceived sharpness without touching
+the frame ladder's memory budget or scheduling:**
+
+1. `scripts/sharpen-frames.py` — offline unsharp-mask + micro-contrast pass
+   over all three tiers, master dimensions unchanged (720x1280 stays
+   720x1280, so the decoded-byte budget math in `ScrollCanvas.tsx` is
+   untouched). `hero-mid`/`hero-proxy` are re-derived from the *sharpened*
+   master via Lanczos, not from the original, so all three tiers read as one
+   consistent image instead of two of them still tracing back to the softer
+   source. Verified on-frame via crop comparisons (porch railings, roofline,
+   string lights) — visibly crisper, no halo artifacts at the settings used
+   (radius 2.2 / 180% on the master, lighter on mid, none on proxy since
+   that tier is only seen during a flick where eye motion blur already masks
+   detail). On-disk cost: hero 25.6MB -> 33.5MB, hero-mid 4.8MB -> 9.8MB
+   (on-demand only, not in the cold-start payload), hero-proxy 1.7MB -> 2.1MB
+   (part of cold start; +0.4MB).
+2. A constant `contrast(1.04) saturate(1.03)` compositor-side lift in
+   `ScrollCanvas.tsx`, stacked under the existing night-grade filter rather
+   than replacing it. Free — a CSS filter on an already-composited canvas
+   layer, not a per-frame JS cost — and it's what keeps the offline sharpen's
+   edge contrast from reading as flat again once the browser's own upscale
+   softens it back down.
+
+**Verified after shipping:** `npx tsc --noEmit` clean; production build
+clean; `?debug=perf` after a 4,800px synthetic scroll on iPhone 15 Pro
+emulation — 100% delivery, `tier: hires`, proxy 240/240 resident at 41.6MB
+(within the 44MB budget), mid 23.6MB (within 24MB), hires 52.7MB (within the
+56MB mobile budget) — the frame ladder's behavior is unchanged by this pass.
+
+**Not fully closed:** this raises the ceiling on how sharp a 720x1280 source
+can look, it does not raise the ceiling itself. A visitor pixel-peeping a
+large monitor will still see a soft cabin in a wide shot, because the
+cabin's own on-screen size is a handful of source pixels wide before any
+upscale happens. Closing that gap is still the same re-master this file
+already named as out of reach a section up.
