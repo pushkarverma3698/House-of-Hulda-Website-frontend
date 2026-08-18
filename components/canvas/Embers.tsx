@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { useRef, useMemo } from 'react'
 import * as THREE from 'three'
 import { useNight } from '@/lib/store/night'
+import { getPointSprite } from '@/lib/three/pointSprite'
 
 const COUNT = 180
 
@@ -27,6 +28,7 @@ export function Embers() {
   const pointsRef = useRef<THREE.Points>(null)
   const materialRef = useRef<THREE.PointsMaterial>(null)
   const { positions, speeds, offsets } = useMemo(() => generateEmbers(), [])
+  const sprite = useMemo(() => getPointSprite(), [])
 
   useFrame((state, _dt) => {
     const t = useNight.getState().t
@@ -78,7 +80,11 @@ export function Embers() {
       </bufferGeometry>
       <pointsMaterial
         ref={materialRef}
-        size={0.06}
+        // Larger than the old 0.06 because the sprite's falloff means most of
+        // the quad is transparent — the lit core is about a third of it, so the
+        // ember reads at roughly its previous size but as a glow, not a block.
+        size={0.16}
+        map={sprite}
         color="#f5a623"
         transparent
         opacity={0}
