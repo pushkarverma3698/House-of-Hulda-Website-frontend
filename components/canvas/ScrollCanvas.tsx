@@ -887,26 +887,13 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       // to a stop could drop a sharp neighbouring frame in favour of the proxy
       // while the exact frame was still in flight, i.e. the picture would get
       // worse at the moment the viewer stopped to look at it.
-      const hires =
-        hiresCache.get(targetFrameIdx) ??
-        hiresCache.getNearestWithin(targetFrameIdx, hiresRadius)
-      // The mid tier gets the same bounded near-search as the sharp one. Matching
-      // only the exact index meant that whenever the sharp tier missed, the mid
-      // tier missed for the identical reason — the playhead had moved on — and
-      // the fallback collapsed straight to the 160 px proxy. Measured over a full
-      // scroll, the mid tier was serving 0.0% of frames: it was costing a request
-      // and a decode per frame change and never once reaching the screen.
-      const mid = hires
-        ? null
-        : midCache.getNearestWithin(targetFrameIdx, MID_NEAREST_RADIUS)
-      const frame: FrameRef | null =
-        hires ?? mid ?? proxyCache.getNearest(targetFrameIdx)
+      const hires = hiresCache.getNearest(targetFrameIdx)
+      const frame: FrameRef | null = hires ?? proxyCache.getNearest(targetFrameIdx)
 
       if (frame) {
         const isHires = hires !== null
-        const isMid = mid !== null
         if (isHires && hiresShownAt === 0) hiresShownAt = now
-        lastTierRef.current = isHires ? 'hires' : isMid ? 'mid' : 'proxy'
+        lastTierRef.current = isHires ? 'hires' : 'proxy'
 
         // Quantise on the NUMBER, not the string — building the template literal
         // every rAF allocated ~60 short-lived strings a second for a value that
@@ -937,7 +924,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
           ? Math.min(1, (now - hiresShownAt) / HIRES_FADE_MS)
           : 1
         const steppedFade = Math.round(fade * ALPHA_STEPS) / ALPHA_STEPS
-        const tierKey = isHires ? 'h' : isMid ? 'm' : 'p'
+        const tierKey = isHires ? 'h' : 'p'
         const drawKey = `${tierKey}_${frame.index}_${steppedFade}_${width}_${fit}`
 
         if (lastDrawnKeyRef.current !== drawKey) {
@@ -972,7 +959,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         }
 
         scrubStats.drawnIdx = frame.index
-        scrubStats.tier = isHires ? 'hires' : isMid ? 'mid' : 'proxy'
+        scrubStats.tier = isHires ? 'hires' : 'proxy'
         scrubStats.proxyResident = proxyCache.residentCount
         scrubStats.proxyBytes = proxyCache.residentBytes
         scrubStats.midResident = midCache.residentCount
