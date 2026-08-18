@@ -64,6 +64,11 @@ export const viewport: Viewport = {
   themeColor: "#0a0f17",
   width: "device-width",
   initialScale: 1,
+  // The film is full-bleed, so the page should be too — otherwise a notched
+  // phone letterboxes the one thing the site is made of. `cover` is also what
+  // makes env(safe-area-inset-*) report real numbers; without it they are all
+  // zero and the bottom chrome sits under the home indicator.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

@@ -133,7 +133,11 @@ export function Soundscape() {
      * A 44px circle is a correct target and occupies roughly a fifth of the
      * area, so what remains of the overlap no longer swallows a sentence. The
      * label returns at md, where there is room for it. */
-    <div className="fixed bottom-6 left-6 z-30 flex items-center gap-3 select-none">
+    /* Lifted clear of the home indicator. At `bottom-6` the 44px circle
+     * finished 24px from the bottom edge — inside the 34px strip iOS reserves
+     * for the swipe-up gesture, where a tap is as likely to send the visitor to
+     * their home screen as it is to toggle the audio. */
+    <div className="fixed left-6 z-30 flex items-center gap-3 select-none bottom-[calc(5.5rem_+_env(safe-area-inset-bottom))] md:bottom-6">
       <button
         onClick={toggleSound}
         aria-label={isPlaying ? 'Turn atmospheric audio off' : 'Turn atmospheric audio on'}

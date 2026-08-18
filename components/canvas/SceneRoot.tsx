@@ -8,15 +8,49 @@ import { StarField } from './StarField'
 import { Embers } from './Embers'
 import { Atmosphere } from './Atmosphere'
 import { PostProcessing } from './PostProcessing'
-import { Suspense, memo, useState } from 'react'
+import { Suspense, memo, useEffect, useState } from 'react'
+import { useNight } from '@/lib/store/night'
 
 const detectCoarsePointer = (): boolean => {
   if (typeof window === 'undefined') return false
   return window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
 }
 
+/** The film canvas covers this one completely until it starts dissolving at
+ *  t = 0.64. Waking at 0.55 leaves the scene nine percent of the page — several
+ *  seconds of scrolling — to settle its damped camera and its particles before
+ *  the first pixel of it is visible. */
+const WAKE_T = 0.55
+
 export const SceneRoot = memo(function SceneRoot() {
   const [isCoarsePointer] = useState(detectCoarsePointer)
+
+  /**
+   * Do not render a sky nobody can see.
+   *
+   * Measured on a phone at ten scroll stops: the film canvas reports opacity 1
+   * from t = 0 to t = 0.62, and this canvas reports opacity 1 the whole time
+   * underneath it. So for the first 55% of the page — six of the nine acts —
+   * a skybox, two thousand star points, embers, drifting atmosphere and a
+   * critically-damped camera were being shaded at full rate behind a fully
+   * opaque photograph.
+   *
+   * On a desktop that is wasted watts. In a hand it is heat, and heat is the
+   * one design flaw a visitor feels physically: the phone warms, the SoC
+   * throttles, and the site gets progressively worse the longer someone stays
+   * with it. The people who scroll furthest were being punished hardest.
+   */
+  const [awake, setAwake] = useState(() =>
+    typeof window === 'undefined' ? false : useNight.getState().t > WAKE_T
+  )
+
+  useEffect(() => {
+    const unsub = useNight.subscribe((state) => {
+      const next = state.t > WAKE_T
+      setAwake((prev) => (prev === next ? prev : next))
+    })
+    return () => unsub()
+  }, [])
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none bg-transparent">
@@ -41,6 +75,10 @@ export const SceneRoot = memo(function SceneRoot() {
         // particles and a gradient — none of which resolve detail worth 4x the
         // fragment cost.
         dpr={isCoarsePointer ? 1 : [1, 2]}
+        // `never` stops the render loop without tearing down the GL context —
+        // the scene keeps its buffers and resumes instantly, so nothing has to
+        // be re-uploaded at the moment the dissolve begins.
+        frameloop={awake ? 'always' : 'never'}
       >
         <Suspense fallback={null}>
           {/* Camera Director Spline & Inversion Controls */}

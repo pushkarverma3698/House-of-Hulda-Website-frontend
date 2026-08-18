@@ -9,6 +9,7 @@ import { TimeRail } from '@/components/film/TimeRail'
 import { Marketplace } from '@/components/film/Marketplace'
 import { Soundscape } from '@/components/film/Soundscape'
 import { Navigation } from '@/components/film/Navigation'
+import { ReserveDock } from '@/components/film/ReserveDock'
 import { FilmReel } from '@/components/film/FilmReel'
 import { StarCard } from '@/components/sky/StarCard'
 import { DateDial } from '@/components/astro/DateDial'
@@ -44,6 +45,9 @@ export function CinematicExperience() {
 
       {/* Cinematic film-reel scroll progress — top of viewport */}
       <FilmReel />
+
+      {/* The reserve a thumb can reach — phone only, from the first beat on */}
+      <ReserveDock />
 
       {/* z-50 Initial Atmospheric Loader */}
       <Preloader />
@@ -252,17 +256,26 @@ export function CinematicExperience() {
                 </p>
               </div>
               <span className="hud-mono text-[10px] text-amber/70 border border-amber/20 px-3 py-1.5 rounded-full self-start md:self-auto bg-amber/5">
-                18 OBJECTS ACTIVE
+                18 OBJECTS ACTIVE<span className="sm:hidden"> · SWIPE →</span>
               </span>
             </div>
 
-            {/* Interactive Grid of Eighteen Deities — staggered cascade */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-2">
+            {/* Interactive Deities — a swipe on a phone, a grid from sm up.
+                As a two-column grid this was nine rows deep, and it made L-07
+                2,610px tall on a 390px phone: 3.1 screens, 23% of the whole
+                page, the single largest block on the site — and it landed
+                immediately after the hearth, so the film ended and handed the
+                visitor a spreadsheet. A rail costs one screen instead of three,
+                keeps the sky visible above and below the panel, and turns
+                eighteen identical rows into something the thumb browses.
+                `overscroll-x-contain` stops a swipe at the last card from
+                triggering the browser's back gesture. */}
+            <div className="flex gap-2.5 pt-2 overflow-x-auto overscroll-x-contain snap-x snap-mandatory -mx-6 px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-3 lg:grid-cols-6 sm:overflow-visible sm:mx-0 sm:px-0">
               {EIGHTEEN_GODS.map((god, idx) => (
                 <button
                   key={god.id}
                   onClick={() => setSelectedStar(god)}
-                  className="p-3 rounded-xl bg-white/[0.03] hover:bg-amber/[0.08] border border-white/[0.06] hover:border-amber/30 text-left transition-all group flex flex-col justify-between min-h-24 shadow-sm hover:shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:scale-[1.02] active:scale-95"
+                  className="w-[44%] shrink-0 snap-start sm:w-auto sm:shrink p-3 rounded-xl bg-white/[0.03] hover:bg-amber/[0.08] border border-white/[0.06] hover:border-amber/30 text-left transition-all group flex flex-col justify-between min-h-24 shadow-sm hover:shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:scale-[1.02] active:scale-95"
                   style={{ animationDelay: `${STAGGER_MS[idx] || idx * 40}ms` }}
                 >
                   <div className="flex justify-between items-start w-full">
