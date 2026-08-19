@@ -20,7 +20,7 @@ const NAV = [
  */
 export function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen bg-bone text-bark">
+    <div className="relative min-h-[100svh] bg-bone text-bark">
       <div aria-hidden className="paper-vignette" />
       <div aria-hidden className="paper-grain" />
 
