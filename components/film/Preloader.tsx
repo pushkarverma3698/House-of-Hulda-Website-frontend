@@ -5,20 +5,25 @@ import { useEffect, useState } from 'react'
 /** Frames that must be in the HTTP cache before the curtain lifts. Enough to
  *  cover the opening beat; ScrollCanvas sweeps the remaining proxy frames
  *  resident behind the user. */
-const CRITICAL_FRAME_COUNT = 32
+const CRITICAL_FRAME_COUNT = 40
 /** Browsers multiplex freely over HTTP/2, so an unbounded fan-out does not
  *  queue — it splits the same pipe and every frame arrives late. */
 const CRITICAL_CONCURRENCY = 6
 const SAFETY_TIMEOUT_MS = 4000
 
 /**
- * The PROXY tier, not the full-resolution one. Entry used to pull 20 frames at
- * ~110 KB — 2.2 MB before the curtain could lift — of images the bitmap cache
- * could not keep anyway. Proxy frames are 7.3 KB, so the same opening beat is
- * 230 KB and lands on 4G instead of timing out into an empty cache.
+ * The HIGH-RES tier. Since 4G/5G is ubiquitous, we use the 4-second loading
+ * window to pre-fetch the first 40 pristine 4K/720p hardware-accelerated JPEGs.
+ * This guarantees a razor-sharp opening beat when the curtain lifts, dropping
+ * back to nearest-cached proxy frames only if the connection is strictly 3G/EDGE.
  */
-const frameUrl = (index: number) =>
-  `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.webp`
+const frameUrl = (index: number) => {
+  if (typeof window === 'undefined') return `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
+  const isDesktop = !window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 768
+  return isDesktop
+    ? `/frames/hero-desktop/frame_${String(index).padStart(3, '0')}.jpg`
+    : `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
+}
 
 /** Warms the HTTP cache. The bitmap cache in ScrollCanvas decodes from here. */
 async function warmFrame(index: number, signal: AbortSignal): Promise<void> {
