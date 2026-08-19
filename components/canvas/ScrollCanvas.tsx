@@ -52,11 +52,11 @@ export const TOTAL_HERO_FRAMES = 240
  * a re-master, not a scheduling change.
  */
 export const proxyFrameUrl = (index: number) =>
-  `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.jpg`
+  `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.webp`
 const midFrameUrl = (index: number) =>
-  `/frames/hero-mid/frame_${String(index).padStart(3, '0')}.jpg`
+  `/frames/hero-mid/frame_${String(index).padStart(3, '0')}.webp`
 const hiresFrameUrl = (index: number) =>
-  `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
+  `/frames/hero/frame_${String(index).padStart(3, '0')}.webp`
 
 /** All 240 proxy frames need 41.7 MB. The budget is headroom over that, not a
  *  target — if it ever binds, the safety valve in evictToBudget has to run. */

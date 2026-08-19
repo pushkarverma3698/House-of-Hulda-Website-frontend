@@ -18,7 +18,7 @@ const SAFETY_TIMEOUT_MS = 4000
  * 230 KB and lands on 4G instead of timing out into an empty cache.
  */
 const frameUrl = (index: number) =>
-  `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.jpg`
+  `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.webp`
 
 /** Warms the HTTP cache. The bitmap cache in ScrollCanvas decodes from here. */
 async function warmFrame(index: number, signal: AbortSignal): Promise<void> {
