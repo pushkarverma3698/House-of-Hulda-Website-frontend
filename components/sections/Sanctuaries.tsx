@@ -53,7 +53,7 @@ export function Sanctuaries() {
     <section
       id="sanctuaries"
       aria-label="Act III · Sanctuaries"
-      className="mx-auto min-h-screen max-w-[1240px] px-[clamp(20px,5vw,40px)] py-[18vh]"
+      className="mx-auto min-h-[100svh] max-w-[1240px] px-[clamp(20px,5vw,40px)] py-[18vh]"
     >
       <Reveal className="mb-[8vh] max-w-[36ch]">
         <div className="mb-[18px] text-[11px] uppercase tracking-[0.34em] text-cream/55">

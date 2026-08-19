@@ -21,7 +21,7 @@ export function Threshold() {
     <section
       id="threshold"
       aria-label="Act 0 · Threshold"
-      className="relative flex min-h-screen flex-col items-center justify-center px-[clamp(20px,5vw,40px)] pb-[90px] pt-[120px] text-center"
+      className="relative flex min-h-[100svh] flex-col items-center justify-center px-[clamp(20px,5vw,40px)] pb-[90px] pt-[120px] text-center"
     >
       {/* IMAX Nolan-style Naggar Mountain Road Backdrop */}
       <div className="absolute inset-0 -z-20 overflow-hidden opacity-40 mix-blend-luminosity">

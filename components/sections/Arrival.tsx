@@ -171,7 +171,7 @@ export function Arrival() {
 
   return (
     <section ref={sectionRef} id="arrival" aria-label="Act II · Arrival" className="relative h-[260vh]">
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-ink">
+      <div className="sticky top-0 h-[100svh] w-full overflow-hidden bg-ink">
         {/* full-bleed house — the real golden-hour exterior, the moment you arrive */}
         <div
           ref={houseRef}

@@ -24,13 +24,15 @@ export const Navigation = memo(function Navigation({
    * that for every act at once, and it is the behaviour people already expect.
    */
   useEffect(() => {
-    lastYRef.current = window.scrollY
+    const scrollContainer = document.getElementById('scroll-wrapper') || window
+    
+    lastYRef.current = scrollContainer === window ? window.scrollY : (scrollContainer as HTMLElement).scrollTop
     let ticking = false
     const onScroll = () => {
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => {
-        const y = window.scrollY
+        const y = scrollContainer === window ? window.scrollY : (scrollContainer as HTMLElement).scrollTop
         const dy = y - lastYRef.current
         // Ignore sub-pixel jitter and the rubber-band at the very top; only a
         // deliberate 12px of travel changes the state.
@@ -41,8 +43,8 @@ export const Navigation = memo(function Navigation({
         ticking = false
       })
     }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    scrollContainer.addEventListener('scroll', onScroll, { passive: true })
+    return () => scrollContainer.removeEventListener('scroll', onScroll)
   }, [])
 
   // Never leave the menu open behind a hidden header.

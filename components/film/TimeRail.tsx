@@ -23,13 +23,15 @@ export const TimeRail = memo(function TimeRail() {
    * component already updates itself outside React for the same reason.
    */
   useEffect(() => {
-    let lastY = window.scrollY
+    const scrollContainer = document.getElementById('scroll-wrapper') || window
+    
+    let lastY = scrollContainer === window ? window.scrollY : (scrollContainer as HTMLElement).scrollTop
     let ticking = false
     const onScroll = () => {
       if (ticking) return
       ticking = true
       requestAnimationFrame(() => {
-        const y = window.scrollY
+        const y = scrollContainer === window ? window.scrollY : (scrollContainer as HTMLElement).scrollTop
         const dy = y - lastY
         if (Math.abs(dy) > 12) {
           const hide = y > 220 && dy > 0
@@ -42,8 +44,8 @@ export const TimeRail = memo(function TimeRail() {
         ticking = false
       })
     }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    scrollContainer.addEventListener('scroll', onScroll, { passive: true })
+    return () => scrollContainer.removeEventListener('scroll', onScroll)
   }, [])
 
   useEffect(() => {

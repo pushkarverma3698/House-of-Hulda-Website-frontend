@@ -16,35 +16,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   useEffect(() => {
+    const wrapper = document.getElementById('scroll-wrapper')
+    const content = document.getElementById('scroll-content')
+    
+    // We provide a fallback to window scrolling for robust development rendering,
+    // but the production wrapper locks the viewport to stop URL bar bouncing on mobile.
     const lenis = new Lenis({
+      wrapper: wrapper || window,
+      content: content || document.documentElement,
       lerp: 0.08,
       wheelMultiplier: 0.85,
-      // syncTouch hijacks touchmove and re-drives the page from JS. On iOS that
-      // fights Safari's own momentum + dynamic URL bar and is the single largest
-      // source of touch-scroll jank. Native touch scrolling is already
-      // interpolated by the OS at 120Hz — we sample it, we do not replace it.
+      // syncTouch must be false for wrapper scrolling to let the browser handle 
+      // native scroll (which prevents URL bar collapse while keeping momentum)
       syncTouch: false,
     })
     lenisInstance = lenis
-
-    // scrollHeight forces a layout flush, so it is measured on resize only,
-    // never inside the frame loop.
-    let maxScroll = 1
-    let lastMeasuredWidth = -1
-    const measure = () => {
-      // Safari fires `resize` every time the dynamic URL bar animates, and BOTH
-      // terms below move with it. Re-deriving maxScroll mid-scroll therefore
-      // remaps `p` discontinuously, which the film shows as the frame index
-      // jumping — exactly in sync with the toolbar sliding. Width is the only
-      // thing that changes on a real resize or an orientation change, so gate
-      // on it. (The layout is sized in `svh` for the same reason: svh is fixed
-      // at the small-viewport size and does not track the toolbar.)
-      if (window.innerWidth === lastMeasuredWidth) return
-      lastMeasuredWidth = window.innerWidth
-      maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
-    }
-    measure()
-    window.addEventListener('resize', measure, { passive: true })
 
     // Single writer, sampled once per frame. Scroll events fire at unpredictable
     // rates (and in bursts during momentum); rAF sampling decouples store writes
@@ -53,7 +39,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     let lastP = -1
 
     const sample = () => {
-      const p = Math.max(0, Math.min(1, window.scrollY / maxScroll))
+      // Lenis calculates `.limit` dynamically and correctly handles resize events.
+      // This eliminates the need for manual scrollHeight - innerHeight math and
+      // avoids iOS Safari resize jump bugs altogether.
+      const p = lenis.limit > 0 ? Math.max(0, Math.min(1, lenis.scroll / lenis.limit)) : 0
       if (Math.abs(p - lastP) < EPSILON) return
       lastP = p
 
@@ -76,7 +65,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     return () => {
       cancelAnimationFrame(rafId)
-      window.removeEventListener('resize', measure)
       lenis.destroy()
       lenisInstance = null
     }
