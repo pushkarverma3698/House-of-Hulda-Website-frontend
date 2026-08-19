@@ -56,11 +56,11 @@ export const proxyFrameUrl = (index: number) =>
 const midFrameUrl = (index: number) =>
   `/frames/hero-mid/frame_${String(index).padStart(3, '0')}.webp`
 const hiresFrameUrl = (index: number) => {
-  if (typeof window === 'undefined') return `/frames/hero/frame_${String(index).padStart(3, '0')}.webp`
+  if (typeof window === 'undefined') return `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
   const isDesktop = !window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 768
   return isDesktop
     ? `/frames/hero-desktop/frame_${String(index).padStart(3, '0')}.jpg`
-    : `/frames/hero/frame_${String(index).padStart(3, '0')}.webp`
+    : `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
 }
 
 /** All 240 proxy frames need 41.7 MB. The budget is headroom over that, not a
