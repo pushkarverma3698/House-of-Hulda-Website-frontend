@@ -16,18 +16,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   useEffect(() => {
-    const wrapper = document.getElementById('scroll-wrapper')
-    const content = document.getElementById('scroll-content')
-    
-    if (!wrapper || !content) return
-
     const lenis = new Lenis({
-      wrapper,
-      content,
       lerp: 0.08,
       wheelMultiplier: 0.85,
-      // syncTouch must be false for wrapper scrolling to let the browser handle 
-      // native scroll (which prevents URL bar collapse while keeping momentum)
+      // syncTouch hijacks touchmove and re-drives the page from JS. On iOS that
+      // fights Safari's own momentum + dynamic URL bar and is the single largest
+      // source of touch-scroll jank. Native touch scrolling is already
+      // interpolated by the OS at 120Hz — we sample it, we do not replace it.
       syncTouch: false,
     })
     lenisInstance = lenis
@@ -46,9 +41,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       // at the small-viewport size and does not track the toolbar.)
       if (window.innerWidth === lastMeasuredWidth) return
       lastMeasuredWidth = window.innerWidth
-      const scrollHeight = wrapper ? wrapper.scrollHeight : document.documentElement.scrollHeight
-      const clientHeight = wrapper ? wrapper.clientHeight : window.innerHeight
-      maxScroll = Math.max(1, scrollHeight - clientHeight)
+      maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
     }
     measure()
     window.addEventListener('resize', measure, { passive: true })
@@ -60,7 +53,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     let lastP = -1
 
     const sample = () => {
-      const p = Math.max(0, Math.min(1, lenis.scroll / maxScroll))
+      const p = Math.max(0, Math.min(1, window.scrollY / maxScroll))
       if (Math.abs(p - lastP) < EPSILON) return
       lastP = p
 

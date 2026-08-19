@@ -80,19 +80,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-IN" className={`${cormorant.variable} ${mulish.variable}`}>
-      <body className="font-body fixed inset-0 overflow-hidden bg-[#0a0f17]">
+      <body className="font-body">
         <script
           type="application/ld+json"
           // schema validates against Google Rich Results — see lib/schema.ts
           dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd()) }}
         />
         <Providers>
-          <div id="scroll-wrapper" className="absolute inset-0 overflow-y-auto overflow-x-hidden">
-            <div id="scroll-content" className="min-h-full">
-              {children}
-              {booking}
-            </div>
-          </div>
+          {children}
+          {booking}
           <WhatsappFab />
         </Providers>
         <Analytics />
