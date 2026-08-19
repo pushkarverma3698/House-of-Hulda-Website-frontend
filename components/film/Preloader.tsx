@@ -6,9 +6,11 @@ import { useEffect, useState, useRef } from 'react'
  *  cover the opening beat; ScrollCanvas sweeps the remaining proxy frames
  *  resident behind the user. */
 const CRITICAL_FRAME_COUNT = 40
+const TOTAL_HERO_FRAMES = 240
 /** Browsers multiplex freely over HTTP/2, so an unbounded fan-out does not
  *  queue — it splits the same pipe and every frame arrives late. */
 const CRITICAL_CONCURRENCY = 6
+const BACKGROUND_CONCURRENCY = 4
 const SAFETY_TIMEOUT_MS = 4000
 
 /**
@@ -74,6 +76,14 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
         setIsLoaded(true)
         onComplete?.()
       }, 400)
+
+      // Start background prefetch for the rest of the film's high-res frames.
+      // This uses a separate AbortController so it survives Preloader unmount.
+      // 4G/5G connections handle this easily, allowing the user to experience
+      // the full sharp tier without falling back to proxy frames.
+      const bgController = new AbortController()
+      const background = Array.from({ length: TOTAL_HERO_FRAMES - CRITICAL_FRAME_COUNT }, (_, i) => i + CRITICAL_FRAME_COUNT + 1)
+      runPool(background, BACKGROUND_CONCURRENCY, bgController.signal).catch(() => {})
     }
 
     const safetyTimeout = setTimeout(completePreloader, SAFETY_TIMEOUT_MS)

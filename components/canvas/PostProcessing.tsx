@@ -54,7 +54,7 @@ export function PostProcessing() {
   return (
     <EffectComposer {...({ disableNormalPass: true } as any)} autoClear={false}>
       <Bloom
-        ref={bloomRef}
+        ref={(el: any) => { bloomRef.current = el }}
         intensity={2.8}
         luminanceThreshold={0.85}
         luminanceSmoothing={0.15}
