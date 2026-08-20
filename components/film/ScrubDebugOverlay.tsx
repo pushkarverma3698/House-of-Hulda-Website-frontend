@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { scrubStats, resetScrubStats, deliveryRatio } from '@/lib/perf/scrubStats'
+import { scrubStats, resetScrubStats, deliveryRatio, hiresShare } from '@/lib/perf/scrubStats'
+import { filmPreloadStatus } from '@/lib/film/preload'
 
 /**
  * On-device scrub telemetry. Open the site on a real phone with ?debug=perf.
@@ -18,6 +19,10 @@ const REFRESH_MS = 250
 
 interface Snapshot {
   delivery: number
+  hires: number
+  /** What the curtain got through, and why it decided to lift. */
+  filmCached: number
+  filmReason: string
   filmFps: number
   activeSec: number
   targetIdx: number
@@ -29,6 +34,8 @@ interface Snapshot {
   midMB: number
   hiresMB: number
   idxVelocity: number
+  stride: number
+  radius: number
   decodes: number
   evictions: number
   worstFreezeMs: number
@@ -45,6 +52,10 @@ export function ScrubDebugOverlay() {
     if (typeof window === 'undefined') return
     if (!new URLSearchParams(window.location.search).has('debug')) return
     setEnabled(true)
+    // Same object the overlay reads, published for the Playwright scrub
+    // harness in scripts/measure-scrub.mjs. Debug-gated, so it exists only
+    // when someone has explicitly asked to be measuring.
+    ;(window as unknown as { __scrubStats?: unknown }).__scrubStats = scrubStats
 
     let rafId = 0
     let lastEmit = 0
@@ -59,6 +70,9 @@ export function ScrubDebugOverlay() {
         const activeSec = Math.max(0.001, scrubStats.activeMs / 1000)
         setSnap({
           delivery: deliveryRatio(),
+          hires: hiresShare(),
+          filmCached: filmPreloadStatus().cached,
+          filmReason: filmPreloadStatus().reason,
           filmFps: scrubStats.paintedIdx.size / activeSec,
           activeSec,
           targetIdx: scrubStats.targetIdx,
@@ -70,6 +84,8 @@ export function ScrubDebugOverlay() {
           midMB: scrubStats.midBytes / 1048576,
           hiresMB: scrubStats.hiresBytes / 1048576,
           idxVelocity: scrubStats.idxVelocity,
+          stride: scrubStats.hiresStride,
+          radius: scrubStats.hiresRadius,
           decodes: scrubStats.decodes,
           evictions: scrubStats.evictions,
           worstFreezeMs: scrubStats.worstFreezeMs,
@@ -88,6 +104,9 @@ export function ScrubDebugOverlay() {
   const deliveryPct = Math.round(snap.delivery * 100)
   const deliveryColor =
     snap.delivery >= 0.8 ? 'text-emerald-400' : snap.delivery >= 0.5 ? 'text-amber-400' : 'text-red-400'
+  const hiresPct = Math.round(snap.hires * 100)
+  const hiresColor =
+    snap.hires >= 0.9 ? 'text-emerald-400' : snap.hires >= 0.6 ? 'text-amber-400' : 'text-red-400'
   const freezeColor =
     snap.worstFreezeMs < 100 ? 'text-emerald-400' : snap.worstFreezeMs < 250 ? 'text-amber-400' : 'text-red-400'
 
@@ -107,6 +126,9 @@ export function ScrubDebugOverlay() {
 
       <div className={`text-2xl font-bold ${deliveryColor}`}>{deliveryPct}%</div>
       <div className="text-[9px] text-white/40 mb-1.5">frames delivered to screen</div>
+
+      <div className={`text-2xl font-bold ${hiresColor}`}>{hiresPct}%</div>
+      <div className="text-[9px] text-white/40 mb-1.5">of those, at full resolution</div>
 
       <Row label="film fps" value={snap.filmFps.toFixed(1)} />
       <Row label="scrubbed" value={`${snap.activeSec.toFixed(1)}s`} />
@@ -137,6 +159,9 @@ export function ScrubDebugOverlay() {
         value={`${snap.idxVelocity.toFixed(3)}/ms`}
         className={snap.idxVelocity > 0.05 ? 'text-amber-400' : 'text-white/70'}
       />
+      <Row label="film cached" value={`${snap.filmCached}/240`} />
+      <Row label="curtain lifted" value={snap.filmReason} />
+      <Row label="stride / radius" value={`${snap.stride} / ${snap.radius}`} />
       <Row label="proxy resident" value={`${snap.proxyResident}/240`} />
       <Row label="proxy mem" value={`${snap.proxyMB.toFixed(1)}MB`} />
       <Row label="mid mem" value={`${snap.midResident}f · ${snap.midMB.toFixed(1)}MB`} />

@@ -1,7 +1,7 @@
 'use client'
 
 import { useFrame } from '@react-three/fiber'
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { useNight } from '@/lib/store/night'
 import { getSolarState, getBloomThreshold } from '@/lib/astro/sun'
@@ -13,7 +13,32 @@ const detectCoarsePointer = (): boolean => {
 }
 
 export function PostProcessing() {
-  const bloomRef = useRef<BloomEffect>(null)
+  const bloomRef = useRef<BloomEffect | null>(null)
+
+  /**
+   * A CALLBACK ref, not a ref object, and the difference is a crash.
+   *
+   * `Bloom` comes from `wrapEffect`, which memoises the effect's constructor
+   * args on `JSON.stringify(props)`. Under React 19 `ref` is an ordinary member
+   * of props, so once this ref holds a BloomEffect — a live object in the THREE
+   * graph, where `parent` and `children` point at each other — that stringify
+   * throws `Converting circular structure to JSON` on the component's next
+   * render. Nothing catches it, so React unwinds the tree: the WebGL scene, the
+   * film canvas and every overlay unmount, mid-scroll, and the page is blank
+   * for the rest of the descent.
+   *
+   * It only bit desktop because the whole postprocessing stack is skipped on a
+   * coarse pointer, and only partway down the page because it needs a re-render
+   * after the ref has been populated.
+   *
+   * `JSON.stringify` omits functions rather than following them, so passing the
+   * ref as a callback keeps the memo key stable and serialisable. `useCallback`
+   * with no dependencies keeps its identity stable too, so React does not
+   * detach and reattach the effect on every render.
+   */
+  const attachBloom = useCallback((effect: BloomEffect | null) => {
+    bloomRef.current = effect
+  }, [])
 
   // Resolved once, lazily, so the composer is never mounted-then-unmounted on
   // mobile — allocating and freeing two fullscreen float render targets during
@@ -54,7 +79,7 @@ export function PostProcessing() {
   return (
     <EffectComposer {...({ disableNormalPass: true } as any)} autoClear={false}>
       <Bloom
-        ref={bloomRef}
+        ref={attachBloom}
         intensity={2.8}
         luminanceThreshold={0.85}
         luminanceSmoothing={0.15}

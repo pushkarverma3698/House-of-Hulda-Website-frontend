@@ -3,84 +3,62 @@
 import { useEffect, useRef, memo } from 'react'
 import { useNight } from '@/lib/store/night'
 import { scrubStats } from '@/lib/perf/scrubStats'
+import { TOTAL_HERO_FRAMES } from '@/lib/film/frames'
+import {
+  proxyCache,
+  midCache,
+  hiresCache,
+  type Drawable,
+  type FrameRef,
+} from '@/lib/film/frameCache'
+import {
+  onFrameDecoded as onFilmFrameDecoded,
+  setFilmActive,
+  fillProxyTier,
+} from '@/lib/film/preload'
+import { isCoarsePointer } from '@/lib/film/frames'
 
-export const TOTAL_HERO_FRAMES = 240
+export { TOTAL_HERO_FRAMES }
 
 /**
- * FRAME LADDER — SHARP BY DEFAULT, STEPPED UNDER LOAD
+ * FRAME LADDER — THE MASTER, OR AS CLOSE TO IT AS THE DEVICE ALLOWS
  *
- * Three encodings of the film exist: a 160x284 proxy, a 320x568 mid, and the
- * 720x1280 master. What changed is which one the viewer actually looks at.
+ * Four encodings of the film exist: a 160x284 proxy, a 320x568 mid, and the
+ * 720x1280 master in two quantisations (see lib/film/frames.ts). This file
+ * decides which one the viewer actually looks at.
  *
  * The ladder used to pick a tier by scroll velocity, dropping to the proxy above
  * a flick threshold and only reaching for the master once the scroll had come to
- * a full stop. Both halves of that misfired against the real geometry:
- *
- *   - The film spans ~5,000 px of mobile scroll across 240 frames, so one frame
- *     is ~21 px and an ordinary 1,400 px/sec scroll is 67 frames/sec. The
- *     threshold sat below almost all real scrolling, so the 160 px proxy was
- *     what the viewer saw for essentially the whole film.
- *   - Gating the master on stillness meant the frames a viewer spends nearly all
- *     their time looking at — the ones being scrolled through — could never be
- *     sharp by construction.
- *
- * Measured at 1,400 px/sec on an iPhone 15 Pro profile, the sharp tier was on
- * screen for 9.3% of frames.
- *
- * The ladder now trades TEMPORAL resolution for SPATIAL resolution instead of
- * the other way round. Eye motion blur hides a dropped frame; it does not hide a
- * 9x upscale, because the blur runs along the axis of travel while the softness
- * is in every direction at once. So when the playhead outruns the pipeline we
- * stop trying to deliver every frame and deliver sharp ones instead:
+ * a full stop. Both halves misfired against the real geometry — the film spans
+ * ~5,700 px of mobile scroll across 240 frames, so one frame is ~24 px and an
+ * ordinary 1,400 px/sec scroll is 59 frames/sec, above almost all of the
+ * threshold — and the fix was to trade TEMPORAL resolution for SPATIAL
+ * resolution rather than the other way round. Eye motion blur hides a dropped
+ * frame; it does not hide a 7.3x upscale, because the blur runs along the axis
+ * of travel while the softness is in every direction at once.
  *
  *   keeping up  -> every frame, from the master
  *   outrunning  -> every STRIDE-th frame from the master, gaps covered by a
  *                  bounded near-search, stride derived from measured decode cost
  *   cache miss  -> mid, then the proxy, which stays fully resident as the floor
  *
- * Decode, not network, is the constraint: a full-resolution frame fetches in
- * ~23 ms and decodes in 5-70 ms depending on whether the device has a hardware
- * JPEG path. The stride is therefore derived from BitmapCache.decodeMsEma at run
- * time rather than from a constant, so a fast phone strides 1 and holds every
- * frame sharp while a slow one degrades to stepping rather than to mush.
+ * That was right, and it was not enough. Measured on a 4G phone profile at
+ * 1,400 px/sec, the master still reached the screen for 4.4% of paints, because
+ * the ladder was being asked to schedule around a download that had barely
+ * started: the curtain lifted on a 4-second timer with 42 of 240 frames cached,
+ * so nearly every master request during the scroll was a cold network fetch
+ * competing with the proxy sweep for the same pipe.
+ *
+ * That is now the curtain's problem, and it solves it — lib/film/preload.ts
+ * puts the whole master sequence in the HTTP cache before lifting. What is left
+ * here is a pipeline bound by DECODE alone, and the numbers below are retuned
+ * for that: a fetch that hits the cache costs ~1 ms instead of ~25, so the
+ * concurrency that starved the read-ahead when every request was a real
+ * download is now the concurrency that keeps it fed.
  *
  * Regenerate the lower tiers with ./scripts/encode-proxy-frames.sh and
  * ./scripts/encode-mid-frames.sh
- *
- * NOTE: the master is 720x1280 and a current phone asks for ~1,440 px wide at
- * native, so even the sharp tier is a ~2x upscale. Closing that last step needs
- * a re-master, not a scheduling change.
  */
-export const proxyFrameUrl = (index: number) =>
-  `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.webp`
-const midFrameUrl = (index: number) =>
-  `/frames/hero-mid/frame_${String(index).padStart(3, '0')}.webp`
-const hiresFrameUrl = (index: number) => {
-  if (typeof window === 'undefined') return `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
-  const isDesktop = !window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 768
-  return isDesktop
-    ? `/frames/hero-desktop/frame_${String(index).padStart(3, '0')}.jpg`
-    : `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
-}
-
-/** All 240 proxy frames need 41.7 MB. The budget is headroom over that, not a
- *  target — if it ever binds, the safety valve in evictToBudget has to run. */
-const PROXY_BUDGET = 44 * 1024 * 1024
-
-/** Full-resolution frames now carry the scroll itself, not just the stops, so
- *  the mobile tier holds a real working window instead of two frames. At
- *  3.52 MiB decoded that is ~16 frames — enough for HIRES_PREFETCH_AHEAD to stay
- *  ahead of a deliberate scroll and to keep a short trail behind it for the
- *  bounded backward search in getNearestWithin. On top of the proxy tier's
- *  41.7 MB and the mid tier's 24 MB this lands near 122 MB, which is within
- *  what current iOS/Android Safari and Chrome hold for a foreground tab. */
-const HIRES_BUDGET_MOBILE = 56 * 1024 * 1024
-const HIRES_BUDGET_DESKTOP = 96 * 1024 * 1024
-
-/** A 320x568 frame is 710 KB decoded, so this is a ~33-frame trailing window.
- *  No mobile/desktop split: 24 MB on top of the proxy tier's 42 MB and two
- *  full-resolution frames is ~73 MB, which the weakest target device holds. */
-const MID_BUDGET = 24 * 1024 * 1024
 
 /**
  * Frames per ms the full-resolution pipeline can actually sustain — fetch a
@@ -112,23 +90,48 @@ const HIRES_SUSTAINED_RATE = 0.02
  *  smoothness is genuinely the better trade. */
 const HIRES_MAX_STRIDE = 8
 
-/** Expected fetch-and-decode latency for one full-resolution frame, in ms, used
- *  to set how far ahead the read-ahead starts. It does not need to be exact —
- *  it only has to be large enough that a requested frame is still in front of
- *  the playhead when it arrives. Too small and every prefetch is stale on
- *  arrival; too large and the read-ahead runs off into film the viewer may
- *  never reach. */
-const HIRES_LEAD_MS = 150
+/**
+ * WHY THERE IS NO FEEDBACK CONTROLLER HERE.
+ *
+ * The obvious way to set the stride is to close a loop on the symptom: measure
+ * the share of the scroll served by the master tier, and widen the stride when
+ * it sags. That was tried, and it is unstable in exactly the case it exists for.
+ *
+ * At a wide stride the read-ahead stops asking for the frame under the playhead
+ * — deliberately, because at speed that request is stale before it lands — and
+ * asks only for frames a stride apart, well ahead. If those land late, nothing
+ * near the playhead is resident, the hit rate falls further, and the controller
+ * responds by widening the stride again. Measured on the phone profile the loop
+ * ran to the ceiling within a second and sat there with a 1% hit rate, while the
+ * same scroll at a fixed stride of 1 served 97%.
+ *
+ * The stride has to come from a model of the pipeline, not from its output. What
+ * was wrong before was the model's input, not its form — see
+ * BitmapCache.loadMsEma.
+ */
+
+/** Smoothing for the master-tier hit rate. Telemetry only: it is what the
+ *  ?debug=perf overlay reports as the ladder's health, and nothing schedules
+ *  from it. */
+const HIT_EMA_ALPHA = 0.08
+
+/** Expected fetch-and-decode latency for one master frame, in ms, used to set
+ *  how far ahead the read-ahead starts. It only has to be large enough that a
+ *  requested frame is still in front of the playhead when it arrives: too small
+ *  and every prefetch is stale on arrival, too large and the read-ahead runs
+ *  off into film the viewer may never reach.
+ *
+ *  150 covered a ~25 ms network fetch plus a decode. The curtain now leaves the
+ *  whole sequence in the HTTP cache, so the fetch half is ~1 ms and what
+ *  remains is decode — but decode is also the half that varies by an order of
+ *  magnitude across devices, so this stays generous rather than being cut to
+ *  match a fast phone. */
+const HIRES_LEAD_MS = 120
 
 /** Smoothing for the frame-velocity estimate. A single slow tick between two
  *  fast ones must not flip the tier and trigger a request the flick will
  *  outrun. */
 const VELOCITY_EMA_ALPHA = 0.3
-
-/** Concurrency for the background sweep that makes the proxy tier resident.
- *  Browsers multiplex over HTTP/2, so an unbounded fan-out does not queue — it
- *  splits the same pipe and every frame arrives late. */
-const PROXY_FILL_CONCURRENCY = 4
 
 /** How long the playhead must hold still before the sharp frame is requested.
  *  Kept only as the trigger for the focus-in cross-fade on a deliberate stop —
@@ -142,26 +145,69 @@ const SETTLE_MS = 140
  *  has gone, so the exact frame is never resident when it is needed and the
  *  fallback is a 160 px proxy. Fetching forward turns the sharp tier from a
  *  thing that arrives late into a thing that is already there. */
-const HIRES_PREFETCH_AHEAD = 10
+const HIRES_PREFETCH_AHEAD = 16
 
-/** Concurrency for full-resolution fetches. The proxy sweep is already using
- *  part of the pipe, and a prefetch fan-out wide enough to compete with it
- *  starves the one frame the playhead actually needs right now.
+/** Concurrency for master-tier requests.
  *
- *  Two, not three: resuming from a pause resets the velocity estimate to zero,
- *  which selects stride 1 and queues a burst of consecutive full-resolution
- *  frames. Measured, three concurrent 720x1280 decodes in that burst produced
- *  350 ms stalls; two holds the same tier occupancy without them. */
-const HIRES_FETCH_CONCURRENCY = 2
+ *  This was 2, and for the right reason at the time: every request was a real
+ *  ~25 ms network fetch competing with a 240-frame proxy sweep over the same
+ *  pipe, and three concurrent cold fetches plus their decodes produced 350 ms
+ *  stalls.
+ *
+ *  Neither half of that is true any more. The curtain leaves the whole master
+ *  sequence in the HTTP cache before it lifts, so a request is a cache read and
+ *  a decode; and the proxy sweep no longer starts until the curtain is gone,
+ *  and runs at concurrency 2 when it does. What bounds the tier now is decode
+ *  throughput alone, createImageBitmap decodes off the main thread, and holding
+ *  the in-flight count at 2 leaves that capacity unused — which shows up as the
+ *  read-ahead falling behind a fast scroll and the ladder stepping down to a
+ *  tier the viewer can see is softer. */
+const HIRES_FETCH_CONCURRENCY = 4
 
 /** Floor for how far from the target a resident sharp frame may be and still be
- *  drawn instead of the proxy. Two frames is ~42 px of scroll — during motion
- *  that reads as a fractionally late film, which is invisible, where dropping to
- *  the proxy reads as the picture dissolving, which is not.
+ *  drawn instead of a softer tier. Two frames is ~48 px of scroll — during
+ *  motion that reads as a fractionally late film, which is invisible, where
+ *  dropping to the proxy reads as the picture dissolving, which is not.
  *
- *  The effective radius is raised to half the current stride at run time; this
- *  is only the minimum, for when the film is being read slowly. */
+ *  This is the minimum, for when the film is being read slowly and the exact
+ *  frame is worth waiting for. HIRES_LAG_TOLERANCE_MS widens it under motion. */
 const HIRES_NEAREST_RADIUS = 2
+
+/**
+ * HOW LATE A SHARP FRAME MAY BE.
+ *
+ * This is the whole spatial-versus-temporal trade, stated as a number, and it
+ * is where the ladder was still giving the picture away.
+ *
+ * The radius used to be max(2, stride/2) — at the strides real scrolling
+ * produces, that is 2. So a sharp frame three indices behind the playhead was
+ * rejected and the paint fell through to a 160x284 proxy: the film swapped a
+ * 50 ms lag nobody can see for a 7.3x upscale everybody can. Measured on the
+ * phone profile, that rejection was most of the 43% of paints still coming from
+ * the proxy after the curtain had cached the whole film.
+ *
+ * A frame's staleness is a time, not a count, so the radius is derived from
+ * one: at the current frame velocity, how many indices fit in the lag the eye
+ * will accept? 120 ms is about two frames of a 60 Hz refresh — well inside what
+ * reads as a film that is fractionally behind the thumb, and nowhere near the
+ * ~250 ms where a scrub starts to feel disconnected from the hand.
+ *
+ * It collapses to HIRES_NEAREST_RADIUS as the playhead slows, so coming to a
+ * stop still lands on the exact frame rather than settling for a near one.
+ */
+const HIRES_LAG_TOLERANCE_MS = 120
+
+/** Ceiling on that widening. Past ~10 frames the near-search stops being "the
+ *  film is slightly behind" and starts being "the film is showing a different
+ *  moment", and at that distance the composition can genuinely have changed. */
+const HIRES_MAX_RADIUS = 10
+
+/** How close a resident proxy frame has to be before the render loop stops
+ *  asking for the exact one. The floor's job is to be there at all, not to be
+ *  on the exact index — at a 7.3x upscale a neighbouring frame is
+ *  indistinguishable, and the request it saves is a decode the master tier
+ *  gets instead. */
+const PROXY_NEAREST_RADIUS = 3
 
 /** Near-search radius for the mid tier. Wider than the sharp tier's because the
  *  mid tier is the graceful step down rather than the target: at 4.5x upscale a
@@ -177,10 +223,6 @@ const HIRES_FADE_MS = 220
 /** A gap longer than this between frame changes is the user not scrolling, not
  *  the page stalling. Telemetry only. */
 const IDLE_GAP_MS = 400
-
-/** Bounded fallback search. Only reachable in the first seconds of a cold load,
- *  before the proxy sweep has made the sequence resident. */
-const NEAREST_SEARCH_RADIUS = 48
 
 /** The colour grade is a compositor filter on a fullscreen layer. Quantising it
  *  re-rasterises that layer ~16 times across the whole scroll instead of once
@@ -277,223 +319,6 @@ const AMBIENT_SINK = 0.58
  */
 const DISSOLVE_STEPS = 32
 
-const detectCoarsePointer = (): boolean => {
-  if (typeof window === 'undefined') return false
-  return window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
-}
-
-/** Anything the cover/aperture math can measure and drawImage can take. The
- *  ambient surround is an HTMLCanvasElement; every film frame is an
- *  ImageBitmap. */
-type Drawable = ImageBitmap | HTMLCanvasElement
-
-interface CachedFrame {
-  bitmap: ImageBitmap
-  bytes: number
-}
-
-export interface FrameRef {
-  bitmap: ImageBitmap
-  index: number
-}
-
-/**
- * Byte-budgeted LRU of decoded frames.
- *
- * Fetch + Blob + createImageBitmap rather than HTMLImageElement because it is
- * the only path with real cancellation (AbortController actually tears down the
- * request; `img.src = ''` does not) and because it never leaves a second
- * decoded copy alive inside an <img> the browser is free to retain.
- */
-class BitmapCache {
-  private cache = new Map<number, CachedFrame>()
-  private inFlight = new Map<number, AbortController>()
-  private bytes = 0
-
-  constructor(
-    private readonly urlFor: (index: number) => string,
-    private budget: number
-  ) {}
-
-  public setBudget(bytes: number): void {
-    this.budget = bytes
-    this.evictToBudget(-1)
-  }
-
-  public get residentCount(): number {
-    return this.cache.size
-  }
-
-  public get residentBytes(): number {
-    return this.bytes
-  }
-
-  public has(index: number): boolean {
-    return this.cache.has(index)
-  }
-
-  /** LRU touch: delete + re-insert moves the entry to the back of the Map. */
-  public get(index: number): FrameRef | null {
-    const frame = this.cache.get(index)
-    if (!frame) return null
-    this.cache.delete(index)
-    this.cache.set(index, frame)
-    return { bitmap: frame.bitmap, index }
-  }
-
-  /** Tear down every request except the one we still want. */
-  public abortAllExcept(keepIndex: number): void {
-    for (const [index, controller] of this.inFlight) {
-      if (index === keepIndex) continue
-      controller.abort()
-      this.inFlight.delete(index)
-    }
-  }
-
-  /**
-   * Tear down requests for frames the playhead can no longer reach, keeping the
-   * ones inside [lo, hi]. abortAllExcept is wrong for a prefetching tier: it
-   * cancels the read-ahead on every frame change, which is every ~21 px of
-   * scroll, so no forward request ever survives long enough to land and the
-   * tier can only ever serve the frame the playhead has already passed.
-   */
-  public abortOutsideWindow(lo: number, hi: number): void {
-    for (const [index, controller] of this.inFlight) {
-      if (index >= lo && index <= hi) continue
-      controller.abort()
-      this.inFlight.delete(index)
-    }
-  }
-
-  public get inFlightCount(): number {
-    return this.inFlight.size
-  }
-
-  /**
-   * Rolling mean of createImageBitmap duration for this tier, in ms.
-   *
-   * The scheduler needs this because decode, not network, is what bounds the
-   * sharp tier — measured on one device, fetching a full-resolution frame took
-   * 23 ms and decoding it 62 ms — and because that figure varies by an order of
-   * magnitude across devices: hardware JPEG decode on a current phone is single
-   * digits, software decode is not. Hard-coding a throughput assumption gets one
-   * class of device right and the rest wrong, so the stride is derived from what
-   * decode is actually costing here, now.
-   */
-  public decodeMsEma = 0
-  private static readonly DECODE_EMA_ALPHA = 0.25
-
-  /**
-   * Nearest resident frame within a tight radius, preferring the one behind.
-   * Separate from getNearest so the sharp tier can accept a slightly stale
-   * frame during motion without inheriting that tier's 48-frame search, which
-   * would happily draw a frame from a completely different shot.
-   */
-  public getNearestWithin(targetIndex: number, radius: number): FrameRef | null {
-    const exact = this.get(targetIndex)
-    if (exact) return exact
-    for (let offset = 1; offset <= radius; offset++) {
-      const behind = this.get(targetIndex - offset)
-      if (behind) return behind
-      const ahead = this.get(targetIndex + offset)
-      if (ahead) return ahead
-    }
-    return null
-  }
-
-  public async load(index: number, onDecode?: () => void): Promise<void> {
-    if (index < 1 || index > TOTAL_HERO_FRAMES) return
-    if (this.cache.has(index) || this.inFlight.has(index)) return
-
-    const controller = new AbortController()
-    this.inFlight.set(index, controller)
-
-    try {
-      const response = await fetch(this.urlFor(index), { signal: controller.signal })
-      if (!response.ok) return
-
-      const blob = await response.blob()
-      if (controller.signal.aborted) return
-
-      // Decodes off the main thread. This is the whole point of the pipeline —
-      // never hand a raw <img> to drawImage and let it decode during paint.
-      const decodeStart = performance.now()
-      const bitmap = await createImageBitmap(blob)
-      this.decodeMsEma =
-        this.decodeMsEma === 0
-          ? performance.now() - decodeStart
-          : this.decodeMsEma * (1 - BitmapCache.DECODE_EMA_ALPHA) +
-            (performance.now() - decodeStart) * BitmapCache.DECODE_EMA_ALPHA
-      if (controller.signal.aborted) {
-        bitmap.close()
-        return
-      }
-
-      const bytes = bitmap.width * bitmap.height * 4
-      this.cache.set(index, { bitmap, bytes })
-      this.bytes += bytes
-      scrubStats.decodes++
-
-      // Evict AFTER insert so the cache is never momentarily empty mid-scroll.
-      this.evictToBudget(index)
-      onDecode?.()
-    } catch {
-      // Aborted or network failure — the render loop falls back to the nearest
-      // resident frame, so a miss is never fatal.
-    } finally {
-      this.inFlight.delete(index)
-    }
-  }
-
-  private evictToBudget(protectedIndex: number): void {
-    if (this.bytes <= this.budget) return
-    for (const index of [...this.cache.keys()]) {
-      if (this.bytes <= this.budget) return
-      if (index === protectedIndex) continue
-      const frame = this.cache.get(index)
-      if (frame) {
-        frame.bitmap.close() // deterministic VRAM release, no GC wait
-        this.bytes -= frame.bytes
-        scrubStats.evictions++
-      }
-      this.cache.delete(index)
-    }
-  }
-
-  public getNearest(targetIndex: number): FrameRef | null {
-    const exact = this.get(targetIndex)
-    if (exact) return exact
-
-    for (let offset = 1; offset <= NEAREST_SEARCH_RADIUS; offset++) {
-      // Behind first: on a miss, holding the last frame the viewer already saw
-      // reads as a pause. Jumping to a future frame reads as a skip.
-      const behind = this.get(targetIndex - offset)
-      if (behind) return behind
-      const ahead = this.get(targetIndex + offset)
-      if (ahead) return ahead
-    }
-    return null
-  }
-
-  /**
-   * Release every GPU-backed bitmap and tear down in-flight requests. Without
-   * this, unmounting leaves the full budget resident for the life of the tab —
-   * on a route where no canvas exists to use it — and lets a decode that lands
-   * after unmount reignite the render loop against a detached canvas.
-   */
-  public dispose(): void {
-    for (const controller of this.inFlight.values()) controller.abort()
-    this.inFlight.clear()
-    for (const frame of this.cache.values()) frame.bitmap.close()
-    this.cache.clear()
-    this.bytes = 0
-  }
-}
-
-export const proxyCache = new BitmapCache(proxyFrameUrl, PROXY_BUDGET)
-export const midCache = new BitmapCache(midFrameUrl, MID_BUDGET)
-export const hiresCache = new BitmapCache(hiresFrameUrl, HIRES_BUDGET_DESKTOP)
-
 /** The frame the playhead is asking for at this scroll position. */
 const frameIndexFor = (t: number): number => {
   if (t >= FILM_END_T) return TOTAL_HERO_FRAMES
@@ -547,8 +372,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
     // the draw is one fullscreen blit, not the frame budget's bottleneck.
     ctx.imageSmoothingQuality = 'high'
 
-    const isCoarsePointer = detectCoarsePointer()
-    hiresCache.setBudget(isCoarsePointer ? HIRES_BUDGET_MOBILE : HIRES_BUDGET_DESKTOP)
+    const coarsePointer = isCoarsePointer()
 
     let animFrameId = 0
     let settleTimerId = 0
@@ -560,6 +384,9 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
     // they live alongside the velocity estimate rather than inside the block.
     let hiresStride = 1
     let hiresRadius = HIRES_NEAREST_RADIUS
+    // Share of the recent scroll served by the master tier. Reported, not
+    // scheduled from — see the note above HIT_EMA_ALPHA.
+    let hiresHitEma = 1
 
     const startRender = () => {
       if (isDisposed || isRenderingRef.current) return
@@ -591,22 +418,6 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       startRender()
     })
 
-    /**
-     * Make the whole proxy sequence resident. 2 MB over the wire, after which
-     * the cache can never miss regardless of how fast the user flicks. Starts
-     * at frame 1 because that is where the viewer starts; the render loop's own
-     * requests jump this queue via the dedupe in load().
-     */
-    const fillProxyTier = () => {
-      let cursor = 1
-      const worker = async () => {
-        while (cursor <= TOTAL_HERO_FRAMES && !isDisposed) {
-          await proxyCache.load(cursor++, onFrameDecoded)
-        }
-      }
-      for (let i = 0; i < PROXY_FILL_CONCURRENCY; i++) void worker()
-    }
-
     const resize = () => {
       // The phone cap used to be 1.5. On every current handset that is a second,
       // invisible softening applied after all the tier work: an iPhone 15 is
@@ -619,14 +430,14 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       // dpr 2, and the film layer's per-frame cost is one fullscreen drawImage,
       // not a shaded scene. The WebGL layer stays capped at dpr 1 in SceneRoot,
       // which is where the fill-rate cost actually lives.
-      const dpr = Math.min(window.devicePixelRatio || 1, isCoarsePointer ? 3 : 2)
+      const dpr = Math.min(window.devicePixelRatio || 1, coarsePointer ? 3 : 2)
       const newWidth = Math.round(window.innerWidth * dpr)
       const newHeight = Math.round(window.innerHeight * dpr)
 
       // Height-only resizes on mobile are the URL bar hiding/showing. Realloc of
       // a fullscreen 2D backing store mid-scroll is a multi-frame stall, and the
       // cover math below absorbs the ~7% height delta without letterboxing.
-      if (isCoarsePointer && canvas.width === newWidth && canvas.width > 0) return
+      if (coarsePointer && canvas.width === newWidth && canvas.width > 0) return
       if (canvas.width === newWidth && canvas.height === newHeight) return
 
       canvas.width = newWidth
@@ -651,7 +462,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       const apertureCssWidth =
         window.innerHeight * APERTURE_HEIGHT_RATIO * (FRAME_ASPECT_W / FRAME_ASPECT_H)
       const fieldPx = (window.innerWidth - apertureCssWidth) / 2
-      fit = !isCoarsePointer && fieldPx >= APERTURE_MIN_FIELD_PX ? 'aperture' : 'cover'
+      fit = !coarsePointer && fieldPx >= APERTURE_MIN_FIELD_PX ? 'aperture' : 'cover'
       document.documentElement.dataset.filmFit = fit
     }
 
@@ -790,14 +601,40 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         clearTimeout(settleTimerId)
         midCache.abortAllExcept(targetFrameIdx)
         // Proxy frames are tiny and the sweep is already fetching them in order;
-        // asking directly only matters when the user has outrun the sweep.
-        void proxyCache.load(targetFrameIdx, onFrameDecoded)
+        // asking directly only matters when the user has outrun the sweep AND
+        // the master tier has nothing to show here.
+        //
+        // Unconditionally, this was the largest consumer of the decode pipeline
+        // during a scroll — one request per frame change, ~240 a pass. Measured
+        // on the phone profile at 1,400 px/sec, a pass spent 70 decodes on the
+        // master tier and 171 on the floor, and the floor is by definition only
+        // drawn when the master tier failed. It was manufacturing the misses it
+        // existed to cover.
+        if (
+          !hiresCache.hasWithin(targetFrameIdx, hiresRadius) &&
+          !proxyCache.hasWithin(targetFrameIdx, PROXY_NEAREST_RADIUS)
+        ) {
+          void proxyCache.load(targetFrameIdx, onFrameDecoded)
+        }
 
-        // The mid tier is now a fallback under hires rather than a
-        // velocity-selected destination, so it is always worth having: a 320 px
-        // decode is low single-digit ms and it is what stands in when the sharp
-        // frame has not landed yet.
-        if (!midCache.has(targetFrameIdx)) {
+        // The mid tier only when the master is actually missing here.
+        //
+        // This used to fire on every frame change, unconditionally, on the
+        // reasoning that a 320 px decode is cheap and it is what stands in when
+        // the master has not landed. Both clauses are true in isolation and
+        // wrong together: it put a second decode next to every master decode,
+        // for ~240 frames a pass, competing for exactly the throughput that
+        // decides whether the master lands at all. Measured over a full scroll
+        // the tier reached the screen for 0.0% of paints — it was paying for
+        // itself out of the budget of the tier it exists to back up.
+        //
+        // Asking only when the near-search has nothing sharp keeps it as the
+        // graceful step down it was meant to be, and hands the throughput back.
+        if (
+          !hiresCache.has(targetFrameIdx) &&
+          !hiresCache.hasWithin(targetFrameIdx, hiresRadius) &&
+          !midCache.has(targetFrameIdx)
+        ) {
           void midCache.load(targetFrameIdx, onFrameDecoded)
         }
 
@@ -815,8 +652,8 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         // only the seed, used until the first full-resolution frame has been
         // timed.
         const sustainedRate =
-          hiresCache.decodeMsEma > 0
-            ? HIRES_FETCH_CONCURRENCY / hiresCache.decodeMsEma
+          hiresCache.loadMsEma > 0
+            ? HIRES_FETCH_CONCURRENCY / hiresCache.loadMsEma
             : HIRES_SUSTAINED_RATE
         hiresStride = Math.max(
           1,
@@ -824,8 +661,19 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         )
         // The near-search has to span half a stride in each direction or frames
         // landing mid-gap find nothing sharp and fall through to the proxy,
-        // which would undo the striding entirely.
-        hiresRadius = Math.max(HIRES_NEAREST_RADIUS, Math.ceil(hiresStride / 2))
+        // which would undo the striding entirely — and it has to span the lag
+        // the eye will accept, or the tier is discarded for being a few tens of
+        // milliseconds late. See HIRES_LAG_TOLERANCE_MS.
+        hiresRadius = Math.min(
+          HIRES_MAX_RADIUS,
+          Math.max(
+            HIRES_NEAREST_RADIUS,
+            Math.ceil(hiresStride / 2),
+            Math.ceil(idxVelocityEma * HIRES_LAG_TOLERANCE_MS)
+          )
+        )
+        scrubStats.hiresStride = hiresStride
+        scrubStats.hiresRadius = hiresRadius
         const stride = hiresStride
 
         // How far ahead the read-ahead has to START. A request is only worth
@@ -872,8 +720,19 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       scrubStats.targetIdx = targetFrameIdx
       scrubStats.demandedIdx.add(targetFrameIdx)
 
+      // The frame directly under the playhead, but only once it has stopped
+      // moving — or while the pipeline is keeping up with every frame anyway.
+      //
+      // This used to run on every render tick, unconditionally, and it quietly
+      // undid the striding above it. The block that sets the stride is explicit
+      // that at speed this is the single worst request available: a decode takes
+      // longer than the frame stays current, so it is stale before it lands, and
+      // because it is re-issued on every tick it occupies the concurrency
+      // permanently — starving the read-ahead that would have arrived in time.
+      // The stride was computed, the guard was written, and then this line asked
+      // for the frame anyway.
       const isSettled = now - idxChangedAt >= SETTLE_MS
-      if (!hiresCache.has(targetFrameIdx)) {
+      if ((isSettled || hiresStride === 1) && !hiresCache.has(targetFrameIdx)) {
         void hiresCache.load(targetFrameIdx, onFrameDecoded)
       }
 
@@ -976,6 +835,18 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
           scrubStats.paintedIdx.add(frame.index)
         }
 
+        // Which tier is on screen, counted per tick rather than per paint —
+        // a sharp frame held across a near-search radius paints once and stays
+        // up for a dozen ticks, so counting paints reports the tier that
+        // changes most often instead of the tier the viewer is looking at.
+        // This is both the quality number the overlay shows and the signal the
+        // stride controller closes on, and reading it per paint had the
+        // controller driving the stride to its ceiling to correct an error that
+        // was in the measurement.
+        scrubStats.onScreenByTier[isHires ? 'hires' : isMid ? 'mid' : 'proxy']++
+        hiresHitEma = hiresHitEma * (1 - HIT_EMA_ALPHA) + (isHires ? 1 : 0) * HIT_EMA_ALPHA
+        scrubStats.hiresHitEma = hiresHitEma
+
         scrubStats.drawnIdx = frame.index
         scrubStats.tier = isHires ? 'hires' : isMid ? 'mid' : 'proxy'
         scrubStats.proxyResident = proxyCache.residentCount
@@ -1015,6 +886,15 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
     // Sized after `render` exists — resize() restarts the loop on its own.
     resize()
     window.addEventListener('resize', resize, { passive: true })
+    // The background sweeps live in lib/film/preload.ts and run while the
+    // curtain is up; all this loop needs from them is to be woken when one of
+    // their decodes lands, because it parks itself as soon as the frame it
+    // wants is on screen.
+    const unsubDecoded = onFilmFrameDecoded(onFrameDecoded)
+    setFilmActive(true)
+    // A remount arrives with the caches disposed and the sweep stopped, so it
+    // has to be restarted; on a first mount the curtain has already started it
+    // and this is a no-op.
     fillProxyTier()
     startRender()
 
@@ -1024,6 +904,8 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       isDisposed = true
       isRenderingRef.current = false
       unsubNight()
+      unsubDecoded()
+      setFilmActive(false)
       cancelAnimationFrame(animFrameId)
       clearTimeout(settleTimerId)
       window.removeEventListener('resize', resize)
