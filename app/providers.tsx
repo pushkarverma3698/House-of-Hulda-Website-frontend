@@ -32,6 +32,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
     })
     lenisInstance = lenis
 
+    // Published for the ?debug=perf scrub harness (scripts/measure-scrub.mjs),
+    // which needs to drive the playhead at an exact, repeatable velocity.
+    // Wheel events cannot do that — Lenis transforms every delta — and writing
+    // scrollTop cannot either, because Lenis owns that property and rewrites it
+    // from its own lerped value on the next frame.
+    if (typeof window !== 'undefined' && window.location.search.includes('debug')) {
+      ;(window as unknown as { __lenis?: Lenis }).__lenis = lenis
+    }
+
     // Single writer, sampled once per frame. Scroll events fire at unpredictable
     // rates (and in bursts during momentum); rAF sampling decouples store writes
     // — and therefore every downstream render — from event timing.

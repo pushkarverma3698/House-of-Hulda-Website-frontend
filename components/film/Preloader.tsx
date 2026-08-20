@@ -1,102 +1,64 @@
-'use client'
-
 import { useEffect, useState, useRef } from 'react'
 
-/** Frames that must be in the HTTP cache before the curtain lifts. Enough to
- *  cover the opening beat; ScrollCanvas sweeps the remaining proxy frames
- *  resident behind the user. */
-const CRITICAL_FRAME_COUNT = 40
-/** Browsers multiplex freely over HTTP/2, so an unbounded fan-out does not
- *  queue — it splits the same pipe and every frame arrives late. */
-const CRITICAL_CONCURRENCY = 6
-const SAFETY_TIMEOUT_MS = 4000
+import {
+  startFilmPreload,
+  onFilmPreload,
+  FILM_PRELOAD_TUNING,
+  type FilmPreloadStatus,
+} from '@/lib/film/preload'
 
 /**
- * The HIGH-RES tier. Since 4G/5G is ubiquitous, we use the 4-second loading
- * window to pre-fetch the first 40 pristine 4K/720p hardware-accelerated JPEGs.
- * This guarantees a razor-sharp opening beat when the curtain lifts, dropping
- * back to nearest-cached proxy frames only if the connection is strictly 3G/EDGE.
+ * The curtain.
+ *
+ * It holds while lib/film/preload.ts pulls the master film down, and the bar it
+ * draws is that download's real progress rather than a timer's — see that file
+ * for why the whole film, and for how the lift decision is made.
+ *
+ * What changed here: this component used to own the fetching. It warmed 40
+ * frames into the HTTP cache, lifted on a 4-second timeout regardless of what
+ * had arrived, and left every frame's decode on the scroll's critical path. The
+ * fetching now lives next to the cache the canvas draws from, so the frames the
+ * curtain pays for are decoded and ready rather than merely downloaded.
  */
-const frameUrl = (index: number) => {
-  if (typeof window === 'undefined') return `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
-  const isDesktop = !window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 768
-  return isDesktop
-    ? `/frames/hero-desktop/frame_${String(index).padStart(3, '0')}.jpg`
-    : `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
-}
-
-/** Warms the HTTP cache. The bitmap cache in ScrollCanvas decodes from here. */
-async function warmFrame(index: number, signal: AbortSignal): Promise<void> {
-  try {
-    const response = await fetch(frameUrl(index), { signal })
-    await response.arrayBuffer() // must drain or the connection stays open
-  } catch {
-    // Aborted or offline — ScrollCanvas re-requests on demand.
-  }
-}
-
-/** Runs `task` over `items` with at most `limit` in flight. */
-async function runPool(
-  items: readonly number[],
-  limit: number,
-  signal: AbortSignal,
-  onEach?: () => void
-): Promise<void> {
-  let cursor = 0
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (cursor < items.length && !signal.aborted) {
-      const index = items[cursor++]
-      await warmFrame(index, signal)
-      onEach?.()
-    }
-  })
-  await Promise.all(workers)
-}
-
 export function Preloader({ onComplete }: { onComplete?: () => void }) {
   const [progress, setProgress] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Preloader logic
+  // The curtain holds until the film says it is safe to lift.
   useEffect(() => {
-    const controller = new AbortController()
-    const { signal } = controller
+    const mountedAt = performance.now()
+    let liftTimer = 0
     let hasCompleted = false
 
-    const critical = Array.from({ length: CRITICAL_FRAME_COUNT }, (_, i) => i + 1)
-
-    const completePreloader = () => {
+    const complete = () => {
       if (hasCompleted) return
       hasCompleted = true
       setProgress(100)
-      setTimeout(() => {
+      // The fade-out is 1200 ms of CSS; unmount after the opening 400 ms of it
+      // so the film is already live underneath as the curtain dissolves.
+      liftTimer = window.setTimeout(() => {
         setIsLoaded(true)
         onComplete?.()
       }, 400)
     }
 
-    const safetyTimeout = setTimeout(completePreloader, SAFETY_TIMEOUT_MS)
+    const unsubscribe = onFilmPreload((s: Readonly<FilmPreloadStatus>) => {
+      if (hasCompleted) return
+      setProgress(Math.min(99, Math.floor(s.progress * 100)))
+      if (!s.ready) return
+      // Never flash. On a warm reload every frame is already in the HTTP cache
+      // and `ready` arrives in the same tick the curtain mounted.
+      const held = performance.now() - mountedAt
+      if (held >= FILM_PRELOAD_TUNING.MIN_CURTAIN_MS) complete()
+      else liftTimer = window.setTimeout(complete, FILM_PRELOAD_TUNING.MIN_CURTAIN_MS - held)
+    })
 
-    let loadedCount = 0
-    const onCriticalFrame = () => {
-      loadedCount++
-      if (!hasCompleted) {
-        setProgress(Math.floor((loadedCount / critical.length) * 99))
-      }
-    }
-
-    runPool(critical, CRITICAL_CONCURRENCY, signal, onCriticalFrame)
-      .then(() => {
-        if (signal.aborted) return
-        clearTimeout(safetyTimeout)
-        completePreloader()
-      })
-      .catch(() => {})
+    startFilmPreload()
 
     return () => {
-      clearTimeout(safetyTimeout)
-      controller.abort()
+      unsubscribe()
+      clearTimeout(liftTimer)
     }
   }, [onComplete])
 
@@ -153,6 +115,7 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
   return (
     <div
       ref={containerRef}
+      data-preloader=""
       className={`fixed inset-0 z-50 flex flex-col justify-center bg-black px-8 md:px-24 transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
         progress >= 100 ? 'opacity-0 scale-105 pointer-events-none blur-md' : 'opacity-100 scale-100 blur-0'
       }`}
