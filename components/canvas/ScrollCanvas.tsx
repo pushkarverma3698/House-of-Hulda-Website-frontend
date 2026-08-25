@@ -230,6 +230,16 @@ const IDLE_GAP_MS = 400
 const GRADE_STEPS = 16
 const ALPHA_STEPS = 32
 
+/** Constant compositor-side micro-contrast/saturation lift, stacked under the
+ *  night grade rather than replacing it. Free — it's a CSS filter on an
+ *  already-composited layer, not a per-pixel JS cost — and it's the other
+ *  half of the sharpness fix in scripts/sharpen-frames.py: the offline pass
+ *  recovers edge contrast the JPEG buried, this keeps that contrast from
+ *  reading as flat once the browser's own upscale softens it back down.
+ *  Kept small enough (4% / 3%) that skin-tone and sky gradients don't band. */
+const CLARITY_CONTRAST = 1.04
+const CLARITY_SATURATE = 1.03
+
 /**
  * WHERE THE FILM ENDS AND THE SKY BEGINS
  *
@@ -787,12 +797,21 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
 
         if (gradeStep !== lastGradeStepRef.current) {
           lastGradeStepRef.current = gradeStep
+          // Every tier is a real-time upscale of a 720x1280 source onto a
+          // backing store that is routinely 1.6x-2.7x wider (offline unsharp
+          // in scripts/sharpen-frames.py handles the source; this is the
+          // free, compositor-side half of the same fix). A small, constant
+          // micro-contrast/saturation lift reads as "in focus" the way a
+          // DI clarity pass does — it doesn't add resolution, it makes the
+          // edges the source already has easier to see. Applied unconditionally
+          // so the film never reverts to the flatter, softer-reading default
+          // outside the night grade window.
           if (gradeStep < 0) {
-            canvas.style.filter = 'none'
+            canvas.style.filter = `contrast(${CLARITY_CONTRAST}) saturate(${CLARITY_SATURATE})`
           } else {
             const step = gradeStep / GRADE_STEPS
             canvas.style.filter =
-              `brightness(${1.0 - step * 0.35}) contrast(${1.0 + step * 0.15}) saturate(${1.0 - step * 0.2})`
+              `brightness(${1.0 - step * 0.35}) contrast(${(1.0 + step * 0.15) * CLARITY_CONTRAST}) saturate(${(1.0 - step * 0.2) * CLARITY_SATURATE})`
           }
         }
 
