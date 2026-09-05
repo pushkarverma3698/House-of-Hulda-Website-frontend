@@ -106,7 +106,7 @@ export function CinematicExperience() {
       <div className="relative z-10 pointer-events-none flex flex-col">
 
         {/* L-01: 0s to 1.8s · The Valley Opening */}
-        <section className="cine-section relative h-[140vh]" data-time-start="0" data-time-end="1.8">
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="0" data-time-end="1.8">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-start px-6 sm:px-12 md:px-24 pr-16 md:pr-24">
             <div className="story-scrim relative z-10 z-10 space-y-4 md:space-y-6 max-w-2xl pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs flex items-center gap-2.5">
@@ -127,7 +127,7 @@ export function CinematicExperience() {
         </section>
 
         {/* L-02: 1.8s to 3.5s · The Architecture */}
-        <section className="cine-section relative h-[140vh]" data-time-start="1.8" data-time-end="3.5">
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="1.8" data-time-end="3.5">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-6 sm:px-12 md:px-24 pr-16 md:pr-24">
             <div className="story-scrim relative z-10 space-y-4 md:space-y-6 max-w-lg pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
@@ -152,7 +152,7 @@ export function CinematicExperience() {
         </section>
 
         {/* L-03: 3.5s to 5.2s · The Hearth */}
-        <section className="cine-section relative h-[140vh]" data-time-start="3.5" data-time-end="5.2">
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="3.5" data-time-end="5.2">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-end text-right px-6 sm:px-12 md:px-24 pl-16 md:pl-24">
             <div className="story-scrim relative z-10 space-y-4 md:space-y-6 max-w-lg pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
@@ -177,7 +177,7 @@ export function CinematicExperience() {
         </section>
 
         {/* L-07: 5.2s to 6.8s · The Eighteen Gods */}
-        <section className="cine-section relative h-[150vh]" data-time-start="5.2" data-time-end="6.8">
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[150vh]" data-time-start="5.2" data-time-end="6.8">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-4 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
             <div className="story-scrim relative z-10 space-y-4 md:space-y-6 pointer-events-auto">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
@@ -224,7 +224,7 @@ export function CinematicExperience() {
         </section>
 
         {/* L-08: 6.8s to 8.0s · Ephemeris & Date Selector */}
-        <section className="cine-section relative h-[150vh]" data-time-start="6.8" data-time-end="8.0">
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[150vh]" data-time-start="6.8" data-time-end="8.0">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-3 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
             <div className="story-scrim pointer-events-auto">
               <DateDial />
@@ -233,7 +233,7 @@ export function CinematicExperience() {
         </section>
 
         {/* L-09: 8.0s to 9.2s · The Valley Commons */}
-        <section className="cine-section relative h-[140vh]" data-time-start="8.0" data-time-end="9.2">
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="8.0" data-time-end="9.2">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-4 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
             <div className="story-scrim relative z-10 space-y-4 md:space-y-6 pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
@@ -248,7 +248,7 @@ export function CinematicExperience() {
         </section>
 
         {/* L-10: 9.2s to 10.0s · First Light & Booking */}
-        <section className="cine-section relative h-[140vh]" data-time-start="9.2" data-time-end="10.0">
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="9.2" data-time-end="10.0">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-center px-6 text-center">
             <div className="story-scrim relative z-10 space-y-6 md:space-y-8 max-w-xl pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">

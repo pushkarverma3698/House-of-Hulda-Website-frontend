@@ -82,7 +82,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd()) }}
         />
         <Providers>
-          <main id="scroll-wrapper" className="h-[100dvh] w-[100dvw] overflow-y-auto overflow-x-hidden relative">
+          <main id="scroll-wrapper" className="h-[100dvh] w-[100dvw] overflow-y-auto overflow-x-hidden relative snap-y snap-mandatory">
             <div id="scroll-content">
               {children}
               {booking}
