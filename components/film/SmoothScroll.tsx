@@ -12,21 +12,30 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (lenis) {
-      gsap.ticker.add((time) => {
+      const updateRaf = (time: number) => {
         lenis.raf(time * 1000);
-      });
+      };
+      gsap.ticker.add(updateRaf);
       gsap.ticker.lagSmoothing(0);
-      ScrollTrigger.normalizeScroll(true); // Safari fix
+
+      return () => {
+        gsap.ticker.remove(updateRaf);
+      };
     }
-    return () => {
-      gsap.ticker.remove((time) => {
-        lenis?.raf(time * 1000);
-      });
-    };
   }, [lenis]);
 
   return (
-    <ReactLenis root options={{ lerp: 0.05, syncTouch: true, smoothWheel: true }}>
+    <ReactLenis
+      root
+      options={{
+        lerp: 0.065, // Luxurious, weighted cinematic easing
+        wheelMultiplier: 0.95,
+        touchMultiplier: 1.25,
+        infinite: false,
+        smoothWheel: true,
+        syncTouch: false, // Fluid native touch inertia on mobile
+      }}
+    >
       {children}
     </ReactLenis>
   );

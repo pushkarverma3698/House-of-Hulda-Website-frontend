@@ -39,9 +39,9 @@ export function DateDial() {
   const activeData = AUGUST_DATES.find((d) => d.day === selectedDay) || AUGUST_DATES[0]
 
   return (
-    <section className="relative my-16 w-full max-w-5xl mx-auto px-4 pointer-events-auto">
+    <section className="relative my-0 w-full max-w-5xl mx-auto px-0 md:px-4 pointer-events-auto">
       {/* Luxury Astronomical Glass Container */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-neutral-950/70 p-6 md:p-10 backdrop-blur-2xl shadow-[0_32px_96px_rgba(0,0,0,0.8)]">
+      <div className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-neutral-950/80 p-4 sm:p-6 md:p-8 backdrop-blur-2xl shadow-[0_32px_96px_rgba(0,0,0,0.8)]">
         {/* Subtle Ambient Radial Glow */}
         <div 
           className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-amber-500/10 blur-3xl pointer-events-none transition-all duration-700"
@@ -74,8 +74,8 @@ export function DateDial() {
         </div>
 
         {/* Interactive Date Dial Bar */}
-        <div className="py-8">
-          <div className="flex items-center justify-between mb-3">
+        <div className="py-3 md:py-6">
+          <div className="flex items-center justify-between mb-2 md:mb-3">
             <span className="hud-mono text-[10px] text-neutral-400 uppercase tracking-widest">
               August 2026 Night Selector
             </span>

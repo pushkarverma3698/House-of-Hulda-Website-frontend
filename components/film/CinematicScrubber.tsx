@@ -3,18 +3,29 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
+import { useNight } from '@/lib/store/night';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export function CinematicScrubber({ desktopSrc, mobileSrc }: { desktopSrc: string, mobileSrc?: string }) {
+interface CinematicScrubberProps {
+  desktopSrc: string;
+  mobileSrc?: string;
+}
+
+export function CinematicScrubber({ desktopSrc, mobileSrc }: CinematicScrubberProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoSrc, setVideoSrc] = useState<string>(desktopSrc);
 
-  // 2026-Era Dynamic Asset Loading: Mount specific video depending on viewport
+  // Dynamic Asset Selection: Load 9:16 portrait on mobile, 16:9 on desktop
   useEffect(() => {
     if (mobileSrc) {
-      const isMobile = window.matchMedia('(max-width: 768px)').matches;
-      setVideoSrc(isMobile ? mobileSrc : desktopSrc);
+      const mediaQuery = window.matchMedia('(max-width: 768px)');
+      const updateSource = (e: MediaQueryListEvent | MediaQueryList) => {
+        setVideoSrc(e.matches ? mobileSrc : desktopSrc);
+      };
+      updateSource(mediaQuery);
+      mediaQuery.addEventListener('change', updateSource);
+      return () => mediaQuery.removeEventListener('change', updateSource);
     }
   }, [desktopSrc, mobileSrc]);
 
@@ -23,8 +34,19 @@ export function CinematicScrubber({ desktopSrc, mobileSrc }: { desktopSrc: strin
     if (!video) return;
 
     let ctx = gsap.context(() => {
+      // Global Night / HUD / Atmosphere sync
+      ScrollTrigger.create({
+        trigger: document.body,
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => {
+          useNight.setState({ t: self.progress });
+        },
+      });
+
       const onLoadedMetadata = () => {
         video.pause();
+        video.currentTime = 0;
 
         const sections = document.querySelectorAll('.cine-section');
         
@@ -36,19 +58,14 @@ export function CinematicScrubber({ desktopSrc, mobileSrc }: { desktopSrc: strin
             trigger: section,
             start: 'top top',
             end: 'bottom top',
-            scrub: 0.5, // Crisp, tight scrubbing
+            scrub: 0.3, // Ultra-responsive, viscous scrubbing
             onUpdate: (self) => {
-              if (video.duration) {
+              if (video.duration && !isNaN(video.duration)) {
                 const targetTime = gsap.utils.interpolate(tStart, tEnd, self.progress);
-                const clampedTime = Math.max(0, Math.min(targetTime, video.duration - 0.01));
+                const clamped = Math.max(0, Math.min(targetTime, video.duration - 0.02));
                 
-                // Hardware accelerated current time manipulation
-                gsap.to(video, {
-                  currentTime: clampedTime,
-                  duration: 0.1,
-                  overwrite: true,
-                  ease: "none"
-                });
+                // Hardware-accelerated direct seek (Instantaneous on all-I-frame video)
+                video.currentTime = clamped;
               }
             },
           });
@@ -57,7 +74,7 @@ export function CinematicScrubber({ desktopSrc, mobileSrc }: { desktopSrc: strin
 
       video.addEventListener('loadedmetadata', onLoadedMetadata);
       if (video.readyState >= 1) onLoadedMetadata();
-      
+
       return () => {
         video.removeEventListener('loadedmetadata', onLoadedMetadata);
       };
@@ -67,17 +84,20 @@ export function CinematicScrubber({ desktopSrc, mobileSrc }: { desktopSrc: strin
   }, [videoSrc]);
 
   return (
-    <div className="fixed inset-0 z-0 bg-black overflow-hidden pointer-events-none">
+    <div className="fixed inset-0 z-0 bg-black overflow-hidden pointer-events-none select-none">
       <video
         ref={videoRef}
-        key={videoSrc} // Force remount if source changes
+        key={videoSrc}
         src={videoSrc}
-        className="w-full h-full object-cover opacity-80"
+        className="w-full h-full object-cover opacity-85"
         playsInline
         muted
+        autoPlay={false}
         preload="auto"
       />
-      <div className="absolute inset-0 z-10 bg-black/40 pointer-events-none mix-blend-overlay" />
+      {/* Cinematic vignette & tonal contrast scrim */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
+      <div className="absolute inset-0 z-10 bg-black/25 pointer-events-none mix-blend-multiply" />
     </div>
   );
 }
