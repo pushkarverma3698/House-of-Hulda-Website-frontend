@@ -365,6 +365,7 @@ class BitmapCache {
     for (const [index, { controller }] of this.inFlight) {
       if (index === keepIndex || this.protectedIndices.has(index)) continue
       controller.abort()
+      this.inFlight.delete(index)
     }
   }
 
@@ -380,6 +381,7 @@ class BitmapCache {
       if (this.protectedIndices.has(index)) continue
       if (index >= lo && index <= hi) continue
       controller.abort()
+      this.inFlight.delete(index)
     }
   }
 
@@ -466,10 +468,7 @@ class BitmapCache {
     } catch {
       // Aborted or network failure
     } finally {
-      const current = this.inFlight.get(index)
-      if (current?.controller === controller) {
-        this.inFlight.delete(index)
-      }
+      this.inFlight.delete(index)
     }
   }
 
@@ -907,6 +906,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       scrubStats.targetIdx = targetFrameIdx
       scrubStats.demandedIdx.add(targetFrameIdx)
 
+      const isSettled = now - idxChangedAt >= SETTLE_MS
       if (!hiresCache.has(targetFrameIdx)) {
         void hiresCache.load(targetFrameIdx, onFrameDecoded)
       }
@@ -926,26 +926,13 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       // to a stop could drop a sharp neighbouring frame in favour of the proxy
       // while the exact frame was still in flight, i.e. the picture would get
       // worse at the moment the viewer stopped to look at it.
-      let hires = hiresCache.get(targetFrameIdx)
-      
-      const MAX_SHARP_HOLD_DISTANCE = 12
-      const hasSharpFrame = displayedHiresIdxRef.current !== -1
-      const isMassiveJump = hasSharpFrame && Math.abs(displayedHiresIdxRef.current - targetFrameIdx) > MAX_SHARP_HOLD_DISTANCE
-
-      // TEMPORAL CONSISTENCY: "Hold Last Good Frame"
-      // If we miss the exact target, prefer holding the last displayed frame (if it's close)
-      // over showing a nearby frame or dropping to a proxy. Continuity feels premium.
-      if (!hires && hasSharpFrame && !isMassiveJump) {
-        hires = hiresCache.get(displayedHiresIdxRef.current)
-      }
-
-      // If neither exact nor the held frame worked, fall back to a dynamic near-search
-      if (!hires) {
-        hires = hiresCache.getNearestWithin(targetFrameIdx, hiresRadius)
-      }
+      const hires =
+        hiresCache.get(targetFrameIdx) ??
+        hiresCache.getNearestWithin(targetFrameIdx, hiresRadius)
       
       // PINNING: Guarantee the currently displayed high-res frame cannot be
-      // evicted by the LRU sweep.
+      // evicted by the LRU sweep, eliminating the HIRES -> PROXY -> HIRES
+      // oscillation when paused.
       if (hires) {
         if (displayedHiresIdxRef.current !== hires.index) {
           if (displayedHiresIdxRef.current !== -1) hiresCache.unprotect(displayedHiresIdxRef.current)
@@ -959,18 +946,17 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         }
       }
 
-      // EMERGENCY TRANSPORT LAYERS: Mid / Proxy
-      // Once the cinematic layer (hires) is established, normal scrolling should NEVER downgrade.
-      // We only allow mid/proxy for initial cold starts or massive timeline jumps.
-      let mid = null
-      let proxy = null
-      
-      if (!hires && (!hasSharpFrame || isMassiveJump)) {
-        mid = midCache.getNearestWithin(targetFrameIdx, MID_NEAREST_RADIUS)
-        if (!mid) proxy = proxyCache.getNearest(targetFrameIdx)
-      }
-
-      const frame: FrameRef | null = hires ?? mid ?? proxy
+      // The mid tier gets the same bounded near-search as the sharp one. Matching
+      // only the exact index meant that whenever the sharp tier missed, the mid
+      // tier missed for the identical reason — the playhead had moved on — and
+      // the fallback collapsed straight to the 160 px proxy. Measured over a full
+      // scroll, the mid tier was serving 0.0% of frames: it was costing a request
+      // and a decode per frame change and never once reaching the screen.
+      const mid = hires
+        ? null
+        : midCache.getNearestWithin(targetFrameIdx, MID_NEAREST_RADIUS)
+      const frame: FrameRef | null =
+        hires ?? mid ?? proxyCache.getNearest(targetFrameIdx)
 
       if (frame) {
         const isHires = hires !== null
