@@ -20,11 +20,11 @@ const SAFETY_TIMEOUT_MS = 4000
  * back to nearest-cached proxy frames only if the connection is strictly 3G/EDGE.
  */
 const frameUrl = (index: number) => {
-  if (typeof window === 'undefined') return `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
+  if (typeof window === 'undefined') return `/frames-v2/hero/frame_${String(index).padStart(3, '0')}.jpg`
   const isDesktop = !window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 768
   return isDesktop
-    ? `/frames/hero-desktop/frame_${String(index).padStart(3, '0')}.jpg`
-    : `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
+    ? `/frames-v2/hero-desktop/frame_${String(index).padStart(3, '0')}.jpg`
+    : `/frames-v2/hero/frame_${String(index).padStart(3, '0')}.jpg`
 }
 
 /** Warms the HTTP cache. The bitmap cache in ScrollCanvas decodes from here. */
