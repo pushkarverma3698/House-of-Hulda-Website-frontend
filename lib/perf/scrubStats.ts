@@ -21,6 +21,13 @@ export interface ScrubStats {
   hiresResident: number
   hiresBytes: number
 
+  /** Read-ahead stride and near-search radius the ladder has settled on, and
+   *  the master-tier hit rate the stride controller is closing on. Together
+   *  these say WHY the ladder is serving what it is serving. */
+  hiresStride: number
+  hiresRadius: number
+  hiresHitEma: number
+
   /** Smoothed frame indices crossed per ms. Above FAST_FLICK_THRESHOLD the mid
    *  tier is skipped — this is the number that says whether the gate is firing
    *  where it should. */
@@ -28,11 +35,34 @@ export interface ScrubStats {
 
   /** Cumulative since the last reset. */
   decodes: number
+  /** Decodes attributed to each tier. The tiers share one decode pipeline, so
+   *  this is what says whether a background sweep is spending the throughput
+   *  the master tier needed. */
+  decodesByTier: { hires: number; mid: number; proxy: number }
   evictions: number
   /** Distinct frame indices that actually reached the screen. */
   paintedIdx: Set<number>
   /** Distinct frame indices the scroll asked for. */
   demandedIdx: Set<number>
+
+  /**
+   * Render ticks on which each rung of the ladder was the source of what was on
+   * screen. Delivery says how many of the asked-for frames reached the screen;
+   * this says what they LOOKED like when they got there. A 100% delivery served
+   * entirely from the 160 px proxy is a smooth scroll through a blurry film,
+   * which is the failure mode this counter exists to make visible.
+   *
+   * Counted per TICK, not per paint, and the difference is not academic. A
+   * sharp frame is held across every target index inside the near-search
+   * radius, so it paints once and stays on screen for a dozen ticks; a proxy
+   * frame matches its index exactly and repaints on every one of them. Counting
+   * paints therefore reports the tier that changes most often rather than the
+   * tier the viewer is looking at — measured, it read a scroll that was sharp
+   * two thirds of the time as 3% sharp, and the stride controller reading that
+   * number drove the stride to its ceiling trying to fix a problem that was in
+   * the instrument.
+   */
+  onScreenByTier: { hires: number; mid: number; proxy: number }
 
   lastPaintAt: number
   /** Longest single frame freeze, ms. The number that reads as "jank".
@@ -60,10 +90,15 @@ export const scrubStats: ScrubStats = {
   hiresResident: 0,
   hiresBytes: 0,
   idxVelocity: 0,
+  hiresStride: 1,
+  hiresRadius: 2,
+  hiresHitEma: 1,
   decodes: 0,
+  decodesByTier: { hires: 0, mid: 0, proxy: 0 },
   evictions: 0,
   paintedIdx: new Set<number>(),
   demandedIdx: new Set<number>(),
+  onScreenByTier: { hires: 0, mid: 0, proxy: 0 },
   lastPaintAt: 0,
   worstFreezeMs: 0,
   freezesOver100ms: 0,
@@ -74,9 +109,15 @@ export const scrubStats: ScrubStats = {
 
 export function resetScrubStats(): void {
   scrubStats.decodes = 0
+  scrubStats.decodesByTier.hires = 0
+  scrubStats.decodesByTier.mid = 0
+  scrubStats.decodesByTier.proxy = 0
   scrubStats.evictions = 0
   scrubStats.paintedIdx.clear()
   scrubStats.demandedIdx.clear()
+  scrubStats.onScreenByTier.hires = 0
+  scrubStats.onScreenByTier.mid = 0
+  scrubStats.onScreenByTier.proxy = 0
   scrubStats.worstFreezeMs = 0
   scrubStats.freezesOver100ms = 0
   scrubStats.activeMs = 0
@@ -93,4 +134,18 @@ export function deliveryRatio(): number {
   const demanded = scrubStats.demandedIdx.size
   if (demanded === 0) return 1
   return scrubStats.paintedIdx.size / demanded
+}
+
+/**
+ * Fraction of the scroll spent looking at the full-resolution tier.
+ *
+ * The companion to deliveryRatio(). Delivery can be driven to 100% by serving
+ * everything from the proxy, so on its own it cannot tell a sharp film from a
+ * smooth blur; this is the number that says the picture was actually sharp.
+ */
+export function hiresShare(): number {
+  const { hires, mid, proxy } = scrubStats.onScreenByTier
+  const total = hires + mid + proxy
+  if (total === 0) return 0
+  return hires / total
 }
