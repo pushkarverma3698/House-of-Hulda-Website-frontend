@@ -8,9 +8,9 @@
 
 | ID | Item | Required For | Desired Format | Current Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **A-01** | Atmospheric Video Loop: Mist | Act 1 Arrival & Act 3 Sanctuary | 5-8s WebM/MP4 (<2MB), pure black background, additive blend | **FALLBACK ACTIVE** (WebGL particle fog active; video loop adds volumetric fidelity) |
-| **A-02** | Atmospheric Video Loop: Steam | Act 3 Outdoor Balcony Tub | 5-8s WebM/MP4 (<2MB), pure black background, additive blend | **PENDING** |
-| **A-03** | Atmospheric Video Loop: Hearth Embers | Act 4 Culinary Hearth | 5-8s WebM/MP4 (<2MB), pure black background, additive blend | **FALLBACK ACTIVE** (3D particle embers active; video loop adds photoreal sparks) |
+| **A-01** | Atmospheric Video Loop: Mist | Act 1 Arrival & Act 2 Ridge | 5-8s MP4 (<2.5MB), pure black background, additive blend | **INTEGRATED & ACTIVE** (`public/videos/mist_loop.mp4` running via `AtmosphericVideoPlane`) |
+| **A-02** | Atmospheric Video Loop: Steam | Act 3 Outdoor Balcony Tub | 5-8s MP4 (<2.5MB), pure black background, additive blend | **INTEGRATED & ACTIVE** (`public/videos/steam_wisps.mp4` running via `AtmosphericVideoPlane`) |
+| **A-03** | Atmospheric Video Loop: Hearth Embers | Act 4 Culinary Hearth | 5-8s MP4 (<2.5MB), pure black background, additive blend | **INTEGRATED & ACTIVE** (`public/videos/hearth_embers.mp4` running via `AtmosphericVideoPlane`) |
 | **A-04** | Ambient Audio: Deodar Pine Wind | Global Soundscape (Act 1-3) | MP3 / OGG loop (<1.5MB, 96kbps), 44.1kHz, seamless loop | **PENDING** (Soundscape UI toggle active; wired to audio element) |
 | **A-05** | Ambient Audio: Woodfire Crackle | Global Soundscape (Act 4-5) | MP3 / OGG loop (<1.5MB, 96kbps), 44.1kHz, seamless loop | **PENDING** |
 | **A-06** | 3D GLB Model: Kath Kuni Joint | Phase 3 Interactive Heritage Sandbox | `.glb` (<3MB, Draco compressed, PBR materials) | **FUNCTIONAL BASELINE ACTIVE** (Procedural 8-course PBR textured interlocking assembly active; custom `.glb` will add sculpted wood chiseling) |

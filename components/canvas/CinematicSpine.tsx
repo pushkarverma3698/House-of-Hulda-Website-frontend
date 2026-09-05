@@ -6,6 +6,7 @@ import { EnvironmentCrossfader } from './EnvironmentCrossfader';
 import { Embers } from './Embers';
 import { StarField } from './StarField';
 import { Atmosphere } from './Atmosphere';
+import { AtmosphericVideoPlane } from './AtmosphericVideoPlane';
 
 /**
  * CinematicSpine: Master 3D narrative scene orchestrator.
@@ -31,6 +32,15 @@ export function CinematicSpine() {
           activeRange={[0.0, 0.38]}
           mouseStrength={0.15}
         />
+        {/* Volumetric Himalayan Valley Mist Loop */}
+        <AtmosphericVideoPlane
+          videoSrc="/videos/mist_loop.mp4"
+          position={[0, 0.2, 0.5]}
+          scale={[15.2, 8.5, 1]}
+          activeRange={[0.0, 0.38]}
+          maxOpacity={0.45}
+          tint="#e2eeff"
+        />
       </Suspense>
 
       {/* ACT 3: The Sanctuary (Deodar Woodcraft & Suite Interior) */}
@@ -44,10 +54,28 @@ export function CinematicSpine() {
           activeRange={[0.34, 0.70]}
           mouseStrength={0.18}
         />
+        {/* Warm Balcony Cedar Bathing Steam Wisps */}
+        <AtmosphericVideoPlane
+          videoSrc="/videos/steam_wisps.mp4"
+          position={[0.5, 0.2, -1.2]}
+          scale={[14.0, 7.9, 1]}
+          activeRange={[0.34, 0.68]}
+          maxOpacity={0.40}
+          tint="#fff0dd"
+        />
       </Suspense>
 
       {/* ACT 4 & 5: Embers & Stardust (Night Celestial Vault) */}
       <Suspense fallback={null}>
+        {/* Photoreal Cedar Woodfire Glowing Embers Video Layer */}
+        <AtmosphericVideoPlane
+          videoSrc="/videos/hearth_embers.mp4"
+          position={[0, 0.0, -0.8]}
+          scale={[15.0, 8.4, 1]}
+          activeRange={[0.50, 0.82]}
+          maxOpacity={0.70}
+          tint="#ffaa33"
+        />
         <Embers />
         <StarField />
         <Atmosphere />
