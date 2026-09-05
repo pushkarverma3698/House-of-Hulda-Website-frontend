@@ -5,6 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { PerformanceMonitor, Preload } from '@react-three/drei';
 import { CameraRig } from './CameraRig';
 import { Effects } from './Effects';
+import { CinematicSpine } from './CinematicSpine';
 
 const detectCoarsePointer = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -47,7 +48,7 @@ export function CanvasRoot({ children }: { children?: React.ReactNode }) {
         <CameraRig />
         <Effects />
         <Suspense fallback={null}>
-          {children}
+          {children || <CinematicSpine />}
           <Preload all />
         </Suspense>
       </Canvas>

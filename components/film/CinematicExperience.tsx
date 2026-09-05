@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { ScrollCanvas } from '@/components/canvas/ScrollCanvas'
 import { Preloader } from '@/components/film/Preloader'
 import { ScrubDebugOverlay } from '@/components/film/ScrubDebugOverlay'
 import { TimeRail } from '@/components/film/TimeRail'
@@ -16,8 +15,8 @@ import { DateDial } from '@/components/astro/DateDial'
 import { EIGHTEEN_GODS, CelestialGod } from '@/content/eighteen'
 import { useState } from 'react'
 
-const SceneRoot = dynamic(
-  () => import('@/components/canvas/SceneRoot').then((mod) => mod.SceneRoot),
+const CanvasRoot = dynamic(
+  () => import('@/components/canvas/CanvasRoot').then((mod) => mod.CanvasRoot),
   { ssr: false }
 )
 
@@ -30,11 +29,8 @@ export function CinematicExperience() {
 
   return (
     <main className="relative min-h-[950svh] bg-transparent text-cream font-body selection:bg-amber selection:text-ink">
-      {/* 2D Master Drone Frame Scrubber Canvas */}
-      <ScrollCanvas />
-
-      {/* z-0 Fixed WebGL Canvas (Dynamic Ephemeris, SkyBox, Embers, StarField, PostProcessing) */}
-      <SceneRoot />
+      {/* z-0 Fixed WebGL Master Cinematic Canvas (3D Volumetric Depth Planes, Dynamic SkyBoxes, Embers, PostProcessing) */}
+      <CanvasRoot />
 
       {/* Navigation Header */}
       <Navigation />

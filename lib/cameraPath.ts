@@ -1,18 +1,12 @@
 import { Vector3 } from 'three';
 
-export interface CameraFrame {
-  position: Vector3;
-  lookAt: Vector3;
-  fov: number;
-}
-
 function easeInOutCubic(x: number): number {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 }
 
 /**
  * Camera path as a pure deterministic function of normalized scroll t ∈ [0, 1].
- * Choreographed for the 8-Act Ascent narrative from Day valley to Night celestial vault to Dawn.
+ * Calibrated for a 16:9 full-bleed cinematic frame distance.
  */
 export function cameraPath(
   t: number,
@@ -21,47 +15,45 @@ export function cameraPath(
 ): number {
   const clamped = Math.min(1, Math.max(0, t));
 
-  if (clamped < 0.22) {
-    // ACT 1: The Arrival & Glacial Springs (Valley Dolly-In)
-    // Camera moves forward from z=8 down to z=4, slightly elevating
-    const s = clamped / 0.22;
+  if (clamped < 0.28) {
+    // ACT 1 & 2: The Arrival & Valley Drive
+    // Smooth cinematic dolly-in from z=11 down to z=7.5 with subtle elevation rise
+    const s = clamped / 0.28;
     const e = easeInOutCubic(s);
-    outPos.set(0, 1.2 + 0.3 * e, 8 - 4 * e);
-    outLook.set(0, 1.0, 0);
-    return 42 - 6 * e; // Dolly-zoom FOV from 42 to 36
-  } else if (clamped < 0.44) {
-    // ACT 2: Kath-Kuni Heritage & Orchard Turns (120° Orbital Reveal)
-    const s = (clamped - 0.22) / 0.22;
-    const theta = easeInOutCubic(s) * ((Math.PI * 2) / 3);
-    outPos.set(4 * Math.sin(theta), 1.5, 4 * Math.cos(theta));
-    outLook.set(0, 1.0, 0);
-    return 36;
-  } else if (clamped < 0.66) {
-    // ACT 3: The Loft & The Culinary Hearth (Z-Axis Push & Crane)
-    const s = (clamped - 0.44) / 0.22;
+    outPos.set(0, 0.2 + 0.4 * e, 11 - 3.5 * e);
+    outLook.set(0, 0.2, 0);
+    return 44 - 6 * e; // Dolly-zoom FOV from 44 to 38
+  } else if (clamped < 0.48) {
+    // ACT 2 to 3: The Kath-Kuni Transition & Orchard Reveal
+    // Slight pan and gentle sweep
+    const s = (clamped - 0.28) / 0.20;
     const e = easeInOutCubic(s);
-    const theta = (Math.PI * 2) / 3;
-    outPos.set(
-      4 * Math.sin(theta) * (1 - e),
-      1.5 + 4.5 * e,
-      4 * Math.cos(theta) + 3 * e
-    );
-    outLook.set(0, 1.0 + 1.5 * e, 0);
-    return 36 + 8 * e; // Expands FOV to 44 as hearth warmth opens
+    outPos.set(1.5 * Math.sin(e * Math.PI * 0.5), 0.6 + 0.3 * e, 7.5 - 1.0 * e);
+    outLook.set(0, 0.3, -1);
+    return 38;
+  } else if (clamped < 0.72) {
+    // ACT 3 & 4: The Sanctuary Loft & Culinary Hearth
+    // Camera pushes in toward the sanctuary and elevates slightly
+    const s = (clamped - 0.48) / 0.24;
+    const e = easeInOutCubic(s);
+    outPos.set(1.5 * (1 - e), 0.9 + 0.8 * e, 6.5 - 1.5 * e);
+    outLook.set(0, 0.5 + 0.5 * e, -2);
+    return 38 + 4 * e;
   } else if (clamped < 0.88) {
-    // ACT 4: The 18 Celestial Gods & The Deep Space Core (Tilt Up to Celestial Vault)
-    const s = (clamped - 0.66) / 0.22;
+    // ACT 5: The 18 Celestial Gods & Night Vault
+    // Camera pulls back and cranes up toward the stars
+    const s = (clamped - 0.72) / 0.16;
     const e = easeInOutCubic(s);
-    outPos.set(0, 6 - 2 * e, 7 - 3 * e);
-    // Tilts lookAt up towards the sky
-    outLook.set(0, 2.5 + 8 * e, -10 * e);
-    return 44 - 16 * e; // 200mm telescope optic compression: narrows FOV to 28
+    outPos.set(0, 1.7 + 2.5 * e, 5.0 + 3.0 * e);
+    outLook.set(0, 1.0 + 4.0 * e, -10 * e);
+    return 42 - 12 * e; // Telephoto compression for stargazing
   } else {
-    // ACT 5: Dawn & The Invitation (First Light Settle)
+    // ACT 6: The Dawn Climax & The Invitation
+    // Settles forward to reveal the panoramic Naggar valley at first light
     const s = (clamped - 0.88) / 0.12;
     const e = easeInOutCubic(s);
-    outPos.set(0, 4 - 2.5 * e, 4 + 4 * e);
-    outLook.set(0, 1.2, 0);
-    return 28 + 14 * e; // Pulls back to natural 42 FOV
+    outPos.set(0, 4.2 - 3.2 * e, 8.0 - 1.5 * e);
+    outLook.set(0, 0.3, -1);
+    return 30 + 12 * e;
   }
 }
