@@ -19,16 +19,19 @@
 
 ---
 
-## 2. Infrastructure Status (Phase 0 Execution)
+## 2. Infrastructure Status (Phase 0 & Phase 2 Execution)
 
 | Task | Target File | Status | Notes |
 | :--- | :--- | :--- | :--- |
 | Single RAF Scroll Engine | `hooks/useScrollRig.ts` | **DONE** | Binds Lenis + GSAP ScrollTrigger via `gsap.ticker` to singleton `scrollState` |
-| Camera Choreography Spline | `lib/cameraPath.ts` | **DONE** | Deterministic function mapping scroll $t \in [0, 1]$ to position, lookAt, and FOV |
+| Camera Choreography Spline | `lib/cameraPath.ts` | **DONE** | Calibrated 16:9 cinematic dolly-zoom path across all 8 acts |
 | Camera Rig Controller | `components/canvas/CameraRig.tsx` | **DONE** | Frame-rate independent exponential decay ($1 - e^{-4\Delta t}$) for 60/120Hz displays |
 | Unified WebGL Canvas | `components/canvas/CanvasRoot.tsx` | **DONE** | DPR clamp [1.0, 1.5], PerformanceMonitor, coarse-pointer tiering |
-| Cinematic Post-Processing | `components/canvas/Effects.tsx` | **DONE** | Desktop only: Bloom, Film Grain, Vignette, Chromatic Aberration (Bypassed on mobile) |
-| Providers Integration | `app/providers.tsx` | **DONE** | Mounts `useScrollRig` and re-exports `getLenis` cleanly |
+| Cinematic Post-Processing | `components/canvas/Effects.tsx` | **DONE** | Desktop: Bloom, Film Grain, Vignette, Chromatic Aberration (Bypassed on mobile) |
+| WebGL Displacement Plane | `components/canvas/DisplacementPlane.tsx` | **DONE** | 128x128 geometric vertex displacement + velocity-driven chromatic dispersion shader |
+| Environment Skybox Crossfader | `components/canvas/EnvironmentCrossfader.tsx` | **DONE** | Smooth 360° spherical blending: Day → Night Celestial → Dawn Sunrise |
+| Master 3D Narrative Spine | `components/canvas/CinematicSpine.tsx` | **DONE** | Orchestrates 8-Act narrative flow, replacing the legacy 240-frame 2D JPEG scrubber |
+
 
 
 ---

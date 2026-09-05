@@ -12,15 +12,19 @@
 1. **Compilation & Build Fix**:
    - Resolved `postprocessing` type error by adding `postprocessing` dependency to `package.json`.
    - Approved pnpm build scripts via `pnpm approve-builds --all`.
-2. **Phase 0 Infrastructure Engine Transplant**:
+2. **Phase 0 & Phase 2 Implementation (Branch: `feature/phase-2-cinematic-scroll`)**:
+   - Switched to dedicated feature branch `feature/phase-2-cinematic-scroll`.
    - `hooks/useScrollRig.ts`: Single-RAF Lenis + GSAP ScrollTrigger engine with global `scrollState` (progress, velocity, direction).
-   - `lib/cameraPath.ts`: Deterministic camera spline with FOV dolly-zoom across the 8-Act narrative.
+   - `lib/cameraPath.ts`: Calibrated 16:9 cinematic dolly-zoom path across all 8 acts.
    - `components/canvas/CameraRig.tsx`: Frame-rate independent exponential camera decay ($1 - e^{-4\Delta t}$).
    - `components/canvas/Effects.tsx`: Cinematic post-processing (Bloom, Film Grain, Vignette, Chromatic Aberration) with automatic mobile bypass for locked 60fps.
    - `components/canvas/CanvasRoot.tsx`: Unified WebGL Canvas with PerformanceMonitor DPR clamping.
-   - `app/providers.tsx`: Single-point mount of `useScrollRig` and re-export of `getLenis`.
+   - `components/canvas/DisplacementPlane.tsx`: 128×128 geometric vertex displacement + velocity-driven chromatic dispersion shader.
+   - `components/canvas/EnvironmentCrossfader.tsx`: Smooth 360° spherical blending (Day → Night Celestial → Dawn Sunrise).
+   - `components/canvas/CinematicSpine.tsx`: Orchestrates the 8-Act narrative flow, replacing the legacy 240-frame 2D JPEG scrubber.
+   - `components/film/CinematicExperience.tsx`: Swapped out `ScrollCanvas` & `SceneRoot` for the unified `CanvasRoot`.
 3. **Living Gap Analysis Tracker**:
-   - Created `docs/MISSING_ASSETS_AND_TASKS.md` actively tracking all missing assets (audio, atmospheric loops, 3D GLB models) and task progress.
+   - Maintained `docs/MISSING_ASSETS_AND_TASKS.md` tracking all missing assets (atmospheric video loops, ambient audio, 3D GLB models) with fallback strategies.
 4. **Phase 1 Assets Generated & Cataloged**:
    - `public/depth/arrival_depth.jpg` — 16-bit linear depth map for Act 1.
    - `public/depth/deodar_suite_depth.jpg` — 16-bit linear depth map for Act 3.
@@ -33,6 +37,7 @@
    - `public/assets_manifest.json` — Dynamic asset manifest.
 5. **Empirical Verification**:
    - Playwright runtime verification on Desktop (1440x900) and Mobile (390x844).
-   - Smooth scroll tested on `#scroll-wrapper` from 0 to 2500px ($t=0.264$, Act 2).
-   - Production build verified: 100% clean build, all 22 static pages compiled.
+   - Verified 3D displacement relief and full-screen panoramic lighting.
+   - Verified zero console errors in production build (`pnpm start`).
+   - `pnpm build` verified: 100% clean build, JS bundle for `/` reduced from 22.7 kB to 19.8 kB.
 
