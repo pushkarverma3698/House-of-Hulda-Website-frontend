@@ -317,13 +317,22 @@ export interface FrameRef {
  */
 class BitmapCache {
   private cache = new Map<number, CachedFrame>()
-  private inFlight = new Map<number, AbortController>()
+  private inFlight = new Map<number, { controller: AbortController, promise: Promise<void> }>()
+  private protectedIndices = new Set<number>()
   private bytes = 0
 
   constructor(
     private readonly urlFor: (index: number) => string,
     private budget: number
   ) {}
+
+  public protect(index: number): void {
+    this.protectedIndices.add(index)
+  }
+
+  public unprotect(index: number): void {
+    this.protectedIndices.delete(index)
+  }
 
   public setBudget(bytes: number): void {
     this.budget = bytes
@@ -353,8 +362,8 @@ class BitmapCache {
 
   /** Tear down every request except the one we still want. */
   public abortAllExcept(keepIndex: number): void {
-    for (const [index, controller] of this.inFlight) {
-      if (index === keepIndex) continue
+    for (const [index, { controller }] of this.inFlight) {
+      if (index === keepIndex || this.protectedIndices.has(index)) continue
       controller.abort()
       this.inFlight.delete(index)
     }
@@ -368,7 +377,8 @@ class BitmapCache {
    * tier can only ever serve the frame the playhead has already passed.
    */
   public abortOutsideWindow(lo: number, hi: number): void {
-    for (const [index, controller] of this.inFlight) {
+    for (const [index, { controller }] of this.inFlight) {
+      if (this.protectedIndices.has(index)) continue
       if (index >= lo && index <= hi) continue
       controller.abort()
       this.inFlight.delete(index)
@@ -411,13 +421,20 @@ class BitmapCache {
     return null
   }
 
-  public async load(index: number, onDecode?: () => void): Promise<void> {
-    if (index < 1 || index > TOTAL_HERO_FRAMES) return
-    if (this.cache.has(index) || this.inFlight.has(index)) return
+  public load(index: number, onDecode?: () => void): Promise<void> {
+    if (index < 1 || index > TOTAL_HERO_FRAMES) return Promise.resolve()
+    if (this.cache.has(index)) return Promise.resolve()
+
+    const existing = this.inFlight.get(index)
+    if (existing) return existing.promise
 
     const controller = new AbortController()
-    this.inFlight.set(index, controller)
+    const promise = this.loadInternal(index, controller, onDecode)
+    this.inFlight.set(index, { controller, promise })
+    return promise
+  }
 
+  private async loadInternal(index: number, controller: AbortController, onDecode?: () => void): Promise<void> {
     try {
       const response = await fetch(this.urlFor(index), { signal: controller.signal })
       if (!response.ok) return
@@ -434,6 +451,7 @@ class BitmapCache {
           ? performance.now() - decodeStart
           : this.decodeMsEma * (1 - BitmapCache.DECODE_EMA_ALPHA) +
             (performance.now() - decodeStart) * BitmapCache.DECODE_EMA_ALPHA
+            
       if (controller.signal.aborted) {
         bitmap.close()
         return
@@ -448,8 +466,7 @@ class BitmapCache {
       this.evictToBudget(index)
       onDecode?.()
     } catch {
-      // Aborted or network failure — the render loop falls back to the nearest
-      // resident frame, so a miss is never fatal.
+      // Aborted or network failure
     } finally {
       this.inFlight.delete(index)
     }
@@ -459,7 +476,7 @@ class BitmapCache {
     if (this.bytes <= this.budget) return
     for (const index of [...this.cache.keys()]) {
       if (this.bytes <= this.budget) return
-      if (index === protectedIndex) continue
+      if (index === protectedIndex || this.protectedIndices.has(index)) continue
       const frame = this.cache.get(index)
       if (frame) {
         frame.bitmap.close() // deterministic VRAM release, no GC wait
@@ -492,7 +509,7 @@ class BitmapCache {
    * after unmount reignite the render loop against a detached canvas.
    */
   public dispose(): void {
-    for (const controller of this.inFlight.values()) controller.abort()
+    for (const { controller } of this.inFlight.values()) controller.abort()
     this.inFlight.clear()
     for (const frame of this.cache.values()) frame.bitmap.close()
     this.cache.clear()
@@ -540,9 +557,19 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const lastTargetIdxRef = useRef<number>(-1)
   const lastTierRef = useRef<'hires' | 'mid' | 'proxy' | ''>('')
+  const displayedHiresIdxRef = useRef<number>(-1)
   const lastDrawnKeyRef = useRef<string>('')
   const lastGradeStepRef = useRef<number>(-1)
   const isRenderingRef = useRef<boolean>(false)
+
+  // Cleanup pinning on unmount
+  useEffect(() => {
+    return () => {
+      if (displayedHiresIdxRef.current !== -1) {
+        hiresCache.unprotect(displayedHiresIdxRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -902,6 +929,23 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       const hires =
         hiresCache.get(targetFrameIdx) ??
         hiresCache.getNearestWithin(targetFrameIdx, hiresRadius)
+      
+      // PINNING: Guarantee the currently displayed high-res frame cannot be
+      // evicted by the LRU sweep, eliminating the HIRES -> PROXY -> HIRES
+      // oscillation when paused.
+      if (hires) {
+        if (displayedHiresIdxRef.current !== hires.index) {
+          if (displayedHiresIdxRef.current !== -1) hiresCache.unprotect(displayedHiresIdxRef.current)
+          hiresCache.protect(hires.index)
+          displayedHiresIdxRef.current = hires.index
+        }
+      } else {
+        if (displayedHiresIdxRef.current !== -1) {
+          hiresCache.unprotect(displayedHiresIdxRef.current)
+          displayedHiresIdxRef.current = -1
+        }
+      }
+
       // The mid tier gets the same bounded near-search as the sharp one. Matching
       // only the exact index meant that whenever the sharp tier missed, the mid
       // tier missed for the identical reason — the playhead had moved on — and

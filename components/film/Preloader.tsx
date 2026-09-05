@@ -17,28 +17,13 @@ const SAFETY_TIMEOUT_MS = 4000
 
 
 
-/**
- * The HIGH-RES tier. Since 4G/5G is ubiquitous, we use the 4-second loading
- * window to pre-fetch the first 40 pristine 4K/720p hardware-accelerated JPEGs.
- * This guarantees a razor-sharp opening beat when the curtain lifts, dropping
- * back to nearest-cached proxy frames only if the connection is strictly 3G/EDGE.
- */
-const frameUrl = (index: number) => {
-  if (typeof window === 'undefined') return `/frames-v2/hero/frame_${String(index).padStart(3, '0')}.jpg`
-  const isDesktop = !window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 768
-  return isDesktop
-    ? `/frames-v2/hero-desktop/frame_${String(index).padStart(3, '0')}.jpg`
-    : `/frames-v2/hero/frame_${String(index).padStart(3, '0')}.jpg`
-}
-
-/** Warms the HTTP cache. The bitmap cache in ScrollCanvas decodes from here. */
+/** Warms the HTTP cache and decodes into GPU memory immediately. */
 async function warmFrame(index: number, signal: AbortSignal): Promise<void> {
+  if (signal.aborted) return
   try {
-    const response = await fetch(frameUrl(index), { signal })
-    await response.arrayBuffer() // must drain or the connection stays open
-    await hiresCache.load(index, () => {}) // Pre-decode into GPU memory so first paint is instantly sharp
+    await hiresCache.load(index)
   } catch {
-    // Aborted or offline — ScrollCanvas re-requests on demand.
+    // Cache miss is non-fatal.
   }
 }
 
@@ -73,17 +58,16 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
     let hasCompleted = false
 
     const critical = Array.from({ length: CRITICAL_FRAME_COUNT }, (_, i) => i + 1)
+    
+    // Protect these frames from being aborted by ScrollCanvas during the opening sequence
+    critical.forEach(i => hiresCache.protect(i))
 
     const completePreloader = () => {
       if (hasCompleted) return
       hasCompleted = true
       setProgress(100)
       setIsReady(true)
-
-      // Start background prefetch for the rest of the film's high-res frames.
-      const bgController = new AbortController()
-      const background = Array.from({ length: TOTAL_HERO_FRAMES - CRITICAL_FRAME_COUNT }, (_, i) => i + CRITICAL_FRAME_COUNT + 1)
-      runPool(background, BACKGROUND_CONCURRENCY, bgController.signal).catch(() => {})
+      critical.forEach(i => hiresCache.unprotect(i))
     }
 
     const safetyTimeout = setTimeout(completePreloader, SAFETY_TIMEOUT_MS)
@@ -105,6 +89,7 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
       .catch(() => {})
 
     return () => {
+      critical.forEach(i => hiresCache.unprotect(i))
       clearTimeout(safetyTimeout)
       controller.abort()
     }

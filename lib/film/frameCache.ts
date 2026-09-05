@@ -93,7 +93,8 @@ export interface FrameRef {
  */
 export class BitmapCache {
   private cache = new Map<number, CachedFrame>()
-  private inFlight = new Map<number, AbortController>()
+  private inFlight = new Map<number, { controller: AbortController, promise: Promise<void> }>()
+  private protectedIndices = new Set<number>()
   private bytes = 0
 
   constructor(
@@ -101,6 +102,14 @@ export class BitmapCache {
     private budget: number,
     private readonly tier: 'hires' | 'mid' | 'proxy'
   ) {}
+
+  public protect(index: number): void {
+    this.protectedIndices.add(index)
+  }
+
+  public unprotect(index: number): void {
+    this.protectedIndices.delete(index)
+  }
 
   public setBudget(bytes: number): void {
     this.budget = bytes
@@ -130,8 +139,8 @@ export class BitmapCache {
 
   /** Tear down every request except the one we still want. */
   public abortAllExcept(keepIndex: number): void {
-    for (const [index, controller] of this.inFlight) {
-      if (index === keepIndex) continue
+    for (const [index, { controller }] of this.inFlight) {
+      if (index === keepIndex || this.protectedIndices.has(index)) continue
       controller.abort()
       this.inFlight.delete(index)
     }
@@ -145,7 +154,8 @@ export class BitmapCache {
    * tier can only ever serve the frame the playhead has already passed.
    */
   public abortOutsideWindow(lo: number, hi: number): void {
-    for (const [index, controller] of this.inFlight) {
+    for (const [index, { controller }] of this.inFlight) {
+      if (this.protectedIndices.has(index)) continue
       if (index >= lo && index <= hi) continue
       controller.abort()
       this.inFlight.delete(index)
@@ -210,14 +220,21 @@ export class BitmapCache {
     return null
   }
 
-  public async load(index: number, onDecode?: () => void): Promise<void> {
-    if (index < 1 || index > TOTAL_HERO_FRAMES) return
-    if (this.cache.has(index) || this.inFlight.has(index)) return
+  public load(index: number, onDecode?: () => void): Promise<void> {
+    if (index < 1 || index > TOTAL_HERO_FRAMES) return Promise.resolve()
+    if (this.cache.has(index)) return Promise.resolve()
+
+    const existing = this.inFlight.get(index)
+    if (existing) return existing.promise
 
     const controller = new AbortController()
-    this.inFlight.set(index, controller)
-    const requestedAt = performance.now()
+    const promise = this.loadInternal(index, controller, onDecode)
+    this.inFlight.set(index, { controller, promise })
+    return promise
+  }
 
+  private async loadInternal(index: number, controller: AbortController, onDecode?: () => void): Promise<void> {
+    const requestedAt = performance.now()
     try {
       const response = await fetch(this.urlFor(index), { signal: controller.signal })
       if (!response.ok) return
@@ -225,14 +242,13 @@ export class BitmapCache {
       const blob = await response.blob()
       if (controller.signal.aborted) return
 
-      // Decodes off the main thread. This is the whole point of the pipeline —
-      // never hand a raw <img> to drawImage and let it decode during paint.
       const bitmap = await createImageBitmap(blob)
       const loadMs = performance.now() - requestedAt
       this.loadMsEma =
         this.loadMsEma === 0
           ? loadMs
           : this.loadMsEma * (1 - BitmapCache.LOAD_EMA_ALPHA) + loadMs * BitmapCache.LOAD_EMA_ALPHA
+          
       if (controller.signal.aborted) {
         bitmap.close()
         return
@@ -244,12 +260,10 @@ export class BitmapCache {
       scrubStats.decodes++
       scrubStats.decodesByTier[this.tier]++
 
-      // Evict AFTER insert so the cache is never momentarily empty mid-scroll.
       this.evictToBudget(index)
       onDecode?.()
     } catch {
-      // Aborted or network failure — the render loop falls back to the nearest
-      // resident frame, so a miss is never fatal.
+      // Aborted or network failure
     } finally {
       this.inFlight.delete(index)
     }
@@ -259,10 +273,10 @@ export class BitmapCache {
     if (this.bytes <= this.budget) return
     for (const index of [...this.cache.keys()]) {
       if (this.bytes <= this.budget) return
-      if (index === protectedIndex) continue
+      if (index === protectedIndex || this.protectedIndices.has(index)) continue
       const frame = this.cache.get(index)
       if (frame) {
-        frame.bitmap.close() // deterministic VRAM release, no GC wait
+        frame.bitmap.close()
         this.bytes -= frame.bytes
         scrubStats.evictions++
       }
@@ -275,8 +289,6 @@ export class BitmapCache {
     if (exact) return exact
 
     for (let offset = 1; offset <= NEAREST_SEARCH_RADIUS; offset++) {
-      // Behind first: on a miss, holding the last frame the viewer already saw
-      // reads as a pause. Jumping to a future frame reads as a skip.
       const behind = this.get(targetIndex - offset)
       if (behind) return behind
       const ahead = this.get(targetIndex + offset)
@@ -285,14 +297,8 @@ export class BitmapCache {
     return null
   }
 
-  /**
-   * Release every GPU-backed bitmap and tear down in-flight requests. Without
-   * this, unmounting leaves the full budget resident for the life of the tab —
-   * on a route where no canvas exists to use it — and lets a decode that lands
-   * after unmount reignite the render loop against a detached canvas.
-   */
   public dispose(): void {
-    for (const controller of this.inFlight.values()) controller.abort()
+    for (const { controller } of this.inFlight.values()) controller.abort()
     this.inFlight.clear()
     for (const frame of this.cache.values()) frame.bitmap.close()
     this.cache.clear()
