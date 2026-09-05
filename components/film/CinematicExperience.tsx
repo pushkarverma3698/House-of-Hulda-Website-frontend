@@ -20,12 +20,24 @@ const CanvasRoot = dynamic(
   { ssr: false }
 )
 
+const HeritageSandbox = dynamic(
+  () => import('@/components/canvas/HeritageSandbox').then((mod) => mod.HeritageSandbox),
+  { ssr: false }
+)
+
+const WebGLGallery = dynamic(
+  () => import('@/components/canvas/WebGLGallery').then((mod) => mod.WebGLGallery),
+  { ssr: false }
+)
+
 // Stagger delays for deity grid cascade
 const STAGGER_MS = [0,40,80,120,160,200,240,280,320,360,400,440,480,520,560,600,640,680]
 
 export function CinematicExperience() {
   const [selectedStar, setSelectedStar] = useState<CelestialGod | null>(null)
   const [isHearthMenuOpen, setIsHearthMenuOpen] = useState(false)
+  const [isSandboxOpen, setIsSandboxOpen] = useState(false)
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false)
 
   return (
     <main className="relative min-h-[950svh] bg-transparent text-cream font-body selection:bg-amber selection:text-ink">
@@ -90,8 +102,8 @@ export function CinematicExperience() {
             L-02: 16:23 — THE WATER
             Right-side alignment, no box
         ═══════════════════════════════════════════ */}
-        <section className="relative h-[120svh] flex flex-col justify-center px-8 md:px-24 items-end">
-          <div data-beat="right" className="story-scrim story-scrim-right relative space-y-4 max-w-lg text-right">
+        <section className="relative h-[120svh] flex flex-col justify-center px-8 md:px-24 items-start">
+          <div data-beat="left" className="story-scrim story-scrim-left relative space-y-4 max-w-lg text-left">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-02 · 16:23 · GLACIAL SPRINGS
             </p>
@@ -106,9 +118,9 @@ export function CinematicExperience() {
 
         {/* ═══════════════════════════════════════════
             L-03: 17:07 — DEODAR AND STONE
-            Left-side, lower third placement
+            Left-side, centered placement
         ═══════════════════════════════════════════ */}
-        <section className="relative h-[120svh] flex flex-col justify-end pb-28 px-8 md:px-24">
+        <section className="relative h-[120svh] flex flex-col justify-center px-8 md:px-24">
           <div data-beat="left" className="story-scrim story-scrim-left relative space-y-4 max-w-xl">
             <p className="hud-mono text-amber tracking-widest text-[10px]">
               L-03 · 17:07 · KATH-KUNI ARCHITECTURE
@@ -122,6 +134,15 @@ export function CinematicExperience() {
             <p className="text-amber/60 text-xs hud-mono tracking-wide text-glow-amber">
               500 years of mountain engineering in every beam.
             </p>
+            <div className="pt-2 pointer-events-auto">
+              <button
+                onClick={() => setIsSandboxOpen(true)}
+                className="inline-flex min-h-11 items-center px-5 py-2.5 rounded-full border border-amber/30 bg-ink/40 backdrop-blur-md text-amber hud-mono text-xs uppercase tracking-widest hover:border-amber hover:bg-amber/10 transition-all gap-2 shadow-lg hover:shadow-[0_0_20px_rgba(217,154,78,0.2)] active:scale-95"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-amber animate-ping" />
+                ✦ Inspect 3D Joinery Model
+              </button>
+            </div>
           </div>
         </section>
 
@@ -164,6 +185,15 @@ export function CinematicExperience() {
             <p className="text-cream/60 text-xs hud-mono text-glow-amber">
               Warm light. Dusk settling. Nowhere else to be.
             </p>
+            <div className="pt-2 pointer-events-auto flex justify-end">
+              <button
+                onClick={() => setIsGalleryOpen(true)}
+                className="inline-flex min-h-11 items-center px-5 py-2.5 rounded-full border border-amber/30 bg-ink/40 backdrop-blur-md text-amber hud-mono text-xs uppercase tracking-widest hover:border-amber hover:bg-amber/10 transition-all gap-2 shadow-lg hover:shadow-[0_0_20px_rgba(217,154,78,0.2)] active:scale-95"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse" />
+                ✦ Explore Suites (Liquid WebGL)
+              </button>
+            </div>
           </div>
         </section>
 
@@ -351,6 +381,18 @@ export function CinematicExperience() {
       {selectedStar && (
         <StarCard star={selectedStar} onClose={() => setSelectedStar(null)} />
       )}
+
+      {/* Tactile Heritage 3D Sandbox Modal */}
+      <HeritageSandbox
+        isOpen={isSandboxOpen}
+        onClose={() => setIsSandboxOpen(false)}
+      />
+
+      {/* Liquid Distortion WebGL Gallery Modal */}
+      <WebGLGallery
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+      />
     </main>
   )
 }

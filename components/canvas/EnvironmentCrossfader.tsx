@@ -68,45 +68,51 @@ export function EnvironmentCrossfader() {
 
     const t = scrollState.progress;
 
-    // Transition Day -> Night: 0.35 to 0.65
-    const blendDayNight = THREE.MathUtils.smoothstep(t, 0.35, 0.65);
-    // Transition Night -> Dawn: 0.80 to 0.95
-    const blendNightDawn = THREE.MathUtils.smoothstep(t, 0.80, 0.95);
+    // Transition Day -> Night: 0.38 to 0.64 (Hearth twilight)
+    const blendDayNight = THREE.MathUtils.smoothstep(t, 0.38, 0.64);
+    // Transition Night -> Dawn: 0.88 to 0.98 (First light sunrise)
+    const blendNightDawn = THREE.MathUtils.smoothstep(t, 0.88, 0.98);
 
     materialRef.current.uniforms.uBlendDayNight.value = blendDayNight;
     materialRef.current.uniforms.uBlendNightDawn.value = blendNightDawn;
     materialRef.current.uniforms.uOverallOpacity.value = 1.0;
 
-    // Dynamic solar lighting update
+    // Dynamic solar lighting update aligned with canonical acts
     if (dirLightRef.current && ambLightRef.current) {
-      if (t < 0.4) {
-        // Crisp day sun
+      if (t < 0.38) {
+        // ACT 1-2: Crisp day mountain sunlight
         dirLightRef.current.color.set('#fff8ee');
         dirLightRef.current.intensity = 1.4;
         ambLightRef.current.color.set('#d8ecf8');
         ambLightRef.current.intensity = 0.6;
-      } else if (t < 0.75) {
-        // Hearth twilight / Night starlight
-        const factor = (t - 0.4) / 0.35;
+      } else if (t < 0.64) {
+        // ACT 3-4: Twilight Hearth transition (Warm woodfire amber)
+        const factor = (t - 0.38) / 0.26;
         dirLightRef.current.color.lerpColors(
           new THREE.Color('#ff8a38'),
           new THREE.Color('#384e72'),
           factor
         );
-        dirLightRef.current.intensity = THREE.MathUtils.lerp(1.2, 0.3, factor);
+        dirLightRef.current.intensity = THREE.MathUtils.lerp(1.2, 0.15, factor);
         ambLightRef.current.color.set('#0a101d');
-        ambLightRef.current.intensity = 0.25;
+        ambLightRef.current.intensity = THREE.MathUtils.lerp(0.5, 0.2, factor);
+      } else if (t < 0.88) {
+        // ACT 5: Deep Himalayan Midnight Celestial Vault (Bortle Class 1 dark sky)
+        dirLightRef.current.color.set('#1e293b');
+        dirLightRef.current.intensity = 0.02; // Pure starlight, no washed-out snow
+        ambLightRef.current.color.set('#020612');
+        ambLightRef.current.intensity = 0.12;
       } else {
-        // Golden hour sunrise
-        const factor = (t - 0.75) / 0.25;
+        // ACT 6: Golden hour sunrise at 06:14
+        const factor = (t - 0.88) / 0.12;
         dirLightRef.current.color.lerpColors(
-          new THREE.Color('#384e72'),
+          new THREE.Color('#1e293b'),
           new THREE.Color('#ffae42'),
           factor
         );
-        dirLightRef.current.intensity = THREE.MathUtils.lerp(0.3, 1.3, factor);
+        dirLightRef.current.intensity = THREE.MathUtils.lerp(0.02, 1.35, factor);
         ambLightRef.current.color.set('#fde2b8');
-        ambLightRef.current.intensity = 0.5;
+        ambLightRef.current.intensity = THREE.MathUtils.lerp(0.12, 0.55, factor);
       }
     }
   });
