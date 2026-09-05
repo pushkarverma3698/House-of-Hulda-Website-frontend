@@ -17,21 +17,32 @@ export function CinematicScrubber({ videoSrc }: { videoSrc: string }) {
       const onLoadedMetadata = () => {
         video.pause();
 
-        ScrollTrigger.create({
-          trigger: document.body,
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: 1, // Smoothing
-          onUpdate: (self) => {
-            if (video.duration) {
-              gsap.to(video, {
-                currentTime: self.progress * video.duration,
-                duration: 0.1,
-                overwrite: true,
-                ease: "none"
-              });
-            }
-          },
+        const sections = document.querySelectorAll('.cine-section');
+        
+        sections.forEach((section) => {
+          const tStart = parseFloat(section.getAttribute('data-time-start') || '0');
+          const tEnd = parseFloat(section.getAttribute('data-time-end') || '0');
+
+          ScrollTrigger.create({
+            trigger: section,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.5, // Crisp, tight scrubbing
+            onUpdate: (self) => {
+              if (video.duration) {
+                const targetTime = gsap.utils.interpolate(tStart, tEnd, self.progress);
+                // Ensure we don't exceed video bounds
+                const clampedTime = Math.max(0, Math.min(targetTime, video.duration - 0.01));
+                
+                gsap.to(video, {
+                  currentTime: clampedTime,
+                  duration: 0.1,
+                  overwrite: true,
+                  ease: "none"
+                });
+              }
+            },
+          });
         });
       };
 
