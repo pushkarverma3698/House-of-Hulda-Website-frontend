@@ -142,7 +142,6 @@ export class BitmapCache {
     for (const [index, { controller }] of this.inFlight) {
       if (index === keepIndex || this.protectedIndices.has(index)) continue
       controller.abort()
-      this.inFlight.delete(index)
     }
   }
 
@@ -158,7 +157,6 @@ export class BitmapCache {
       if (this.protectedIndices.has(index)) continue
       if (index >= lo && index <= hi) continue
       controller.abort()
-      this.inFlight.delete(index)
     }
   }
 
@@ -265,7 +263,10 @@ export class BitmapCache {
     } catch {
       // Aborted or network failure
     } finally {
-      this.inFlight.delete(index)
+      const current = this.inFlight.get(index)
+      if (current?.controller === controller) {
+        this.inFlight.delete(index)
+      }
     }
   }
 

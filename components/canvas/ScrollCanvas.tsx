@@ -365,7 +365,6 @@ class BitmapCache {
     for (const [index, { controller }] of this.inFlight) {
       if (index === keepIndex || this.protectedIndices.has(index)) continue
       controller.abort()
-      this.inFlight.delete(index)
     }
   }
 
@@ -381,7 +380,6 @@ class BitmapCache {
       if (this.protectedIndices.has(index)) continue
       if (index >= lo && index <= hi) continue
       controller.abort()
-      this.inFlight.delete(index)
     }
   }
 
@@ -468,7 +466,10 @@ class BitmapCache {
     } catch {
       // Aborted or network failure
     } finally {
-      this.inFlight.delete(index)
+      const current = this.inFlight.get(index)
+      if (current?.controller === controller) {
+        this.inFlight.delete(index)
+      }
     }
   }
 
@@ -906,7 +907,6 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       scrubStats.targetIdx = targetFrameIdx
       scrubStats.demandedIdx.add(targetFrameIdx)
 
-      const isSettled = now - idxChangedAt >= SETTLE_MS
       if (!hiresCache.has(targetFrameIdx)) {
         void hiresCache.load(targetFrameIdx, onFrameDecoded)
       }
@@ -926,21 +926,22 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       // to a stop could drop a sharp neighbouring frame in favour of the proxy
       // while the exact frame was still in flight, i.e. the picture would get
       // worse at the moment the viewer stopped to look at it.
-      let hires =
-        hiresCache.get(targetFrameIdx) ??
-        hiresCache.getNearestWithin(targetFrameIdx, hiresRadius)
-        
+      let hires = hiresCache.get(targetFrameIdx)
+      
+      const MAX_SHARP_HOLD_DISTANCE = 12
+
       // TEMPORAL CONSISTENCY: "Hold Last Good Frame"
-      // If we miss the hires cache (even within the dynamic radius), do not immediately drop
-      // to a blurry proxy if we already have a sharp frame pinned. Instead, visually 
-      // pause on the last sharp frame until the new one decodes. 
-      // A stuttering 4K film feels premium; a blurry one feels broken.
-      // We allow the freeze up to a 60-frame jump (~1 second of film). Beyond that,
-      // it's a huge scrub, so falling back to proxy is semantically correct.
+      // If we miss the exact target, prefer holding the last displayed frame (if it's close)
+      // over showing a nearby frame or dropping to a proxy. Continuity feels premium.
       if (!hires && displayedHiresIdxRef.current !== -1) {
-        if (Math.abs(displayedHiresIdxRef.current - targetFrameIdx) <= 60) {
+        if (Math.abs(displayedHiresIdxRef.current - targetFrameIdx) <= MAX_SHARP_HOLD_DISTANCE) {
           hires = hiresCache.get(displayedHiresIdxRef.current)
         }
+      }
+
+      // If neither exact nor the held frame worked, fall back to a dynamic near-search
+      if (!hires) {
+        hires = hiresCache.getNearestWithin(targetFrameIdx, hiresRadius)
       }
       
       // PINNING: Guarantee the currently displayed high-res frame cannot be
