@@ -926,9 +926,22 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       // to a stop could drop a sharp neighbouring frame in favour of the proxy
       // while the exact frame was still in flight, i.e. the picture would get
       // worse at the moment the viewer stopped to look at it.
-      const hires =
+      let hires =
         hiresCache.get(targetFrameIdx) ??
         hiresCache.getNearestWithin(targetFrameIdx, hiresRadius)
+        
+      // TEMPORAL CONSISTENCY: "Hold Last Good Frame"
+      // If we miss the hires cache (even within the dynamic radius), do not immediately drop
+      // to a blurry proxy if we already have a sharp frame pinned. Instead, visually 
+      // pause on the last sharp frame until the new one decodes. 
+      // A stuttering 4K film feels premium; a blurry one feels broken.
+      // We allow the freeze up to a 60-frame jump (~1 second of film). Beyond that,
+      // it's a huge scrub, so falling back to proxy is semantically correct.
+      if (!hires && displayedHiresIdxRef.current !== -1) {
+        if (Math.abs(displayedHiresIdxRef.current - targetFrameIdx) <= 60) {
+          hires = hiresCache.get(displayedHiresIdxRef.current)
+        }
+      }
       
       // PINNING: Guarantee the currently displayed high-res frame cannot be
       // evicted by the LRU sweep, eliminating the HIRES -> PROXY -> HIRES
