@@ -1,66 +1,117 @@
+'use client'
+
 import { useEffect, useState, useRef } from 'react'
 
-import {
-  startFilmPreload,
-  onFilmPreload,
-  FILM_PRELOAD_TUNING,
-  type FilmPreloadStatus,
-} from '@/lib/film/preload'
+/** Frames that must be in the HTTP cache before the curtain lifts. Enough to
+ *  cover the opening beat; ScrollCanvas sweeps the remaining proxy frames
+ *  resident behind the user. */
+const CRITICAL_FRAME_COUNT = 40
+const TOTAL_HERO_FRAMES = 240
+/** Browsers multiplex freely over HTTP/2, so an unbounded fan-out does not
+ *  queue — it splits the same pipe and every frame arrives late. */
+const CRITICAL_CONCURRENCY = 6
+const BACKGROUND_CONCURRENCY = 4
+const SAFETY_TIMEOUT_MS = 4000
 
 /**
- * The curtain.
- *
- * It holds while lib/film/preload.ts pulls the master film down, and the bar it
- * draws is that download's real progress rather than a timer's — see that file
- * for why the whole film, and for how the lift decision is made.
- *
- * What changed here: this component used to own the fetching. It warmed 40
- * frames into the HTTP cache, lifted on a 4-second timeout regardless of what
- * had arrived, and left every frame's decode on the scroll's critical path. The
- * fetching now lives next to the cache the canvas draws from, so the frames the
- * curtain pays for are decoded and ready rather than merely downloaded.
+ * The HIGH-RES tier. Since 4G/5G is ubiquitous, we use the 4-second loading
+ * window to pre-fetch the first 40 pristine 4K/720p hardware-accelerated JPEGs.
+ * This guarantees a razor-sharp opening beat when the curtain lifts, dropping
+ * back to nearest-cached proxy frames only if the connection is strictly 3G/EDGE.
  */
+const frameUrl = (index: number) => {
+  if (typeof window === 'undefined') return `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
+  const isDesktop = !window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 768
+  return isDesktop
+    ? `/frames/hero-desktop/frame_${String(index).padStart(3, '0')}.jpg`
+    : `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
+}
+
+/** Warms the HTTP cache. The bitmap cache in ScrollCanvas decodes from here. */
+async function warmFrame(index: number, signal: AbortSignal): Promise<void> {
+  try {
+    const response = await fetch(frameUrl(index), { signal })
+    await response.arrayBuffer() // must drain or the connection stays open
+  } catch {
+    // Aborted or offline — ScrollCanvas re-requests on demand.
+  }
+}
+
+/** Runs `task` over `items` with at most `limit` in flight. */
+async function runPool(
+  items: readonly number[],
+  limit: number,
+  signal: AbortSignal,
+  onEach?: () => void
+): Promise<void> {
+  let cursor = 0
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length && !signal.aborted) {
+      const index = items[cursor++]
+      await warmFrame(index, signal)
+      onEach?.()
+    }
+  })
+  await Promise.all(workers)
+}
+
 export function Preloader({ onComplete }: { onComplete?: () => void }) {
   const [progress, setProgress] = useState(0)
+  const [isReady, setIsReady] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // The curtain holds until the film says it is safe to lift.
+  // Preloader logic
   useEffect(() => {
-    const mountedAt = performance.now()
-    let liftTimer = 0
+    const controller = new AbortController()
+    const { signal } = controller
     let hasCompleted = false
 
-    const complete = () => {
+    const critical = Array.from({ length: CRITICAL_FRAME_COUNT }, (_, i) => i + 1)
+
+    const completePreloader = () => {
       if (hasCompleted) return
       hasCompleted = true
       setProgress(100)
-      // The fade-out is 1200 ms of CSS; unmount after the opening 400 ms of it
-      // so the film is already live underneath as the curtain dissolves.
-      liftTimer = window.setTimeout(() => {
-        setIsLoaded(true)
-        onComplete?.()
-      }, 400)
+      setIsReady(true)
+
+      // Start background prefetch for the rest of the film's high-res frames.
+      const bgController = new AbortController()
+      const background = Array.from({ length: TOTAL_HERO_FRAMES - CRITICAL_FRAME_COUNT }, (_, i) => i + CRITICAL_FRAME_COUNT + 1)
+      runPool(background, BACKGROUND_CONCURRENCY, bgController.signal).catch(() => {})
     }
 
-    const unsubscribe = onFilmPreload((s: Readonly<FilmPreloadStatus>) => {
-      if (hasCompleted) return
-      setProgress(Math.min(99, Math.floor(s.progress * 100)))
-      if (!s.ready) return
-      // Never flash. On a warm reload every frame is already in the HTTP cache
-      // and `ready` arrives in the same tick the curtain mounted.
-      const held = performance.now() - mountedAt
-      if (held >= FILM_PRELOAD_TUNING.MIN_CURTAIN_MS) complete()
-      else liftTimer = window.setTimeout(complete, FILM_PRELOAD_TUNING.MIN_CURTAIN_MS - held)
-    })
+    const safetyTimeout = setTimeout(completePreloader, SAFETY_TIMEOUT_MS)
 
-    startFilmPreload()
+    let loadedCount = 0
+    const onCriticalFrame = () => {
+      loadedCount++
+      if (!hasCompleted) {
+        setProgress(Math.floor((loadedCount / critical.length) * 99))
+      }
+    }
+
+    runPool(critical, CRITICAL_CONCURRENCY, signal, onCriticalFrame)
+      .then(() => {
+        if (signal.aborted) return
+        clearTimeout(safetyTimeout)
+        completePreloader()
+      })
+      .catch(() => {})
 
     return () => {
-      unsubscribe()
-      clearTimeout(liftTimer)
+      clearTimeout(safetyTimeout)
+      controller.abort()
     }
-  }, [onComplete])
+  }, [])
+
+  const handleEnter = () => {
+    setIsLoaded(true)
+    setTimeout(() => {
+      onComplete?.()
+      window.dispatchEvent(new Event('start-atmosphere'))
+    }, 400)
+  }
 
   // High-performance Parallax logic (Mouse & Gyro)
   useEffect(() => {
@@ -81,9 +132,7 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
     const handleDeviceOrientation = (e: DeviceOrientationEvent) => {
       if (e.gamma === null || e.beta === null) return
       const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
-      // Gamma is roughly -90 to 90 (left/right). Clamp to -30 to 30.
       targetX = clamp(e.gamma, -30, 30) / 30
-      // Beta is front/back. Assume holding at 45 degrees.
       targetY = clamp(e.beta - 45, -30, 30) / 30
     }
 
@@ -91,7 +140,6 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
     window.addEventListener('deviceorientation', handleDeviceOrientation)
 
     const loop = () => {
-      // Lerp for buttery smooth physics
       currentX += (targetX - currentX) * 0.1
       currentY += (targetY - currentY) * 0.1
 
@@ -115,9 +163,8 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
   return (
     <div
       ref={containerRef}
-      data-preloader=""
       className={`fixed inset-0 z-50 flex flex-col justify-center bg-black px-8 md:px-24 transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        progress >= 100 ? 'opacity-0 scale-105 pointer-events-none blur-md' : 'opacity-100 scale-100 blur-0'
+        isLoaded ? 'opacity-0 scale-105 pointer-events-none blur-md' : 'opacity-100 scale-100 blur-0'
       }`}
     >
       <div className="max-w-md space-y-3 relative">
@@ -160,12 +207,21 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
         </div>
         
         <div 
-          className="will-change-transform mt-2"
+          className="will-change-transform mt-2 h-10"
           style={{ transform: 'translate3d(calc(var(--px, 0) * 10px), calc(var(--py, 0) * 10px), 0)' }}
         >
-          <p className="font-mono text-xs text-white/30 tracking-widest">
-            {progress.toString().padStart(3, '0')}%
-          </p>
+          {!isReady ? (
+            <p className="font-mono text-xs text-white/30 tracking-widest">
+              {progress.toString().padStart(3, '0')}%
+            </p>
+          ) : (
+            <button 
+              onClick={handleEnter}
+              className="px-6 py-2 border border-amber-500/30 text-amber-500 text-[10px] uppercase font-mono tracking-widest rounded-full hover:bg-amber-500 hover:text-black transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] animate-[pulse_2s_ease-in-out_infinite]"
+            >
+              Enter Experience
+            </button>
+          )}
         </div>
       </div>
     </div>

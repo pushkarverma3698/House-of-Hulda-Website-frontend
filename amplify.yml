@@ -9,6 +9,7 @@ frontend:
       commands:
         - npm run build
         - cp -r public .next/public
+        - rm -rf .next/public/videos .next/public/frames
   artifacts:
     baseDirectory: .next
     files:

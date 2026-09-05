@@ -42,19 +42,19 @@ export function Marketplace() {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pointer-events-auto">
+      <div className="flex gap-4 overflow-x-auto pb-3 md:pb-0 md:grid md:grid-cols-3 md:gap-6 mt-6 md:mt-8 pointer-events-auto [scrollbar-width:none]">
         {PRODUCTS.map(product => (
           <button 
             key={product.id}
             onClick={() => setActiveProduct(product)}
-            className="group relative flex flex-col text-left overflow-hidden border border-white/10 bg-black/40 backdrop-blur-sm hover:border-amber-500/50 transition-colors"
+            className="w-[68vw] sm:w-[48vw] md:w-auto shrink-0 md:shrink group relative flex flex-col text-left overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-sm hover:border-amber-500/50 transition-all duration-300"
           >
-            <div className="aspect-square overflow-hidden bg-neutral-900 relative">
+            <div className="aspect-[4/3] md:aspect-square overflow-hidden bg-neutral-900 relative">
               <Image 
                 src={product.image} 
                 alt={product.name}
                 fill
-                className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105"
+                className="object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105"
               />
             </div>
             <div className="p-4">
