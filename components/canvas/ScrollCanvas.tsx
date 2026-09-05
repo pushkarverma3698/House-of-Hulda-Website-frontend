@@ -84,8 +84,8 @@ const PROXY_BUDGET = 44 * 1024 * 1024
  *  bounded backward search in getNearestWithin. On top of the proxy tier's
  *  41.7 MB and the mid tier's 24 MB this lands near 122 MB, which is within
  *  what current iOS/Android Safari and Chrome hold for a foreground tab. */
-const HIRES_BUDGET_MOBILE = 56 * 1024 * 1024
-const HIRES_BUDGET_DESKTOP = 96 * 1024 * 1024
+const HIRES_BUDGET_MOBILE = 160 * 1024 * 1024
+const HIRES_BUDGET_DESKTOP = 400 * 1024 * 1024
 
 /** A 320x568 frame is 710 KB decoded, so this is a ~33-frame trailing window.
  *  No mobile/desktop split: 24 MB on top of the proxy tier's 42 MB and two
