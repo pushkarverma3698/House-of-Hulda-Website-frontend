@@ -107,6 +107,10 @@ export const scrubStats: ScrubStats = {
   tickMsEma: 0,
 }
 
+if (typeof window !== 'undefined') {
+  ;(window as any).__scrubStats = scrubStats
+}
+
 export function resetScrubStats(): void {
   scrubStats.decodes = 0
   scrubStats.decodesByTier.hires = 0

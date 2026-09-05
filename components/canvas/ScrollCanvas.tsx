@@ -929,14 +929,14 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       let hires = hiresCache.get(targetFrameIdx)
       
       const MAX_SHARP_HOLD_DISTANCE = 12
+      const hasSharpFrame = displayedHiresIdxRef.current !== -1
+      const isMassiveJump = hasSharpFrame && Math.abs(displayedHiresIdxRef.current - targetFrameIdx) > MAX_SHARP_HOLD_DISTANCE
 
       // TEMPORAL CONSISTENCY: "Hold Last Good Frame"
       // If we miss the exact target, prefer holding the last displayed frame (if it's close)
       // over showing a nearby frame or dropping to a proxy. Continuity feels premium.
-      if (!hires && displayedHiresIdxRef.current !== -1) {
-        if (Math.abs(displayedHiresIdxRef.current - targetFrameIdx) <= MAX_SHARP_HOLD_DISTANCE) {
-          hires = hiresCache.get(displayedHiresIdxRef.current)
-        }
+      if (!hires && hasSharpFrame && !isMassiveJump) {
+        hires = hiresCache.get(displayedHiresIdxRef.current)
       }
 
       // If neither exact nor the held frame worked, fall back to a dynamic near-search
@@ -945,8 +945,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
       }
       
       // PINNING: Guarantee the currently displayed high-res frame cannot be
-      // evicted by the LRU sweep, eliminating the HIRES -> PROXY -> HIRES
-      // oscillation when paused.
+      // evicted by the LRU sweep.
       if (hires) {
         if (displayedHiresIdxRef.current !== hires.index) {
           if (displayedHiresIdxRef.current !== -1) hiresCache.unprotect(displayedHiresIdxRef.current)
@@ -960,17 +959,18 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
         }
       }
 
-      // The mid tier gets the same bounded near-search as the sharp one. Matching
-      // only the exact index meant that whenever the sharp tier missed, the mid
-      // tier missed for the identical reason — the playhead had moved on — and
-      // the fallback collapsed straight to the 160 px proxy. Measured over a full
-      // scroll, the mid tier was serving 0.0% of frames: it was costing a request
-      // and a decode per frame change and never once reaching the screen.
-      const mid = hires
-        ? null
-        : midCache.getNearestWithin(targetFrameIdx, MID_NEAREST_RADIUS)
-      const frame: FrameRef | null =
-        hires ?? mid ?? proxyCache.getNearest(targetFrameIdx)
+      // EMERGENCY TRANSPORT LAYERS: Mid / Proxy
+      // Once the cinematic layer (hires) is established, normal scrolling should NEVER downgrade.
+      // We only allow mid/proxy for initial cold starts or massive timeline jumps.
+      let mid = null
+      let proxy = null
+      
+      if (!hires && (!hasSharpFrame || isMassiveJump)) {
+        mid = midCache.getNearestWithin(targetFrameIdx, MID_NEAREST_RADIUS)
+        if (!mid) proxy = proxyCache.getNearest(targetFrameIdx)
+      }
+
+      const frame: FrameRef | null = hires ?? mid ?? proxy
 
       if (frame) {
         const isHires = hires !== null
