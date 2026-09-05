@@ -46,6 +46,9 @@ export function useScrollRig() {
     const wrapper = document.getElementById('scroll-wrapper');
     const content = document.getElementById('scroll-content');
 
+    if (wrapper) {
+      ScrollTrigger.defaults({ scroller: wrapper });
+    }
     const lenis = new Lenis({
       wrapper: wrapper || window,
       content: content || document.documentElement,

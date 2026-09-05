@@ -162,27 +162,32 @@ export function Soundscape() {
     return () => unsub()
   }, [])
 
+  useEffect(() => {
+    const handleStartEvent = () => {
+      if (!isPlaying) toggleSound()
+    }
+    window.addEventListener('start-atmosphere', handleStartEvent)
+    return () => window.removeEventListener('start-atmosphere', handleStartEvent)
+  }, [isPlaying])
+
   return (
-    <div className="fixed z-40 flex items-center gap-2.5 select-none top-4 right-20 md:top-auto md:right-auto md:left-8 md:bottom-8">
+    <div className="fixed z-40 flex items-center select-none bottom-[calc(5.5rem_+_env(safe-area-inset-bottom))] md:bottom-[32px] left-[32px]">
       <button
         onClick={toggleSound}
         aria-label={isPlaying ? 'Turn atmospheric audio off' : 'Turn atmospheric audio on'}
         aria-pressed={isPlaying}
-        className={`pointer-events-auto flex items-center gap-2.5 px-3 py-2 md:px-4 md:py-2 rounded-full border backdrop-blur-xl font-mono text-[10px] tracking-widest transition-all duration-500 shadow-2xl group ${
+        className={`pointer-events-auto flex items-center justify-center h-[50px] w-[50px] rounded-full border backdrop-blur-md transition-all duration-500 shadow-[0_8px_24px_rgba(0,0,0,0.35)] group ${
           isPlaying
-            ? 'border-amber-400/60 bg-black/80 text-amber-300 shadow-[0_0_25px_rgba(217,154,78,0.25)]'
-            : 'border-white/15 bg-black/60 text-cream/70 hover:text-cream hover:border-amber-400/40 hover:bg-black/80'
+            ? 'bg-amber-400 border-transparent shadow-[0_0_25px_rgba(245,158,11,0.4)]'
+            : 'border-white/10 bg-black/20 hover:scale-[1.06] hover:bg-amber-400 hover:border-transparent'
         }`}
         title="Toggle Himalayan Atmospheric Sound"
       >
-        {/* Equalizer Waveform Bars */}
-        <span className="flex items-end justify-center gap-[2.5px] h-3.5 w-3.5">
-          <span className={`w-[2px] bg-amber-400 rounded-full transition-all duration-300 ${isPlaying ? 'h-3.5 animate-[pulse_0.6s_ease-in-out_infinite]' : 'h-1.5 opacity-60'}`} />
-          <span className={`w-[2px] bg-amber-400 rounded-full transition-all duration-300 ${isPlaying ? 'h-2.5 animate-[pulse_0.9s_ease-in-out_infinite]' : 'h-2.5 opacity-60'}`} />
-          <span className={`w-[2px] bg-amber-400 rounded-full transition-all duration-300 ${isPlaying ? 'h-3 animate-[pulse_1.2s_ease-in-out_infinite]' : 'h-1 opacity-60'}`} />
-        </span>
-        <span className="text-[9px] md:text-[10px] uppercase font-medium">
-          {isPlaying ? 'ATMOSPHERE ON' : 'ENTER SOUNDSCAPE'}
+        {/* Equalizer Waveform Bars / Sound Icon */}
+        <span className="flex items-end justify-center gap-[3px] h-4 w-4">
+          <span className={`w-[2px] rounded-full transition-all duration-300 ${isPlaying ? 'bg-black h-4 animate-[pulse_0.6s_ease-in-out_infinite]' : 'bg-white/60 h-2 group-hover:bg-white'}`} />
+          <span className={`w-[2px] rounded-full transition-all duration-300 ${isPlaying ? 'bg-black h-3 animate-[pulse_0.9s_ease-in-out_infinite]' : 'bg-white/60 h-3.5 group-hover:bg-white'}`} />
+          <span className={`w-[2px] rounded-full transition-all duration-300 ${isPlaying ? 'bg-black h-3.5 animate-[pulse_1.2s_ease-in-out_infinite]' : 'bg-white/60 h-1.5 group-hover:bg-white'}`} />
         </span>
       </button>
     </div>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { SITE, lodgingBusinessJsonLd } from "@/lib/schema";
 import { CinematicExperience } from "@/components/film/CinematicExperience";
-import { SmoothScroll } from "@/components/film/SmoothScroll";
 
 export const metadata: Metadata = {
   title: "House of Hulda — Heritage Homestay & Café in Naggar, Manali",
@@ -46,9 +45,8 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd()) }}
       />
-      <SmoothScroll>
-        <CinematicExperience />
-      </SmoothScroll>
-    </>
+              <CinematicExperience />
+
+          </>
   );
 }

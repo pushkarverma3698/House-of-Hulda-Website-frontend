@@ -76,13 +76,18 @@ export default function RootLayout({
   return (
     <html lang="en-IN" className={`${cormorant.variable} ${mulish.variable}`}>
       <body className="font-body bg-[#0a0f17] text-cream">
+        <div className="film-grain" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd()) }}
         />
         <Providers>
-          {children}
-          {booking}
+          <main id="scroll-wrapper" className="h-[100dvh] w-[100dvw] overflow-y-auto overflow-x-hidden relative">
+            <div id="scroll-content">
+              {children}
+              {booking}
+            </div>
+          </main>
           <WhatsappFab />
         </Providers>
         <Analytics />

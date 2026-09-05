@@ -57,6 +57,7 @@ async function runPool(
 
 export function Preloader({ onComplete }: { onComplete?: () => void }) {
   const [progress, setProgress] = useState(0)
+  const [isReady, setIsReady] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -72,15 +73,9 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
       if (hasCompleted) return
       hasCompleted = true
       setProgress(100)
-      setTimeout(() => {
-        setIsLoaded(true)
-        onComplete?.()
-      }, 400)
+      setIsReady(true)
 
       // Start background prefetch for the rest of the film's high-res frames.
-      // This uses a separate AbortController so it survives Preloader unmount.
-      // 4G/5G connections handle this easily, allowing the user to experience
-      // the full sharp tier without falling back to proxy frames.
       const bgController = new AbortController()
       const background = Array.from({ length: TOTAL_HERO_FRAMES - CRITICAL_FRAME_COUNT }, (_, i) => i + CRITICAL_FRAME_COUNT + 1)
       runPool(background, BACKGROUND_CONCURRENCY, bgController.signal).catch(() => {})
@@ -108,7 +103,15 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
       clearTimeout(safetyTimeout)
       controller.abort()
     }
-  }, [onComplete])
+  }, [])
+
+  const handleEnter = () => {
+    setIsLoaded(true)
+    setTimeout(() => {
+      onComplete?.()
+      window.dispatchEvent(new Event('start-atmosphere'))
+    }, 400)
+  }
 
   // High-performance Parallax logic (Mouse & Gyro)
   useEffect(() => {
@@ -129,9 +132,7 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
     const handleDeviceOrientation = (e: DeviceOrientationEvent) => {
       if (e.gamma === null || e.beta === null) return
       const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max)
-      // Gamma is roughly -90 to 90 (left/right). Clamp to -30 to 30.
       targetX = clamp(e.gamma, -30, 30) / 30
-      // Beta is front/back. Assume holding at 45 degrees.
       targetY = clamp(e.beta - 45, -30, 30) / 30
     }
 
@@ -139,7 +140,6 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
     window.addEventListener('deviceorientation', handleDeviceOrientation)
 
     const loop = () => {
-      // Lerp for buttery smooth physics
       currentX += (targetX - currentX) * 0.1
       currentY += (targetY - currentY) * 0.1
 
@@ -164,7 +164,7 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
     <div
       ref={containerRef}
       className={`fixed inset-0 z-50 flex flex-col justify-center bg-black px-8 md:px-24 transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        progress >= 100 ? 'opacity-0 scale-105 pointer-events-none blur-md' : 'opacity-100 scale-100 blur-0'
+        isLoaded ? 'opacity-0 scale-105 pointer-events-none blur-md' : 'opacity-100 scale-100 blur-0'
       }`}
     >
       <div className="max-w-md space-y-3 relative">
@@ -207,12 +207,21 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
         </div>
         
         <div 
-          className="will-change-transform mt-2"
+          className="will-change-transform mt-2 h-10"
           style={{ transform: 'translate3d(calc(var(--px, 0) * 10px), calc(var(--py, 0) * 10px), 0)' }}
         >
-          <p className="font-mono text-xs text-white/30 tracking-widest">
-            {progress.toString().padStart(3, '0')}%
-          </p>
+          {!isReady ? (
+            <p className="font-mono text-xs text-white/30 tracking-widest">
+              {progress.toString().padStart(3, '0')}%
+            </p>
+          ) : (
+            <button 
+              onClick={handleEnter}
+              className="px-6 py-2 border border-amber-500/30 text-amber-500 text-[10px] uppercase font-mono tracking-widest rounded-full hover:bg-amber-500 hover:text-black transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] animate-[pulse_2s_ease-in-out_infinite]"
+            >
+              Enter Experience
+            </button>
+          )}
         </div>
       </div>
     </div>

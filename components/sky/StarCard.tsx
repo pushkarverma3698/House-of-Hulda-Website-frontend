@@ -84,7 +84,7 @@ export const StarCard = memo(function StarCard({
       )}
 
       {/* Slide-over Card */}
-      <div className="relative w-full sm:w-[480px] h-[100dvh] sm:h-[90vh] sm:mr-6 sm:rounded-2xl bg-neutral-950/95 border border-white/10 flex flex-col shadow-2xl backdrop-blur-xl animate-in slide-in-from-right duration-500 overflow-hidden">
+      <div className="relative w-full sm:w-[480px] h-[100dvh] sm:h-[90vh] sm:mr-6 sm:rounded-2xl bg-black/60 border border-white/10 flex flex-col shadow-2xl backdrop-blur-xl animate-in slide-in-from-right duration-500 overflow-hidden">
         {/* Header */}
         <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
           <div className="space-y-1">
@@ -119,19 +119,19 @@ export const StarCard = memo(function StarCard({
 
           {/* Technical Telemetry Grid */}
           <div className="grid grid-cols-2 gap-3 hud-mono text-xs">
-            <div className="p-3 rounded-lg bg-black/40 border border-white/5 space-y-1">
+            <div className="p-3 rounded-lg bg-white/[0.04] border border-white/5 space-y-1">
               <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Right Ascension</span>
               <p className="text-neutral-200 font-semibold">{star.ra}</p>
             </div>
-            <div className="p-3 rounded-lg bg-black/40 border border-white/5 space-y-1">
+            <div className="p-3 rounded-lg bg-white/[0.04] border border-white/5 space-y-1">
               <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Declination</span>
               <p className="text-neutral-200 font-semibold">{star.dec}</p>
             </div>
-            <div className="p-3 rounded-lg bg-black/40 border border-white/5 space-y-1">
+            <div className="p-3 rounded-lg bg-white/[0.04] border border-white/5 space-y-1">
               <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Visual Magnitude</span>
               <p className="text-neutral-200 font-semibold">+{star.magnitude.toFixed(1)} mag</p>
             </div>
-            <div className="p-3 rounded-lg bg-black/40 border border-white/5 space-y-1">
+            <div className="p-3 rounded-lg bg-white/[0.04] border border-white/5 space-y-1">
               <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Distance</span>
               <p className="text-neutral-200 font-semibold">{star.distanceLightYears}</p>
             </div>

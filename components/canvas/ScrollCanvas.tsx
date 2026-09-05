@@ -51,10 +51,20 @@ export const TOTAL_HERO_FRAMES = 240
  * native, so even the sharp tier is a ~2x upscale. Closing that last step needs
  * a re-master, not a scheduling change.
  */
-export const proxyFrameUrl = (index: number) =>
-  `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.webp`
-const midFrameUrl = (index: number) =>
-  `/frames/hero-mid/frame_${String(index).padStart(3, '0')}.webp`
+export const proxyFrameUrl = (index: number) => {
+  if (typeof window === 'undefined') return `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.jpg`
+  const isDesktop = !window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 768
+  return isDesktop
+    ? `/frames/hero-proxy-desktop/frame_${String(index).padStart(3, '0')}.jpg`
+    : `/frames/hero-proxy/frame_${String(index).padStart(3, '0')}.jpg`
+}
+const midFrameUrl = (index: number) => {
+  if (typeof window === 'undefined') return `/frames/hero-mid/frame_${String(index).padStart(3, '0')}.jpg`
+  const isDesktop = !window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 768
+  return isDesktop
+    ? `/frames/hero-mid-desktop/frame_${String(index).padStart(3, '0')}.jpg`
+    : `/frames/hero-mid/frame_${String(index).padStart(3, '0')}.jpg`
+}
 const hiresFrameUrl = (index: number) => {
   if (typeof window === 'undefined') return `/frames/hero/frame_${String(index).padStart(3, '0')}.jpg`
   const isDesktop = !window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 768
@@ -648,10 +658,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
      * aperture is active would put the copy in a column that is not there.
      */
     const applyFit = () => {
-      const apertureCssWidth =
-        window.innerHeight * APERTURE_HEIGHT_RATIO * (FRAME_ASPECT_W / FRAME_ASPECT_H)
-      const fieldPx = (window.innerWidth - apertureCssWidth) / 2
-      fit = !isCoarsePointer && fieldPx >= APERTURE_MIN_FIELD_PX ? 'aperture' : 'cover'
+      fit = 'cover'
       document.documentElement.dataset.filmFit = fit
     }
 
@@ -1039,7 +1046,7 @@ export const ScrollCanvas = memo(function ScrollCanvas() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0 object-cover w-full h-full"
+      className="fixed inset-0 pointer-events-none z-0 object-cover w-[100dvw] h-[100dvh]"
     />
   )
 })

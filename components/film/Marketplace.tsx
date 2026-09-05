@@ -47,14 +47,14 @@ export function Marketplace() {
           <button 
             key={product.id}
             onClick={() => setActiveProduct(product)}
-            className="w-[68vw] sm:w-[48vw] md:w-auto shrink-0 md:shrink group relative flex flex-col text-left overflow-hidden rounded-xl border border-white/10 bg-black/40 backdrop-blur-sm hover:border-amber-500/50 transition-all duration-300"
+            className="w-[68vw] sm:w-[48vw] md:w-auto shrink-0 md:shrink group relative flex flex-col text-left overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] backdrop-blur-sm hover:border-amber-500/50 transition-all duration-300"
           >
             <div className="aspect-[4/3] md:aspect-square overflow-hidden bg-neutral-900 relative">
               <Image 
                 src={product.image} 
                 alt={product.name}
                 fill
-                className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105"
+                className="object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105"
               />
             </div>
             <div className="p-4">

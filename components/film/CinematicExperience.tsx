@@ -4,7 +4,6 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Preloader } from '@/components/film/Preloader'
 import { ScrubDebugOverlay } from '@/components/film/ScrubDebugOverlay'
-import { TimeRail } from '@/components/film/TimeRail'
 import { Marketplace } from '@/components/film/Marketplace'
 import { Soundscape } from '@/components/film/Soundscape'
 import { Navigation } from '@/components/film/Navigation'
@@ -14,7 +13,7 @@ import { StarCard } from '@/components/sky/StarCard'
 import { DateDial } from '@/components/astro/DateDial'
 import { EIGHTEEN_GODS, CelestialGod } from '@/content/eighteen'
 import { useState, useEffect, useRef } from 'react'
-import { CinematicScrubber } from '@/components/film/CinematicScrubber'
+import { ScrollCanvas } from '@/components/canvas/ScrollCanvas'
 import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 
@@ -45,37 +44,42 @@ export function CinematicExperience() {
       sections.forEach((section) => {
         const textWrapper = section.querySelector('.story-scrim')
         if (textWrapper) {
-          gsap.fromTo(textWrapper, 
-            { opacity: 0, y: 40, filter: 'blur(12px)', scale: 0.98 },
-            { 
-              opacity: 1, 
-              y: 0, 
-              filter: 'blur(0px)',
-              scale: 1,
-              duration: 1.2,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: section,
-                start: 'top 55%',
-                end: 'top 25%',
-                scrub: 1.2
-              }
-            }
-          )
+          const elements = Array.from(textWrapper.children);
+          gsap.set(elements, { opacity: 0, y: 60, filter: 'blur(16px)', scale: 0.95 });
           
-          gsap.to(textWrapper, {
-            opacity: 0,
-            y: -35,
-            filter: 'blur(10px)',
-            scale: 0.98,
-            ease: 'power3.in',
+          const tl = gsap.timeline({
             scrollTrigger: {
               trigger: section,
-              start: 'bottom 75%',
-              end: 'bottom 45%',
-              scrub: 1.2
+              scroller: document.getElementById('scroll-wrapper') || window,
+              start: 'top 85%',
+              end: 'bottom 15%',
+              scrub: 1.2,
             }
+          });
+          
+          tl.to(elements, { 
+            opacity: 1, 
+            y: 15, 
+            filter: 'blur(0px)', 
+            scale: 1, 
+            duration: 0.25, 
+            ease: 'power3.out',
+            stagger: 0.05
           })
+          .to(elements, {
+            y: -15,
+            duration: 0.5,
+            ease: 'none'
+          })
+          .to(elements, { 
+            opacity: 0, 
+            y: -60, 
+            filter: 'blur(16px)', 
+            scale: 1.05, 
+            duration: 0.25, 
+            ease: 'power3.in',
+            stagger: 0.03
+          }, ">-0.1");
         }
       })
     }, containerRef)
@@ -86,15 +90,11 @@ export function CinematicExperience() {
   return (
     <main ref={containerRef} className="relative bg-transparent text-cream font-body selection:bg-amber selection:text-ink">
       
-      {/* 2026 Apple-Tier Scrubbed Cinematic Video with Responsive Injection */}
-      <CinematicScrubber 
-        desktopSrc="/videos/master_scroll_optimized.mp4" 
-        mobileSrc="/videos/master_mobile_optimized.mp4"
-      />
+      {/* 2026 Apple-Tier Scrubbed Cinematic Image Sequence */}
+      <ScrollCanvas />
 
       <Navigation />
-      <TimeRail />
-      <Soundscape />
+            <Soundscape />
       <FilmReel />
       <ReserveDock />
       <Preloader />
@@ -107,19 +107,19 @@ export function CinematicExperience() {
 
         {/* L-01: 0s to 1.8s · The Valley Opening */}
         <section className="cine-section relative h-[140vh]" data-time-start="0" data-time-end="1.8">
-          <div className="sticky top-0 h-[100svh] flex flex-col justify-center items-start px-6 sm:px-12 md:px-24 pr-16 md:pr-24">
-            <div className="story-scrim relative space-y-4 md:space-y-6 max-w-2xl pointer-events-auto drop-shadow-2xl">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-start px-6 sm:px-12 md:px-24 pr-16 md:pr-24">
+            <div className="story-scrim relative z-10 z-10 space-y-4 md:space-y-6 max-w-2xl pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs flex items-center gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-amber animate-ping" />
                 L-01 · 15:40 · ALT 2,180M
               </p>
-              <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-normal leading-[1.05] text-cream [text-shadow:0_4px_30px_rgba(0,0,0,0.9)]">
+              <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-normal leading-[1.05] text-cream drop-shadow-md">
                 The road stops<br />at Rumsu.
               </h1>
-              <p className="text-cream/90 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl [text-shadow:0_2px_16px_rgba(0,0,0,0.9)]">
+              <p className="text-cream/90 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl drop-shadow-md">
                 Above it, the trail to Chandrakhani — where a storm once tore a basket of eighteen gods off a rishi&apos;s head and scattered them across these peaks.
               </p>
-              <p className="text-amber-300/80 text-xs sm:text-sm hud-mono tracking-wide [text-shadow:0_2px_12px_rgba(0,0,0,0.9)]">
+              <p className="text-amber-300/80 text-xs sm:text-sm hud-mono tracking-wide [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
                 They&apos;re still up there. We have a telescope.
               </p>
             </div>
@@ -128,21 +128,21 @@ export function CinematicExperience() {
 
         {/* L-02: 1.8s to 3.5s · The Architecture */}
         <section className="cine-section relative h-[140vh]" data-time-start="1.8" data-time-end="3.5">
-          <div className="sticky top-0 h-[100svh] flex flex-col justify-center px-6 sm:px-12 md:px-24 pr-16 md:pr-24">
-            <div className="story-scrim relative space-y-4 md:space-y-6 max-w-lg pointer-events-auto drop-shadow-2xl">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-6 sm:px-12 md:px-24 pr-16 md:pr-24">
+            <div className="story-scrim relative z-10 space-y-4 md:space-y-6 max-w-lg pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
                 L-02 · 16:15 · THE APPROACH
               </p>
-              <h2 className="font-display text-3xl sm:text-5xl md:text-6xl font-normal leading-tight text-cream [text-shadow:0_4px_30px_rgba(0,0,0,0.9)]">
+              <h2 className="font-display text-3xl sm:text-5xl md:text-6xl font-normal leading-tight text-cream drop-shadow-md">
                 Built like a fortress.<br /><span className="italic text-amber-200/90">Smells like pine.</span>
               </h2>
-              <p className="text-cream/90 text-sm sm:text-base leading-relaxed [text-shadow:0_2px_16px_rgba(0,0,0,0.9)]">
+              <p className="text-cream/90 text-sm sm:text-base leading-relaxed drop-shadow-md">
                 Kath-kuni architecture doesn&apos;t use nails. It weaves solid deodar cedar and metamorphic slate into a joint that flexes with the mountain.
               </p>
               <div>
                 <button 
                   onClick={() => setIsSandboxOpen(true)}
-                  className="px-6 py-3 rounded-full bg-black/60 hover:bg-black/90 border border-amber-400/30 hover:border-amber-400/80 text-amber-300 text-xs hud-mono tracking-widest transition-all uppercase pointer-events-auto shadow-2xl backdrop-blur-xl hover:scale-105 active:scale-95"
+                  className="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/20 hover:border-amber-400/80 text-amber-300 text-xs hud-mono tracking-widest transition-all uppercase pointer-events-auto shadow-2xl backdrop-blur-xl hover:scale-105 active:scale-95"
                 >
                   Inspect Architecture →
                 </button>
@@ -153,21 +153,21 @@ export function CinematicExperience() {
 
         {/* L-03: 3.5s to 5.2s · The Hearth */}
         <section className="cine-section relative h-[140vh]" data-time-start="3.5" data-time-end="5.2">
-          <div className="sticky top-0 h-[100svh] flex flex-col justify-center items-end text-right px-6 sm:px-12 md:px-24 pl-16 md:pl-24">
-            <div className="story-scrim relative space-y-4 md:space-y-6 max-w-lg pointer-events-auto drop-shadow-2xl">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-end text-right px-6 sm:px-12 md:px-24 pl-16 md:pl-24">
+            <div className="story-scrim relative z-10 space-y-4 md:space-y-6 max-w-lg pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
                 L-03 · 18:30 · THE HEARTH
               </p>
-              <h2 className="font-display text-3xl sm:text-5xl md:text-6xl font-normal leading-tight text-cream [text-shadow:0_4px_30px_rgba(0,0,0,0.9)]">
+              <h2 className="font-display text-3xl sm:text-5xl md:text-6xl font-normal leading-tight text-cream drop-shadow-md">
                 Cold outside.<br /><span className="italic text-amber-300">Warm inside.</span>
               </h2>
-              <p className="text-cream/90 text-sm sm:text-base leading-relaxed [text-shadow:0_2px_16px_rgba(0,0,0,0.9)]">
+              <p className="text-cream/90 text-sm sm:text-base leading-relaxed drop-shadow-md">
                 The woodstove is always running. Dinner is slow-cooked, and the stories outlast the embers.
               </p>
               <div>
                 <button 
                   onClick={() => setIsGalleryOpen(true)}
-                  className="px-6 py-3 rounded-full bg-black/60 hover:bg-black/90 border border-amber-400/30 hover:border-amber-400/80 text-amber-300 text-xs hud-mono tracking-widest transition-all uppercase pointer-events-auto shadow-2xl backdrop-blur-xl hover:scale-105 active:scale-95"
+                  className="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/20 hover:border-amber-400/80 text-amber-300 text-xs hud-mono tracking-widest transition-all uppercase pointer-events-auto shadow-2xl backdrop-blur-xl hover:scale-105 active:scale-95"
                 >
                   View The Hearth →
                 </button>
@@ -178,8 +178,8 @@ export function CinematicExperience() {
 
         {/* L-07: 5.2s to 6.8s · The Eighteen Gods */}
         <section className="cine-section relative h-[150vh]" data-time-start="5.2" data-time-end="6.8">
-          <div className="sticky top-0 h-[100svh] flex flex-col justify-center px-4 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
-            <div className="story-scrim space-y-4 md:space-y-6 bg-neutral-950/80 p-5 sm:p-8 md:p-10 rounded-2xl md:rounded-3xl backdrop-blur-2xl border border-white/10 shadow-[0_32px_96px_rgba(0,0,0,0.85)] pointer-events-auto">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-4 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
+            <div className="story-scrim relative z-10 space-y-4 md:space-y-6 pointer-events-auto">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
                 <div className="space-y-2">
                   <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs flex items-center gap-2">
@@ -225,7 +225,7 @@ export function CinematicExperience() {
 
         {/* L-08: 6.8s to 8.0s · Ephemeris & Date Selector */}
         <section className="cine-section relative h-[150vh]" data-time-start="6.8" data-time-end="8.0">
-          <div className="sticky top-0 h-[100svh] flex flex-col justify-center px-3 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-3 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
             <div className="story-scrim pointer-events-auto">
               <DateDial />
             </div>
@@ -234,8 +234,8 @@ export function CinematicExperience() {
 
         {/* L-09: 8.0s to 9.2s · The Valley Commons */}
         <section className="cine-section relative h-[140vh]" data-time-start="8.0" data-time-end="9.2">
-          <div className="sticky top-0 h-[100svh] flex flex-col justify-center px-4 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
-            <div className="story-scrim space-y-4 bg-neutral-950/80 p-5 sm:p-8 md:p-12 rounded-2xl md:rounded-3xl backdrop-blur-2xl border border-white/10 shadow-[0_32px_96px_rgba(0,0,0,0.85)] pointer-events-auto">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-4 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
+            <div className="story-scrim relative z-10 space-y-4 md:space-y-6 pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
                 L-09 · 02:27 · THE VALLEY COMMONS
               </p>
@@ -249,15 +249,15 @@ export function CinematicExperience() {
 
         {/* L-10: 9.2s to 10.0s · First Light & Booking */}
         <section className="cine-section relative h-[140vh]" data-time-start="9.2" data-time-end="10.0">
-          <div className="sticky top-0 h-[100svh] flex flex-col justify-center items-center px-6 text-center">
-            <div className="story-scrim relative space-y-6 md:space-y-8 max-w-xl pointer-events-auto drop-shadow-2xl">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-center px-6 text-center">
+            <div className="story-scrim relative z-10 space-y-6 md:space-y-8 max-w-xl pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
                 L-10 · 06:05 · FIRST LIGHT
               </p>
-              <h2 className="font-display text-4xl sm:text-6xl md:text-7xl font-normal text-cream leading-tight [text-shadow:0_4px_30px_rgba(0,0,0,0.9)]">
+              <h2 className="font-display text-4xl sm:text-6xl md:text-7xl font-normal text-cream leading-tight drop-shadow-md">
                 Sunrise at 06:14.
               </h2>
-              <p className="text-cream/90 text-sm sm:text-base leading-relaxed [text-shadow:0_2px_16px_rgba(0,0,0,0.9)]">
+              <p className="text-cream/90 text-sm sm:text-base leading-relaxed drop-shadow-md">
                 The shadow of the ridge slides down the orchard. The fire is still burning. Your morning coffee is ready.
               </p>
               <div>

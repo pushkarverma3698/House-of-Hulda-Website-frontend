@@ -41,7 +41,7 @@ export function DateDial() {
   return (
     <section className="relative my-0 w-full max-w-5xl mx-auto px-0 md:px-4 pointer-events-auto">
       {/* Luxury Astronomical Glass Container */}
-      <div className="relative overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-neutral-950/80 p-4 sm:p-6 md:p-8 backdrop-blur-2xl shadow-[0_32px_96px_rgba(0,0,0,0.8)]">
+      <div className="relative overflow-hidden p-4 sm:p-6 md:p-8">
         {/* Subtle Ambient Radial Glow */}
         <div 
           className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-amber-500/10 blur-3xl pointer-events-none transition-all duration-700"
@@ -49,7 +49,7 @@ export function DateDial() {
         />
 
         {/* Top Header & Telemetry Coordinates */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-white/10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
@@ -118,25 +118,25 @@ export function DateDial() {
 
         {/* Telemetry Grid & Celestial Status */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 pt-2 pb-6">
-          <div className="p-4 rounded-xl border border-white/5 bg-black/40 backdrop-blur-md flex flex-col justify-between">
+          <div className="p-4 rounded-xl flex flex-col justify-between">
             <span className="hud-mono text-[9.5px] uppercase tracking-wider text-neutral-400">Dark From</span>
             <div className="mt-2 font-mono text-xl md:text-2xl text-amber-300 font-semibold">{activeData.darkFrom}</div>
             <span className="text-[10px] text-neutral-400 mt-1 font-body">Astronomical twilight start</span>
           </div>
 
-          <div className="p-4 rounded-xl border border-white/5 bg-black/40 backdrop-blur-md flex flex-col justify-between">
+          <div className="p-4 rounded-xl flex flex-col justify-between">
             <span className="hud-mono text-[9.5px] uppercase tracking-wider text-neutral-400">Until</span>
             <div className="mt-2 font-mono text-xl md:text-2xl text-amber-300 font-semibold">{activeData.darkUntil}</div>
             <span className="text-[10px] text-neutral-400 mt-1 font-body">Dawn twilight onset</span>
           </div>
 
-          <div className="p-4 rounded-xl border border-white/5 bg-black/40 backdrop-blur-md flex flex-col justify-between">
+          <div className="p-4 rounded-xl flex flex-col justify-between">
             <span className="hud-mono text-[9.5px] uppercase tracking-wider text-neutral-400">Hours Dark</span>
             <div className="mt-2 font-mono text-xl md:text-2xl text-neutral-100 font-semibold">{activeData.darkHours}</div>
             <span className="text-[10px] text-neutral-400 mt-1 font-body">Total unpolluted dark window</span>
           </div>
 
-          <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 backdrop-blur-md flex flex-col justify-between">
+          <div className="p-4 rounded-xl flex flex-col justify-between">
             <div className="flex justify-between items-center">
               <span className="hud-mono text-[9.5px] uppercase tracking-wider text-amber-400">Moon Phase</span>
               <span className="hud-mono text-[9px] text-amber-300 font-bold">{activeData.moonIllum}</span>
@@ -149,7 +149,7 @@ export function DateDial() {
         </div>
 
         {/* Celestial Highlight & Deity Count Banner */}
-        <div className="p-5 rounded-2xl border border-white/10 bg-white/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-4 my-2">
+        <div className="p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 my-2">
           <div className="flex items-start gap-3">
             <span className="text-2xl">✦</span>
             <div>
