@@ -1,4 +1,6 @@
 'use client'
+import { hiresCache } from "@/components/canvas/ScrollCanvas"
+
 
 import { useEffect, useState, useRef } from 'react'
 
@@ -12,6 +14,8 @@ const TOTAL_HERO_FRAMES = 240
 const CRITICAL_CONCURRENCY = 6
 const BACKGROUND_CONCURRENCY = 4
 const SAFETY_TIMEOUT_MS = 4000
+
+
 
 /**
  * The HIGH-RES tier. Since 4G/5G is ubiquitous, we use the 4-second loading
@@ -32,6 +36,7 @@ async function warmFrame(index: number, signal: AbortSignal): Promise<void> {
   try {
     const response = await fetch(frameUrl(index), { signal })
     await response.arrayBuffer() // must drain or the connection stays open
+    await hiresCache.load(index, () => {}) // Pre-decode into GPU memory so first paint is instantly sharp
   } catch {
     // Aborted or offline — ScrollCanvas re-requests on demand.
   }
