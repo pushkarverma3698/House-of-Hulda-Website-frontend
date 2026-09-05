@@ -84,8 +84,11 @@ export function CinematicExperience() {
   return (
     <main ref={containerRef} className="relative bg-transparent text-cream font-body selection:bg-amber selection:text-ink">
       
-      {/* 2026 Apple-Tier Scrubbed Cinematic Video */}
-      <CinematicScrubber videoSrc="/videos/master_scroll_optimized.mp4" />
+      {/* 2026 Apple-Tier Scrubbed Cinematic Video with Responsive Injection */}
+      <CinematicScrubber 
+        desktopSrc="/videos/master_scroll_optimized.mp4" 
+        mobileSrc="/videos/master_mobile_optimized.mp4"
+      />
 
       <Navigation />
       <TimeRail />
@@ -102,7 +105,7 @@ export function CinematicExperience() {
 
         {/* L-01: 0s to 2.5s */}
         <section className="cine-section relative h-[150vh]" data-time-start="0" data-time-end="2.5">
-          <div className="sticky top-0 h-screen flex flex-col justify-center items-start px-8 md:px-24">
+          <div className="sticky top-0 h-[100svh] flex flex-col justify-center items-start px-8 md:px-24">
             <div className="story-scrim relative space-y-5 max-w-2xl pointer-events-auto drop-shadow-2xl">
               <p className="hud-mono text-amber tracking-widest text-[10px] flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber animate-ping" />
@@ -123,7 +126,7 @@ export function CinematicExperience() {
 
         {/* L-02: 2.5s to 4.5s */}
         <section className="cine-section relative h-[150vh]" data-time-start="2.5" data-time-end="4.5">
-          <div className="sticky top-0 h-screen flex flex-col justify-center px-8 md:px-24">
+          <div className="sticky top-0 h-[100svh] flex flex-col justify-center px-8 md:px-24">
             <div className="story-scrim relative space-y-5 max-w-lg pointer-events-auto drop-shadow-2xl">
               <p className="hud-mono text-amber tracking-widest text-[10px]">
                 L-02 · 16:15 · THE APPROACH
@@ -146,7 +149,7 @@ export function CinematicExperience() {
 
         {/* L-03: 4.5s to 6.5s */}
         <section className="cine-section relative h-[150vh]" data-time-start="4.5" data-time-end="6.5">
-          <div className="sticky top-0 h-screen flex flex-col justify-center items-end text-right px-8 md:px-24">
+          <div className="sticky top-0 h-[100svh] flex flex-col justify-center items-end text-right px-8 md:px-24">
             <div className="story-scrim relative space-y-5 max-w-lg pointer-events-auto drop-shadow-2xl">
               <p className="hud-mono text-amber tracking-widest text-[10px]">
                 L-03 · 18:30 · THE HEARTH
@@ -169,7 +172,7 @@ export function CinematicExperience() {
 
         {/* L-07: 6.5s to 8.0s */}
         <section className="cine-section relative h-[150vh]" data-time-start="6.5" data-time-end="8.0">
-          <div className="sticky top-0 h-screen flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto w-full">
+          <div className="sticky top-0 h-[100svh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto w-full">
             <div className="story-scrim space-y-6 bg-black/40 p-6 md:p-10 rounded-2xl backdrop-blur-xl border border-white/[0.07] shadow-2xl pointer-events-auto">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="space-y-3">
@@ -212,7 +215,7 @@ export function CinematicExperience() {
 
         {/* L-08: 8.0s to 9.0s */}
         <section className="cine-section relative h-[150vh]" data-time-start="8.0" data-time-end="9.0">
-          <div className="sticky top-0 h-screen flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto w-full">
+          <div className="sticky top-0 h-[100svh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto w-full">
             <div className="story-scrim space-y-4 bg-black/40 p-8 md:p-12 rounded-2xl backdrop-blur-xl border border-white/[0.06] pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px]">
                 L-08 · 02:27 · THE VALLEY COMMONS
@@ -227,7 +230,7 @@ export function CinematicExperience() {
 
         {/* L-09: 9.0s to 10.0s */}
         <section className="cine-section relative h-[150vh]" data-time-start="9.0" data-time-end="10.0">
-          <div className="sticky top-0 h-screen flex flex-col justify-center items-center px-8 text-center">
+          <div className="sticky top-0 h-[100svh] flex flex-col justify-center items-center px-8 text-center">
             <div className="story-scrim relative space-y-7 max-w-xl pointer-events-auto drop-shadow-2xl">
               <p className="hud-mono text-amber tracking-widest text-[10px]">
                 L-09 · 06:05 · FIRST LIGHT
