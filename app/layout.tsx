@@ -48,7 +48,6 @@ export const metadata: Metadata = {
     siteName: SITE.name,
     title: "House of Hulda Manali — Somewhere above the noise, a light is on.",
     description: SITE.description,
-    // TODO[Phase 2]: replace with the golden Arrival hero (real photo) at /og.jpg
     images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "House of Hulda at golden hour, Naggar, Manali" }],
   },
   twitter: {
@@ -64,10 +63,6 @@ export const viewport: Viewport = {
   themeColor: "#0a0f17",
   width: "device-width",
   initialScale: 1,
-  // The film is full-bleed, so the page should be too — otherwise a notched
-  // phone letterboxes the one thing the site is made of. `cover` is also what
-  // makes env(safe-area-inset-*) report real numbers; without it they are all
-  // zero and the bottom chrome sits under the home indicator.
   viewportFit: "cover",
 };
 
@@ -80,19 +75,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-IN" className={`${cormorant.variable} ${mulish.variable}`}>
-      <body className="font-body fixed inset-0 overflow-hidden bg-[#0a0f17]">
+      <body className="font-body bg-[#0a0f17] text-cream">
         <script
           type="application/ld+json"
-          // schema validates against Google Rich Results — see lib/schema.ts
           dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd()) }}
         />
         <Providers>
-          <div id="scroll-wrapper" className="absolute inset-0 overflow-y-auto overflow-x-hidden">
-            <div id="scroll-content" className="min-h-full">
-              {children}
-              {booking}
-            </div>
-          </div>
+          {children}
+          {booking}
           <WhatsappFab />
         </Providers>
         <Analytics />
