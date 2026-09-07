@@ -392,4 +392,25 @@ Follow this strict production contract:
 
 ---
 
+## 11. Phase 10: Asymmetric Resolution Architecture & Frictionless Momentum
+
+### 1. The Asymmetric Resolution Contract
+- **Desktop (1080p Lanczos)**:
+  - Master frames extracted at **1920×1080** using `-vf "scale=1920:1080:flags=lanczos" -qscale:v 3`.
+  - 240 frames weigh **41 MB** (~158 KB/frame).
+  - VRAM budget expanded to **500 MB** in `ScrollCanvas.tsx` (holds 63 frames of uncompressed 1080p RGBA).
+  - Hardware decode on Apple Silicon / modern desktop takes only **3–6 ms** (locked 60 FPS).
+  - Eliminates the 2.25x–3x bilinear canvas upscale blur on Retina MacBooks and 4K displays.
+- **Mobile (720p Guardrail)**:
+  - Master frames kept strictly at **720×1280 (720p)**.
+  - VRAM budget kept at **160 MB** (holds 45 frames).
+  - **Why?** iOS Safari WebKit forcibly terminates tabs at ~350 MB (`jetsam` supervisor). Holding 48 frames of 1080p would require 380 MB of VRAM alone (+ 140 MB base DOM = 520 MB), guaranteeing a 100% crash rate on iPhones. 720p avoids this while delivering ~240 effective PPI on a 6.1" screen.
+
+### 2. Frictionless "God Feel" Scroll Momentum
+- **The Stutter Trap**: Placing artificial bounds (such as calling `lenis.scrollTo(clampedTarget, { force: true })` inside `lenis.on('scroll')`) forcefully overwrites Lenis's internal momentum calculation, causing jarring stutter during trackpad flicks.
+- **The Solution**: With all 240 frames cached locally in the browser's HTTP disk cache, the playhead cannot outrun the network. Removing artificial clamping and setting `lerp: 0.075` (desktop) and `wheelMultiplier: 0.95` restores continuous, silky cinema-camera glide matching 24 FPS film playback.
+
+---
+
 *Document finalized and archived in `Cinematic 3d videos trick/CASE_STUDY_AND_PRODUCTION_BLUEPRINT.md` and ingested into canonical memory brain.*
+
