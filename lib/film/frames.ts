@@ -53,12 +53,18 @@ export const isCoarsePointer = (): boolean => {
   return coarsePointer
 }
 
-export const proxyFrameUrl = (index: number) => `/frames/hero-proxy/frame_${pad(index)}.webp`
-export const midFrameUrl = (index: number) => `/frames/hero-mid/frame_${pad(index)}.webp`
+export const proxyFrameUrl = (index: number) =>
+  isCoarsePointer()
+    ? `/frames-v2/hero-proxy/frame_${pad(index)}.jpg`
+    : `/frames-v2/hero-proxy-desktop/frame_${pad(index)}.jpg`
+export const midFrameUrl = (index: number) =>
+  isCoarsePointer()
+    ? `/frames-v2/hero-mid/frame_${pad(index)}.jpg`
+    : `/frames-v2/hero-mid-desktop/frame_${pad(index)}.jpg`
 export const hiresFrameUrl = (index: number) =>
   isCoarsePointer()
-    ? `/frames/hero/frame_${pad(index)}.jpg`
-    : `/frames/hero-desktop/frame_${pad(index)}.jpg`
+    ? `/frames-v2/hero/frame_${pad(index)}.jpg`
+    : `/frames-v2/hero-desktop/frame_${pad(index)}.jpg`
 
 /** Bytes the whole master sequence costs on the wire, used to project how long
  *  the curtain still has to hold. Measured from the encoded directories, not

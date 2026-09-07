@@ -74,7 +74,7 @@ const firstByteAt = { value: 0 }
 const started = Date.now()
 page.on('response', async (res) => {
   const url = res.url()
-  if (!url.includes('/frames/')) return
+  if (!url.includes('/frames') && !url.includes('/frames-v2')) return
   let bucket = 'other'
   if (url.includes('/hero-proxy/')) bucket = 'proxy'
   else if (url.includes('/hero-mid/')) bucket = 'mid'
@@ -96,6 +96,15 @@ if (cpuRate > 1) await cdp.send('Emulation.setCPUThrottlingRate', { rate: cpuRat
 
 const navStart = Date.now()
 await page.goto(`${baseUrl}/?debug=perf`, { waitUntil: 'domcontentloaded' })
+
+// Wait for preloader enter button and click
+try {
+  const enterBtn = page.locator('.fixed.inset-0.z-50 button')
+  await enterBtn.waitFor({ state: 'visible', timeout: 15_000 })
+  await enterBtn.click()
+} catch {
+  // If button not present or auto-unmounted
+}
 
 // The curtain is gone when the preloader unmounts itself.
 await page.waitForFunction(

@@ -59,6 +59,7 @@ export function useScrollRig() {
       syncTouch: false, // native momentum on mobile devices
     });
     globalLenis = lenis;
+    if (typeof window !== 'undefined') (window as any).__lenis = lenis;
 
     const EPSILON = 1 / 4096;
     let lastP = -1;

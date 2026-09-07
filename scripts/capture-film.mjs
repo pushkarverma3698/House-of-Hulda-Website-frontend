@@ -57,7 +57,18 @@ await cdp.send('Network.emulateNetworkConditions', {
 })
 
 await page.goto(`${url}/?debug=perf`, { waitUntil: 'domcontentloaded' })
-await page.waitForFunction(() => !document.querySelector('[data-preloader]'), null, { timeout: 60_000 })
+
+try {
+  const enterBtn = page.locator('.fixed.inset-0.z-50 button')
+  await enterBtn.waitFor({ state: 'visible', timeout: 15_000 })
+  await enterBtn.click()
+} catch {}
+
+await page.waitForFunction(
+  () => !document.querySelector('[data-preloader]') && !document.querySelector('.fixed.inset-0.z-50'),
+  null,
+  { timeout: 60_000 }
+)
 await page.waitForTimeout(500)
 
 const captures = await page.evaluate(

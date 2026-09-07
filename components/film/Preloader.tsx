@@ -1,5 +1,5 @@
 'use client'
-import { hiresCache } from "@/components/canvas/ScrollCanvas"
+import { hiresCache, warmRemainingHighResFrames } from "@/components/canvas/ScrollCanvas"
 
 
 import { useEffect, useState, useRef } from 'react'
@@ -68,6 +68,7 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
       setProgress(100)
       setIsReady(true)
       critical.forEach(i => hiresCache.unprotect(i))
+      warmRemainingHighResFrames()
     }
 
     const safetyTimeout = setTimeout(completePreloader, SAFETY_TIMEOUT_MS)
@@ -97,6 +98,7 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
 
   const handleEnter = () => {
     setIsLoaded(true)
+    warmRemainingHighResFrames()
     setTimeout(() => {
       onComplete?.()
       window.dispatchEvent(new Event('start-atmosphere'))
