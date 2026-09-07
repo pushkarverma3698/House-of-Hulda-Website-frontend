@@ -52,9 +52,9 @@ export function useScrollRig() {
     const lenis = new Lenis({
       wrapper: wrapper || window,
       content: content || document.documentElement,
-      lerp: isCoarse ? 0.12 : 0.09,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.5,
+      lerp: isCoarse ? 0.10 : 0.075,
+      wheelMultiplier: 0.95,
+      touchMultiplier: 1.2,
       smoothWheel: true,
       syncTouch: false, // native momentum on mobile devices
     });
@@ -65,19 +65,6 @@ export function useScrollRig() {
     let lastP = -1;
 
     lenis.on('scroll', (e: any) => {
-      // SImple deterministic UX constraint:
-      // No matter how hard the user flicks the wheel, they are not allowed to queue a 
-      // scroll target that skips past the next component (e.g. > 150vh).
-      // This mathematically guarantees they cannot outrun the cinematic cache stride.
-      const maxDist = window.innerHeight * 1.5;
-      const dist = e.targetScroll - e.actualScroll;
-      
-      if (Math.abs(dist) > maxDist) {
-        const clampedTarget = e.actualScroll + Math.sign(dist) * maxDist;
-        // Intercept and rewrite the inertia destination
-        lenis.scrollTo(clampedTarget, { immediate: false, lock: false, force: true });
-      }
-
       const p = e.limit > 0 ? Math.max(0, Math.min(1, e.scroll / e.limit)) : 0;
       scrollState.progress = p;
       scrollState.velocity = e.velocity;

@@ -11,11 +11,11 @@ ffmpeg -v error -y -i public/videos/master_mobile_test.mp4 -vf "scale=320:-2:fla
 echo "Extracting Mobile (hero-proxy)..."
 ffmpeg -v error -y -i public/videos/master_mobile_test.mp4 -vf "scale=160:-2:flags=lanczos" -qscale:v 6 public/frames-v2/hero-proxy/frame_%03d.jpg
 
-echo "Extracting Desktop (hero-desktop)..."
-ffmpeg -v error -y -i public/videos/master_scroll_test.mp4 -qscale:v 2 public/frames-v2/hero-desktop/frame_%03d.jpg
+echo "Extracting Desktop (hero-desktop 1080p)..."
+ffmpeg -v error -y -i public/videos/master_scroll_test.mp4 -vf "scale=1920:1080:flags=lanczos" -qscale:v 3 public/frames-v2/hero-desktop/frame_%03d.jpg
 echo "Extracting Desktop (hero-mid-desktop)..."
-ffmpeg -v error -y -i public/videos/master_scroll_test.mp4 -vf "scale=568:-2:flags=lanczos" -qscale:v 4 public/frames-v2/hero-mid-desktop/frame_%03d.jpg
+ffmpeg -v error -y -i public/videos/master_scroll_test.mp4 -vf "scale=960:-2:flags=lanczos" -qscale:v 4 public/frames-v2/hero-mid-desktop/frame_%03d.jpg
 echo "Extracting Desktop (hero-proxy-desktop)..."
-ffmpeg -v error -y -i public/videos/master_scroll_test.mp4 -vf "scale=284:-2:flags=lanczos" -qscale:v 6 public/frames-v2/hero-proxy-desktop/frame_%03d.jpg
+ffmpeg -v error -y -i public/videos/master_scroll_test.mp4 -vf "scale=480:-2:flags=lanczos" -qscale:v 6 public/frames-v2/hero-proxy-desktop/frame_%03d.jpg
 
 echo "Done!"

@@ -42,10 +42,40 @@ export function CinematicExperience() {
       // Atmospheric entrance and exit easing for each story beat
       const sections = gsap.utils.toArray('.cine-section') as HTMLElement[]
       
-      sections.forEach((section) => {
+      sections.forEach((section, idx) => {
         const textWrapper = section.querySelector('.story-scrim')
         if (textWrapper) {
           const elements = Array.from(textWrapper.children);
+          
+          if (idx === 0) {
+            // First section is hero arrival: starts fully visible and fades up smoothly on scroll
+            gsap.set(elements, { opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 });
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: section,
+                scroller: document.getElementById('scroll-wrapper') || window,
+                start: 'top top',
+                end: 'bottom 20%',
+                scrub: 1.2,
+              }
+            });
+            tl.to(elements, {
+              y: -20,
+              duration: 0.5,
+              ease: 'none'
+            })
+            .to(elements, { 
+              opacity: 0, 
+              y: -60, 
+              filter: 'blur(16px)', 
+              scale: 1.05, 
+              duration: 0.35, 
+              ease: 'power3.in',
+              stagger: 0.03
+            });
+            return;
+          }
+
           gsap.set(elements, { opacity: 0, y: 60, filter: 'blur(16px)', scale: 0.95 });
           
           const tl = gsap.timeline({
@@ -110,19 +140,28 @@ export function CinematicExperience() {
         <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="0" data-time-end="1.8">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-start px-6 sm:px-12 md:px-24 pr-16 md:pr-24 pb-24 md:pb-0">
             <div className="story-scrim relative z-10 space-y-4 md:space-y-6 max-w-2xl pointer-events-auto">
-              <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs flex items-center gap-2.5">
+              <p className="hud-mono text-amber tracking-[0.25em] text-xs md:text-sm font-medium uppercase flex items-center gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-amber animate-rec shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
-                L-01 · 15:40 · ALT 2,180M
+                HOUSE OF HULDA
               </p>
-              <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-normal leading-[1.05] text-cream drop-shadow-md">
-                The road stops<br />at Rumsu.
+              <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal uppercase leading-[1.02] tracking-tight text-cream drop-shadow-lg">
+                THE ROAD STOPS<br />AT RUMSU.
               </h1>
-              <p className="text-cream/90 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl drop-shadow-md">
-                Above it, the trail to Chandrakhani — where a storm once tore a basket of eighteen gods off a rishi&apos;s head and scattered them across these peaks.
+              <p className="text-cream/90 font-serif italic text-lg sm:text-xl md:text-2xl drop-shadow-md">
+                Naggar · Himachal Pradesh
               </p>
-              <p className="text-amber-300/80 text-xs sm:text-sm hud-mono tracking-wide [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
-                They&apos;re still up there. We have a telescope.
+              <p className="hud-mono text-amber-300/90 text-xs sm:text-sm tracking-widest uppercase [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
+                2,180 m
               </p>
+              <div className="pt-2">
+                <Link
+                  href="/book"
+                  className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-400 text-ink font-semibold hud-mono text-xs tracking-widest uppercase transition-all duration-300 shadow-[0_0_24px_rgba(245,158,11,0.4)] hover:shadow-[0_0_32px_rgba(245,158,11,0.7)] hover:scale-105 active:scale-95"
+                >
+                  Reserve
+                  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
