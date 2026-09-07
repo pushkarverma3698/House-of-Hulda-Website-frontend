@@ -168,10 +168,10 @@ export function DateDial() {
             <Link
               href="/book"
               scroll={false}
-              className="px-6 py-3 rounded-full bg-amber-400 text-black font-mono text-xs font-bold uppercase tracking-widest hover:bg-amber-300 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:scale-[1.03] active:scale-95 whitespace-nowrap flex items-center gap-2"
+              className="group px-6 py-3 rounded-full bg-amber-400 text-black font-mono text-xs font-bold uppercase tracking-widest hover:bg-amber-300 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:scale-[1.03] active:scale-95 whitespace-nowrap flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f17]"
             >
               <span>Hold {activeData.dateStr}</span>
-              <span>→</span>
+              <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
             </Link>
           </div>
         </div>

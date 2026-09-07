@@ -242,9 +242,29 @@ body {
  * The directional weighting also goes: it existed so a block pushed against the
  * viewport edge would not have its falloff clipped into a visible rectangle. In
  * the field the block is inset on both sides, so centred is correct — and it
- * frees a beat to sit on either side regardless of which modifier it carries. */
-[data-film-fit='aperture'] 
-[data-film-fit='aperture'] 
+/* Ambient story scrim: casts a soft, low-contrast radial shadow behind narrative text
+   so typography remains consistently legible even when the high-res film passes over snow or sunlight */
+.story-scrim {
+  position: relative;
+}
+.story-scrim::before {
+  content: "";
+  position: absolute;
+  inset: -2rem -2.5rem;
+  background: radial-gradient(ellipse at center, rgba(10, 15, 23, 0.72) 0%, rgba(10, 15, 23, 0.38) 50%, transparent 78%);
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 1.5rem;
+}
+
+/* Mechanical camera recording indicator blink for real-time telemetry HUD */
+@keyframes recBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(0.92); }
+}
+.animate-rec {
+  animation: recBlink 1.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
 
 /* Film chapter heading — slides up from 12px below and fades in */
 @keyframes chapterReveal {

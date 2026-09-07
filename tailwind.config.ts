@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 /**
  * Design tokens from the story bible's color & light system.
@@ -25,8 +26,12 @@ const config: Config = {
         // Warm cream — primary text/UI on dark grade
         cream: "#f3ece1",
         ink: "#1a120b",
-        // Brand accent (window-light amber) + ember
-        amber: "#d99a4e",
+        // Brand accent: preserves full Tailwind amber palette (amber-200, 300, 400, 500)
+        // while defaulting `bg-amber` / `text-amber` to the brand's window-light amber #d99a4e
+        amber: {
+          ...colors.amber,
+          DEFAULT: "#d99a4e",
+        },
         ember: "#c2603a",
         // Base canvas before grade kicks in
         canvas: "#0a0f17",
