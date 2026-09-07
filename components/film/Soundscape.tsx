@@ -120,26 +120,60 @@ export function Soundscape() {
     return () => window.removeEventListener('start-atmosphere', handleStartEvent)
   }, [isPlaying, toggleSound])
 
+  const [showHint, setShowHint] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowHint(true)
+    }, 1800)
+    const hideTimer = setTimeout(() => {
+      setShowHint(false)
+    }, 8500)
+    return () => {
+      clearTimeout(timer)
+      clearTimeout(hideTimer)
+    }
+  }, [])
+
   return (
     <div className="fixed z-40 flex items-center select-none bottom-[calc(5.5rem_+_env(safe-area-inset-bottom))] md:bottom-[32px] left-[32px]">
-      <button
-        onClick={toggleSound}
-        aria-label={isPlaying ? 'Turn atmospheric audio off' : 'Turn atmospheric audio on'}
-        aria-pressed={isPlaying}
-        className={`pointer-events-auto flex items-center justify-center h-[50px] w-[50px] rounded-full border backdrop-blur-md transition-all duration-500 shadow-[0_8px_24px_rgba(0,0,0,0.35)] group ${
-          isPlaying
-            ? 'bg-amber-400 border-transparent shadow-[0_0_25px_rgba(245,158,11,0.4)]'
-            : 'border-white/10 bg-black/20 hover:scale-[1.06] hover:bg-amber-400 hover:border-transparent'
-        }`}
-        title="Toggle Himalayan Atmospheric Sound"
-      >
-        {/* Equalizer Waveform Bars / Sound Icon */}
-        <span className="flex items-end justify-center gap-[3px] h-4 w-4">
-          <span className={`w-[2px] rounded-full transition-all duration-300 ${isPlaying ? 'bg-black h-4 animate-[pulse_0.6s_ease-in-out_infinite]' : 'bg-white/60 h-2 group-hover:bg-white'}`} />
-          <span className={`w-[2px] rounded-full transition-all duration-300 ${isPlaying ? 'bg-black h-3 animate-[pulse_0.9s_ease-in-out_infinite]' : 'bg-white/60 h-3.5 group-hover:bg-white'}`} />
-          <span className={`w-[2px] rounded-full transition-all duration-300 ${isPlaying ? 'bg-black h-3.5 animate-[pulse_1.2s_ease-in-out_infinite]' : 'bg-white/60 h-1.5 group-hover:bg-white'}`} />
-        </span>
-      </button>
+      <div className="relative flex items-center">
+        <button
+          onClick={() => {
+            setShowHint(false)
+            toggleSound()
+          }}
+          aria-label={isPlaying ? 'Turn atmospheric audio off' : 'Turn atmospheric audio on'}
+          aria-pressed={isPlaying}
+          className={`pointer-events-auto flex items-center justify-center h-[50px] w-[50px] rounded-full border backdrop-blur-md transition-all duration-500 shadow-[0_8px_24px_rgba(0,0,0,0.35)] group ${
+            isPlaying
+              ? 'bg-amber-400 border-transparent shadow-[0_0_25px_rgba(245,158,11,0.4)]'
+              : 'border-amber-500/20 bg-black/40 hover:scale-[1.06] hover:bg-amber-400 hover:border-transparent hover:shadow-[0_0_25px_rgba(245,158,11,0.4)]'
+          }`}
+          title="Toggle Himalayan Atmospheric Sound"
+        >
+          {/* Equalizer Waveform Bars / Sound Icon */}
+          <span className="flex items-end justify-center gap-[3px] h-4 w-4">
+            <span className={`w-[2px] rounded-full transition-all duration-300 ${isPlaying ? 'bg-black h-4 animate-[pulse_0.6s_ease-in-out_infinite]' : 'bg-white/70 h-2 group-hover:bg-black'}`} />
+            <span className={`w-[2px] rounded-full transition-all duration-300 ${isPlaying ? 'bg-black h-3 animate-[pulse_0.9s_ease-in-out_infinite]' : 'bg-white/70 h-3.5 group-hover:bg-black'}`} />
+            <span className={`w-[2px] rounded-full transition-all duration-300 ${isPlaying ? 'bg-black h-3.5 animate-[pulse_1.2s_ease-in-out_infinite]' : 'bg-white/70 h-1.5 group-hover:bg-black'}`} />
+          </span>
+        </button>
+
+        {/* Ambient discovery hint for first-time visitors */}
+        {showHint && !isPlaying && (
+          <div 
+            onClick={() => {
+              setShowHint(false)
+              toggleSound()
+            }}
+            className="absolute left-14 whitespace-nowrap px-3.5 py-1.5 rounded-full bg-black/80 border border-amber-400/40 text-amber-300 hud-mono text-[10px] tracking-wider uppercase shadow-[0_0_20px_rgba(245,158,11,0.25)] animate-in fade-in slide-in-from-left-2 duration-500 cursor-pointer hover:border-amber-300 hover:scale-105 transition-all flex items-center gap-2 backdrop-blur-md"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+            <span>Listen to Naggar Wind</span>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

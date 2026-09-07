@@ -114,11 +114,15 @@ interface HeritageSandboxProps {
 export function HeritageSandbox({ isOpen, onClose }: HeritageSandboxProps) {
   useEffect(() => {
     if (!isOpen) return;
+    window.dispatchEvent(new CustomEvent('app-modal-open'));
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.dispatchEvent(new CustomEvent('app-modal-close'));
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -128,31 +132,32 @@ export function HeritageSandbox({ isOpen, onClose }: HeritageSandboxProps) {
       role="dialog"
       aria-modal="true"
       aria-label="Kath-Kuni 3D Heritage Explorer"
-      className="fixed inset-0 z-50 flex flex-col justify-between bg-black/95 text-cream backdrop-blur-2xl animate-in fade-in duration-500 select-none"
+      className="fixed inset-0 z-50 flex flex-col justify-between bg-[#070a0f]/95 text-cream backdrop-blur-2xl animate-in fade-in duration-500 select-none"
     >
       {/* Top Architectural Header */}
-      <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-white/10">
+      <header className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 border-b border-white/10 bg-black/40 backdrop-blur-md">
         <div>
-          <span className="hud-mono text-amber tracking-widest text-[10px] uppercase flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber animate-ping" />
+          <span className="hud-mono text-amber-400 tracking-widest text-[10px] uppercase flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
             Tactile Heritage Explorer · 3D Sandbox
           </span>
-          <h2 className="font-display text-2xl text-cream mt-0.5">
+          <h2 className="font-display text-xl sm:text-2xl text-cream mt-0.5">
             Kath-Kuni Architectural Joint
           </h2>
         </div>
 
         <button
           onClick={onClose}
-          className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 hover:border-amber hover:bg-amber/10 text-cream/70 hover:text-white transition-all text-xs font-mono"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 hover:border-amber-400 hover:bg-amber-400/10 text-cream/80 hover:text-white transition-all text-xs font-mono group"
           aria-label="Close Sandbox"
         >
-          ✕
+          <span>✕</span>
+          <span className="hidden sm:inline-block text-[9px] text-amber-300/80 bg-white/5 px-1.5 py-0.5 rounded border border-white/10 group-hover:border-amber-400/40">ESC</span>
         </button>
       </header>
 
-      {/* 3D Viewport with Presentation Controls (Drag & Orbit) */}
-      <div className="relative flex-1 cursor-grab active:cursor-grabbing overflow-hidden">
+      {/* 3D Viewport with Presentation Controls (Drag & Orbit) & Ambient Studio Spotlight */}
+      <div className="relative flex-1 cursor-grab active:cursor-grabbing overflow-hidden bg-[radial-gradient(circle_at_center,_rgba(45,34,22,0.65)_0%,_#06080d_75%)]">
         <Canvas
           camera={{ position: [0, 1.5, 6.5], fov: 42 }}
           gl={{ antialias: true, powerPreference: 'high-performance' }}
@@ -171,31 +176,31 @@ export function HeritageSandbox({ isOpen, onClose }: HeritageSandboxProps) {
         </Canvas>
 
         {/* Orbit Instruction Hint */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none hud-mono text-[10px] text-cream/50 tracking-widest uppercase bg-black/50 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md flex items-center gap-2">
-          <span>✦</span> Click & Drag to Rotate 3D Model · Move Cursor for Lighting <span>✦</span>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none hud-mono text-[10px] text-cream/60 tracking-widest uppercase bg-black/60 px-5 py-2.5 rounded-full border border-white/15 backdrop-blur-md flex items-center gap-2 shadow-lg">
+          <span className="text-amber-400">✦</span> Click & Drag to Rotate Joint · Move Cursor for Mountain Sunlight <span className="text-amber-400">✦</span>
         </div>
       </div>
 
-      {/* Technical Spec Telemetry Grid */}
-      <footer className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 px-8 py-6 border-t border-white/10 bg-ink/50 backdrop-blur-md">
-        <div className="space-y-1">
-          <p className="hud-mono text-[9px] text-amber uppercase tracking-widest">Engineering Principle</p>
-          <p className="font-display text-sm text-cream/90">Mortarless Elastic Flexibility</p>
-          <p className="text-xs text-cream/60 leading-relaxed font-light">
+      {/* Technical Spec Telemetry Grid with Frosted Card Plates */}
+      <footer className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 px-6 md:px-10 py-5 border-t border-white/10 bg-black/60 backdrop-blur-xl">
+        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-amber-400/30 transition-all space-y-1.5 shadow-sm">
+          <p className="hud-mono text-[9px] text-amber-400 uppercase tracking-widest">Engineering Principle</p>
+          <p className="font-display text-sm text-cream font-medium">Mortarless Elastic Flexibility</p>
+          <p className="text-xs text-cream/70 leading-relaxed font-light">
             Alternating courses of dressed mountain schist and hand-hewn cedar beams tighten with frost and dissipate earthquake tremors harmlessly.
           </p>
         </div>
-        <div className="space-y-1">
-          <p className="hud-mono text-[9px] text-amber uppercase tracking-widest">Woodcraft & Material</p>
-          <p className="font-display text-sm text-cream/90">Aged Mountain Deodar (Cedrus deodara)</p>
-          <p className="text-xs text-cream/60 leading-relaxed font-light">
+        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-amber-400/30 transition-all space-y-1.5 shadow-sm">
+          <p className="hud-mono text-[9px] text-amber-400 uppercase tracking-widest">Woodcraft & Material</p>
+          <p className="font-display text-sm text-cream font-medium">Aged Mountain Deodar (Cedrus deodara)</p>
+          <p className="text-xs text-cream/70 leading-relaxed font-light">
             High natural resin content shields against decay, rot, and high-altitude moisture without chemical paints or sealants.
           </p>
         </div>
-        <div className="space-y-1">
-          <p className="hud-mono text-[9px] text-amber uppercase tracking-widest">Heritage Lineage</p>
-          <p className="font-display text-sm text-cream/90">500+ Years in Naggar Valley</p>
-          <p className="text-xs text-cream/60 leading-relaxed font-light">
+        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-amber-400/30 transition-all space-y-1.5 shadow-sm">
+          <p className="hud-mono text-[9px] text-amber-400 uppercase tracking-widest">Heritage Lineage</p>
+          <p className="font-display text-sm text-cream font-medium">500+ Years in Naggar Valley</p>
+          <p className="text-xs text-cream/70 leading-relaxed font-light">
             House of Hulda preserves this ancient joinery across every floor, ceiling joist, and cantilevered attic café balcony.
           </p>
         </div>

@@ -150,18 +150,20 @@ export function WebGLGallery({ isOpen, onClose }: WebGLGalleryProps) {
     goTo(prev);
   }, [currentIdx, goTo]);
 
-  // Keyboard navigation & lock body
+  // Keyboard navigation & modal lifecycle
   useEffect(() => {
     if (!isOpen) return;
-
+    window.dispatchEvent(new CustomEvent('app-modal-open'));
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight') nextSlide();
       if (e.key === 'ArrowLeft') prevSlide();
     };
-
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.dispatchEvent(new CustomEvent('app-modal-close'));
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen, onClose, nextSlide, prevSlide]);
 
   if (!isOpen) return null;
@@ -171,30 +173,31 @@ export function WebGLGallery({ isOpen, onClose }: WebGLGalleryProps) {
       role="dialog"
       aria-modal="true"
       aria-label="Liquid WebGL Gallery"
-      className="fixed inset-0 z-50 flex flex-col justify-between bg-black/95 text-cream backdrop-blur-2xl animate-in fade-in duration-500 select-none"
+      className="fixed inset-0 z-50 flex flex-col justify-between bg-[#06080d]/95 text-cream backdrop-blur-2xl animate-in fade-in duration-500 select-none"
     >
       {/* Top Header Bar */}
-      <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-white/10">
+      <header className="relative z-10 flex items-center justify-between px-6 md:px-10 py-5 border-b border-white/10 bg-black/40 backdrop-blur-md">
         <div>
-          <span className="hud-mono text-amber tracking-widest text-[10px] uppercase flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber animate-pulse" />
-            House of Hulda · Liquid WebGL Gallery
+          <span className="hud-mono text-amber-400 tracking-widest text-[10px] uppercase flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            House of Hulda · Tactile Sanctuary Gallery
           </span>
-          <h2 className="font-display text-2xl text-cream mt-0.5">
-            {GALLERY_SLIDES[currentIdx].title}
+          <h2 className="font-display text-xl sm:text-2xl text-cream mt-0.5">
+            Living Spaces & Deodar Architecture
           </h2>
         </div>
 
-        <div className="flex items-center gap-6">
-          <span className="hud-mono text-xs text-cream/50 tracking-widest">
+        <div className="flex items-center gap-4">
+          <span className="hud-mono text-xs text-amber-400/80 tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/10">
             {String(currentIdx + 1).padStart(2, '0')} / {String(GALLERY_SLIDES.length).padStart(2, '0')}
           </span>
           <button
             onClick={onClose}
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-white/20 hover:border-amber hover:bg-amber/10 text-cream/70 hover:text-white transition-all text-xs font-mono"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 hover:border-amber-400 hover:bg-amber-400/10 text-cream/80 hover:text-white transition-all text-xs font-mono group"
             aria-label="Close Gallery"
           >
-            ✕
+            <span>✕</span>
+            <span className="hidden sm:inline-block text-[9px] text-amber-300/80 bg-white/5 px-1.5 py-0.5 rounded border border-white/10 group-hover:border-amber-400/40">ESC</span>
           </button>
         </div>
       </header>
@@ -227,27 +230,50 @@ export function WebGLGallery({ isOpen, onClose }: WebGLGalleryProps) {
         </Canvas>
 
         {/* Drag Hint Overlay */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none hud-mono text-[9px] text-cream/40 tracking-widest uppercase bg-black/40 px-3 py-1.5 rounded-full border border-white/5">
-          ← Drag or Swipe to Distort →
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 pointer-events-none hud-mono text-[10px] text-cream/60 tracking-widest uppercase bg-black/60 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md shadow-md flex items-center gap-2">
+          <span className="text-amber-400">←</span> Drag or Swipe to Distort <span className="text-amber-400">→</span>
         </div>
       </div>
 
-      {/* Bottom Footer Controls */}
-      <footer className="relative z-10 flex flex-col md:flex-row items-center justify-between px-8 py-5 border-t border-white/10 gap-4">
-        <p className="text-sm text-cream/70 font-light max-w-xl">
-          {GALLERY_SLIDES[currentIdx].caption}
-        </p>
+      {/* Bottom Unified Monograph Controls */}
+      <footer className="relative z-10 flex flex-col md:flex-row items-center justify-between px-6 md:px-10 py-5 border-t border-white/10 bg-black/60 backdrop-blur-xl gap-4">
+        <div className="space-y-1 text-center md:text-left">
+          <div className="flex items-center justify-center md:justify-start gap-2.5">
+            <span className="hud-mono text-xs text-amber-400 font-semibold tracking-wider">
+              PLATE #{String(currentIdx + 1).padStart(2, '0')}
+            </span>
+            <span className="text-cream/30 text-xs">·</span>
+            <h3 className="font-display text-base sm:text-lg text-cream font-medium">
+              {GALLERY_SLIDES[currentIdx].title}
+            </h3>
+          </div>
+          <p className="text-xs sm:text-sm text-cream/70 font-light max-w-xl leading-relaxed">
+            {GALLERY_SLIDES[currentIdx].caption}
+          </p>
+        </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Mobile slide indicator dots */}
+          <div className="flex sm:hidden items-center gap-1.5 mr-2">
+            {GALLERY_SLIDES.map((_, i) => (
+              <span
+                key={i}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === currentIdx ? 'w-4 bg-amber-400' : 'w-1.5 bg-white/20'
+                }`}
+              />
+            ))}
+          </div>
+
           <button
             onClick={prevSlide}
-            className="px-5 py-2.5 rounded-full border border-white/20 hover:border-amber hover:bg-amber/10 hud-mono text-xs tracking-widest uppercase transition-all"
+            className="px-5 py-2.5 rounded-full border border-white/20 hover:border-amber-400 hover:bg-amber-400/10 text-cream/90 hover:text-white hud-mono text-xs tracking-widest uppercase transition-all"
           >
             ← Prev
           </button>
           <button
             onClick={nextSlide}
-            className="px-6 py-2.5 rounded-full border border-amber/40 bg-amber/10 hover:bg-amber/25 text-amber hud-mono text-xs tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(217,154,78,0.2)]"
+            className="px-6 py-2.5 rounded-full border border-amber-400/50 bg-amber-400/15 hover:bg-amber-400 hover:text-black text-amber-300 hud-mono text-xs tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)]"
           >
             Next →
           </button>

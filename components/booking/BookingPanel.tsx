@@ -110,7 +110,7 @@ export function BookingPanel() {
         <div className="mt-[22px] grid items-stretch gap-[clamp(18px,3vw,32px)] md:[grid-template-columns:1fr_0.92fr]">
           {/* real photograph of the selected stay */}
           <div
-            className="relative min-h-[240px] overflow-hidden rounded-[14px]"
+            className="group relative min-h-[240px] overflow-hidden rounded-[14px] shadow-lg"
             style={{ background: moodFillGradient(pkg.accent) }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -118,11 +118,11 @@ export function BookingPanel() {
               key={pkg.image}
               src={pkg.image}
               alt={pkg.label}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-            <div className="absolute inset-0 flex items-end p-[20px]">
-              <div className="font-body text-[10px] uppercase leading-[1.7] tracking-[0.08em] text-white/85">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 flex items-end p-[20px] pointer-events-none">
+              <div className="font-body text-[10px] uppercase leading-[1.7] tracking-[0.08em] text-white/90 drop-shadow-sm">
                 {pkg.label}
               </div>
             </div>
@@ -141,7 +141,7 @@ export function BookingPanel() {
               {pkg.inclusions.map((inc) => (
                 <span
                   key={inc}
-                  className="rounded-full border border-white/15 px-[11px] py-[5px] text-[10px] tracking-[0.08em] text-cream/75"
+                  className="rounded-full border border-amber-500/20 bg-amber-500/5 px-[11px] py-[5px] text-[10px] tracking-[0.08em] text-cream/80"
                 >
                   {inc}
                 </span>
@@ -151,26 +151,31 @@ export function BookingPanel() {
             <div className="mt-[24px] flex flex-wrap items-end gap-[24px]">
               <label className="flex flex-col gap-[8px]">
                 <span className="text-[9.5px] uppercase tracking-[0.2em] text-cream/55">Arrive</span>
-                <select
-                  value={arriveIdx}
-                  onChange={(e) => setArriveIdx(Number(e.target.value))}
-                  className="cursor-pointer rounded-[9px] border border-white/20 bg-white/[0.06] px-[12px] py-[10px] font-body text-[14px] text-cream"
-                >
-                  {SAMPLE_ARRIVALS.map((a, i) => (
-                    <option key={a} value={i} className="text-ink">
-                      {a}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={arriveIdx}
+                    onChange={(e) => setArriveIdx(Number(e.target.value))}
+                    className="cursor-pointer appearance-none rounded-[10px] border border-amber-500/30 bg-black/60 px-[14px] py-[10px] pr-[36px] font-body text-[14px] text-cream hover:border-amber-400/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 transition-colors shadow-sm"
+                  >
+                    {SAMPLE_ARRIVALS.map((a, i) => (
+                      <option key={a} value={i} className="bg-neutral-900 text-cream py-2">
+                        {a}
+                      </option>
+                    ))}
+                  </select>
+                  <svg className="w-4 h-4 text-amber-400 pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </label>
 
               <div className="flex flex-col gap-[8px]">
                 <span className="text-[9.5px] uppercase tracking-[0.2em] text-cream/55">Nights</span>
-                <div className="flex items-center gap-[14px] rounded-[9px] border border-white/20 bg-white/[0.06] px-[12px] py-[6px]">
+                <div className="flex items-center gap-[14px] rounded-[10px] border border-white/20 bg-black/60 px-[12px] py-[6px] shadow-sm">
                   <button
                     onClick={() => setNights((n) => Math.max(pkg.minNights, n - 1))}
                     aria-label="Fewer nights"
-                    className="px-[4px] text-[20px] leading-none text-cream"
+                    className="px-[4px] text-[20px] leading-none text-cream hover:text-amber-400 transition-colors"
                   >
                     −
                   </button>
@@ -178,7 +183,7 @@ export function BookingPanel() {
                   <button
                     onClick={() => setNights((n) => n + 1)}
                     aria-label="More nights"
-                    className="px-[4px] text-[20px] leading-none text-cream"
+                    className="px-[4px] text-[20px] leading-none text-cream hover:text-amber-400 transition-colors"
                   >
                     +
                   </button>
@@ -188,14 +193,17 @@ export function BookingPanel() {
 
             <div className="mt-auto flex flex-wrap items-end justify-between gap-[18px] pt-[26px]">
               <div>
-                <div className="font-display text-[32px] leading-none">{formatINR(total)}</div>
+                <div className="font-display text-[32px] leading-none text-cream">{formatINR(total)}</div>
                 <div className="mt-[6px] text-[10.5px] tracking-[0.1em] text-cream/55">
                   {formatINR(pkg.rate)} / {pkg.rateUnit} · night · {formatINR(total)} total
+                </div>
+                <div className="mt-1.5 text-[10px] text-amber-300/80 font-body">
+                  ✦ Direct reservation · Includes local breakfast & orchard access
                 </div>
               </div>
               <button
                 onClick={requestDates}
-                className="rounded-full bg-amber px-[28px] py-[15px] text-[12px] font-bold uppercase tracking-[0.14em] text-ink shadow-[0_10px_30px_rgba(217,154,78,0.3)] transition-transform hover:scale-[1.03]"
+                className="rounded-full bg-amber-400 px-[28px] py-[15px] text-[12px] font-bold uppercase tracking-[0.14em] text-black shadow-[0_10px_30px_rgba(245,158,11,0.3)] transition-all hover:bg-amber-300 hover:scale-[1.03] active:scale-95"
               >
                 Request these dates
               </button>

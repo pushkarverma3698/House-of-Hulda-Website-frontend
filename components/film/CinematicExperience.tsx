@@ -12,6 +12,7 @@ import { FilmReel } from '@/components/film/FilmReel'
 import { StarCard } from '@/components/sky/StarCard'
 import { DateDial } from '@/components/astro/DateDial'
 import { EIGHTEEN_GODS, CelestialGod } from '@/content/eighteen'
+import { whatsappLink } from '@/lib/site-config'
 import { useState, useEffect, useRef } from 'react'
 import { ScrollCanvas } from '@/components/canvas/ScrollCanvas'
 import gsap from 'gsap'
@@ -203,10 +204,10 @@ export function CinematicExperience() {
                   <button
                     key={god.id}
                     onClick={() => setSelectedStar(god)}
-                    className="w-[42vw] sm:w-auto shrink-0 sm:shrink p-3 rounded-xl bg-white/[0.03] hover:bg-amber-400/[0.1] border border-white/[0.08] hover:border-amber-400/40 text-left transition-all group shadow-sm min-h-20 flex flex-col justify-between focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400/70"
+                    className="w-[44vw] sm:w-auto shrink-0 sm:shrink p-3.5 rounded-xl bg-white/[0.03] hover:bg-amber-400/[0.1] border border-white/[0.08] hover:border-amber-400/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] text-left transition-all duration-300 group min-h-24 flex flex-col justify-between focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400/70"
                   >
                     <div className="flex justify-between items-start w-full">
-                      <span className="hud-mono text-[9px] text-amber-400/70">
+                      <span className="hud-mono text-[9px] text-amber-400/80">
                         #{god.id.toString().padStart(2, '0')}
                       </span>
                       <span className="hud-mono text-[8px] text-cream/40 uppercase">
@@ -214,9 +215,12 @@ export function CinematicExperience() {
                       </span>
                     </div>
                     <div>
-                      <h3 className="font-display text-sm text-cream/90 group-hover:text-amber-300 transition-colors">
+                      <h3 className="font-display text-sm text-cream/90 group-hover:text-amber-300 transition-colors leading-tight">
                         {god.deity}
                       </h3>
+                      <p className="hud-mono text-[9px] text-cream/45 line-clamp-1 mt-0.5 group-hover:text-cream/70 transition-colors">
+                        {god.deityRole}
+                      </p>
                     </div>
                   </button>
                 ))}
@@ -264,7 +268,7 @@ export function CinematicExperience() {
               <p className="text-cream/90 text-sm sm:text-base leading-relaxed drop-shadow-md">
                 The shadow of the ridge slides down the orchard. The fire is still burning. Your morning coffee is ready.
               </p>
-              <div>
+              <div className="space-y-4">
                 <Link
                   href="/book"
                   scroll={false}
@@ -273,6 +277,17 @@ export function CinematicExperience() {
                   Reserve The Stay
                   <span className="inline-block transition-transform duration-300 group-hover:translate-x-1.5 ml-2">→</span>
                 </Link>
+                <div>
+                  <a
+                    href={whatsappLink("Hello House of Hulda! I have a few questions before reserving a stay.")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hud-mono text-xs text-cream/60 hover:text-amber-300 transition-colors inline-flex items-center gap-2 group"
+                  >
+                    <span>Questions before booking? Inquire with our host on WhatsApp</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>

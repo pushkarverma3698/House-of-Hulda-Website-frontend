@@ -116,32 +116,38 @@ export function DateDial() {
           </div>
         </div>
 
-        {/* Telemetry Grid & Celestial Status */}
+        {/* Telemetry Grid & Celestial Status - Frosted Glass Panels */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 pt-2 pb-6">
-          <div className="p-4 rounded-xl flex flex-col justify-between">
+          <div className="p-4.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-amber-400/30 backdrop-blur-md shadow-sm transition-all flex flex-col justify-between">
             <span className="hud-mono text-[9.5px] uppercase tracking-wider text-neutral-400">Dark From</span>
             <div className="mt-2 font-mono text-xl md:text-2xl text-amber-300 font-semibold">{activeData.darkFrom}</div>
             <span className="text-[10px] text-neutral-400 mt-1 font-body">Astronomical twilight start</span>
           </div>
 
-          <div className="p-4 rounded-xl flex flex-col justify-between">
+          <div className="p-4.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-amber-400/30 backdrop-blur-md shadow-sm transition-all flex flex-col justify-between">
             <span className="hud-mono text-[9.5px] uppercase tracking-wider text-neutral-400">Until</span>
             <div className="mt-2 font-mono text-xl md:text-2xl text-amber-300 font-semibold">{activeData.darkUntil}</div>
             <span className="text-[10px] text-neutral-400 mt-1 font-body">Dawn twilight onset</span>
           </div>
 
-          <div className="p-4 rounded-xl flex flex-col justify-between">
+          <div className="p-4.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-amber-400/30 backdrop-blur-md shadow-sm transition-all flex flex-col justify-between">
             <span className="hud-mono text-[9.5px] uppercase tracking-wider text-neutral-400">Hours Dark</span>
             <div className="mt-2 font-mono text-xl md:text-2xl text-neutral-100 font-semibold">{activeData.darkHours}</div>
             <span className="text-[10px] text-neutral-400 mt-1 font-body">Total unpolluted dark window</span>
           </div>
 
-          <div className="p-4 rounded-xl flex flex-col justify-between">
+          <div className="p-4.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-amber-400/30 backdrop-blur-md shadow-sm transition-all flex flex-col justify-between">
             <div className="flex justify-between items-center">
               <span className="hud-mono text-[9.5px] uppercase tracking-wider text-amber-400">Moon Phase</span>
-              <span className="hud-mono text-[9px] text-amber-300 font-bold">{activeData.moonIllum}</span>
+              <span className="hud-mono text-[9px] text-amber-300 font-bold bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">{activeData.moonIllum}</span>
             </div>
-            <div className="mt-2 font-serif text-lg md:text-xl text-neutral-100 font-medium truncate">{activeData.moonPhase}</div>
+            <div className="mt-2 flex items-center gap-2">
+              <svg className="w-5 h-5 text-amber-300 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M12 3a9 9 0 0 1 0 18 9 9 0 0 0 0-18z" fill="currentColor" opacity={Math.max(0.2, parseInt(activeData.moonIllum) / 100)} />
+              </svg>
+              <span className="font-serif text-lg md:text-xl text-neutral-100 font-medium truncate">{activeData.moonPhase}</span>
+            </div>
             <span className="text-[10px] text-amber-200/70 mt-1 font-body truncate">
               {parseInt(activeData.moonIllum) < 15 ? 'Faint objects hold up' : 'Moonlit landscape view'}
             </span>
@@ -149,16 +155,16 @@ export function DateDial() {
         </div>
 
         {/* Celestial Highlight & Deity Count Banner */}
-        <div className="p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 my-2">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">✦</span>
+        <div className="p-5 md:p-6 rounded-2xl bg-gradient-to-r from-amber-500/[0.08] via-white/[0.02] to-transparent border border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4 my-2 backdrop-blur-md shadow-md">
+          <div className="flex items-start gap-3.5">
+            <span className="text-2xl text-amber-400">✦</span>
             <div>
               <div className="flex items-center gap-2">
-                <span className="hud-mono text-[10px] text-amber-400 uppercase font-semibold">
+                <span className="hud-mono text-[10px] text-amber-400 uppercase font-semibold tracking-wider">
                   {activeData.godsCount} of the 18 Gods at Best Visibility
                 </span>
               </div>
-              <p className="text-sm text-neutral-200 font-body mt-0.5">
+              <p className="text-sm text-neutral-200 font-body mt-0.5 leading-relaxed">
                 {activeData.highlight}
               </p>
             </div>

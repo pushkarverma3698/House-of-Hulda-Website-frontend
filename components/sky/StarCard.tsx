@@ -14,6 +14,21 @@ export const StarCard = memo(function StarCard({
   const [jitter, setJitter] = useState({ ra: 0, dec: 0 })
 
   useEffect(() => {
+    window.dispatchEvent(new CustomEvent('app-modal-open'))
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isTelescopeView) setIsTelescopeView(false)
+        else onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.dispatchEvent(new CustomEvent('app-modal-close'))
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isTelescopeView, onClose])
+
+  useEffect(() => {
     if (!isTelescopeView) return
     const interval = setInterval(() => {
       setJitter({ ra: (Math.random() - 0.5) * 0.005, dec: (Math.random() - 0.5) * 0.005 })
@@ -98,9 +113,10 @@ export const StarCard = memo(function StarCard({
           <button
             onClick={onClose}
             aria-label="Close star details"
-            className="p-2 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 hover:border-amber-400 hover:bg-amber-400/10 text-neutral-300 hover:text-white transition-all text-xs font-mono group"
           >
-            ✕
+            <span>✕</span>
+            <span className="hidden sm:inline-block text-[9px] text-amber-300/80 bg-white/5 px-1.5 py-0.5 rounded border border-white/10 group-hover:border-amber-400/40">ESC</span>
           </button>
         </div>
 
@@ -159,22 +175,22 @@ export const StarCard = memo(function StarCard({
             </div>
             <button
               onClick={() => setIsTelescopeView(true)}
-              className="w-full py-2.5 rounded-lg border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-mono text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl border border-amber-400/50 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/10 hover:from-amber-500/30 hover:to-amber-400/25 text-amber-300 font-mono text-[11px] font-bold uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] flex items-center justify-center gap-2"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              Engage Optics
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span>Engage Balcony Optics</span>
             </button>
           </div>
         </div>
 
         {/* Footer CTA */}
-        <div className="p-6 border-t border-white/10 bg-neutral-900/60 flex items-center justify-between">
-          <span className="hud-mono text-[10px] text-neutral-500">
+        <div className="p-6 border-t border-white/10 bg-neutral-900/80 backdrop-blur-md flex items-center justify-between">
+          <span className="hud-mono text-[10px] text-neutral-400 tracking-wider">
             OBSERVATION #0{star.id} / 18
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-full bg-white text-black font-mono text-xs font-semibold uppercase tracking-widest hover:bg-amber-400 transition-colors"
+            className="min-h-11 px-6 py-2.5 rounded-full bg-cream hover:bg-amber-400 text-black font-mono text-xs font-bold uppercase tracking-widest transition-all shadow-md active:scale-95"
           >
             Return to Sky
           </button>

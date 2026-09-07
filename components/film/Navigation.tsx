@@ -58,24 +58,21 @@ export const Navigation = memo(function Navigation({
         hidden ? '-translate-y-full' : 'translate-y-0'
       }`}
     >
-      {/* Header scrim. The bar floats directly on the film, and over a bright
-          frame — the opening cloud-and-snowline shot especially — the amber
-          "Reserve" measured close to its background. A gradient is composited,
-          not re-blurred per frame, so it costs nothing while scrolling. */}
+      {/* Header scrim. Protects typography legibility over bright snowline frames without harsh banding */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-32 -z-10 pointer-events-none bg-gradient-to-b from-ink/75 via-ink/35 to-transparent"
+        className="absolute inset-x-0 top-0 h-36 -z-10 pointer-events-none bg-gradient-to-b from-black/85 via-black/35 to-transparent backdrop-blur-[2px]"
       />
       {/* Brand Stamp */}
       <div className="flex items-center gap-3 pointer-events-auto">
         <Link
           href="/"
-          className="flex min-h-11 items-center gap-2.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/5 hover:border-amber/30 transition-colors shadow-lg group"
+          className="flex min-h-11 items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/10 hover:border-amber-400/50 transition-all shadow-lg group"
         >
-          <span className="font-display italic font-light text-xl text-cream group-hover:text-amber transition-colors">
+          <span className="font-display italic font-light text-xl text-cream group-hover:text-amber-300 transition-colors">
             H
           </span>
-          <span className="hud-mono text-xs tracking-widest text-cream/90 uppercase">
+          <span className="hud-mono text-xs tracking-widest text-cream/90 uppercase group-hover:text-cream">
             House of Hulda
           </span>
         </Link>
@@ -87,53 +84,50 @@ export const Navigation = memo(function Navigation({
       {/* Film-safe minimal nav */}
       <nav className="flex items-center gap-2 md:gap-3 pointer-events-auto">
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-1 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/5 shadow-lg">
+        <div className="hidden md:flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/10 shadow-lg">
           <Link
             href="/stay"
-            className="px-3 py-1 hud-mono text-xs tracking-wider text-cream/80 hover:text-amber transition-colors"
+            className="px-3 py-1 hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all"
           >
             Stay
           </Link>
           <span className="text-cream/20 text-xs">/</span>
           <Link
             href="/cafe"
-            className="px-3 py-1 hud-mono text-xs tracking-wider text-cream/80 hover:text-amber transition-colors"
+            className="px-3 py-1 hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all"
           >
             Café
           </Link>
           <span className="text-cream/20 text-xs">/</span>
           <Link
             href="/naggar"
-            className="px-3 py-1 hud-mono text-xs tracking-wider text-cream/80 hover:text-amber transition-colors"
+            className="px-3 py-1 hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all"
           >
             Naggar
           </Link>
           <span className="text-cream/20 text-xs">/</span>
           <Link
             href="/blog"
-            className="px-3 py-1 hud-mono text-xs tracking-wider text-cream/80 hover:text-amber transition-colors"
+            className="px-3 py-1 hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all"
           >
             Stories
           </Link>
         </div>
 
         {/* Primary Reserve CTA */}
-        {/* min-h-11 is the 44px floor: this was a 95x33 target, and it is the
-            primary conversion control on the page. */}
         <Link
           href="/book"
           scroll={false}
-          className="inline-flex items-center min-h-11 px-5 py-2 rounded-full bg-amber/15 border border-amber/40 text-amber hover:bg-amber/25 hover:border-amber/60 hud-mono tracking-widest transition-all backdrop-blur-md shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:shadow-[0_0_20px_rgba(217,154,78,0.3)] active:scale-95 cursor-pointer"
+          className="inline-flex items-center min-h-11 px-5 py-2 rounded-full bg-amber-400/20 border border-amber-400/50 text-amber-300 hover:bg-amber-400/30 hover:border-amber-400/80 hud-mono tracking-widest transition-all backdrop-blur-md shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] active:scale-95 cursor-pointer"
         >
           Reserve
         </Link>
 
-        {/* Mobile Menu Trigger — was 34x34, under the 44px minimum for the
-            page's primary navigation control. */}
+        {/* Mobile Menu Trigger */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle navigation menu"
-          className="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/40 backdrop-blur-md border border-white/5 text-cream/90"
+          className="md:hidden inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-cream/90 hover:border-amber-400/40 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {menuOpen ? (
@@ -147,35 +141,53 @@ export const Navigation = memo(function Navigation({
 
       {/* Mobile Drawer Menu */}
       {menuOpen && (
-        <div className="absolute top-20 right-6 w-48 bg-black/90 backdrop-blur-xl border border-white/5 rounded-2xl p-4 flex flex-col gap-3 shadow-2xl pointer-events-auto md:hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="absolute top-20 right-6 w-64 bg-black/95 backdrop-blur-2xl border border-amber-500/20 rounded-2xl p-5 flex flex-col gap-3 shadow-[0_20px_50px_rgba(0,0,0,0.8)] pointer-events-auto md:hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="pb-2 border-b border-white/10 flex items-center justify-between">
+            <span className="hud-mono text-[9px] text-amber-400 tracking-widest uppercase">The Estate</span>
+            <span className="hud-mono text-[9px] text-cream/40">2,180M</span>
+          </div>
           <Link
             href="/stay"
             onClick={() => setMenuOpen(false)}
-            className="hud-mono text-xs tracking-wider text-cream/80 hover:text-amber py-1"
+            className="hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 py-1.5 flex items-center justify-between group transition-colors"
           >
-            The Stay
+            <span>The Stay</span>
+            <span className="text-amber-400/40 group-hover:text-amber-400 group-hover:translate-x-1 transition-all">→</span>
           </Link>
           <Link
             href="/cafe"
             onClick={() => setMenuOpen(false)}
-            className="hud-mono text-xs tracking-wider text-cream/80 hover:text-amber py-1"
+            className="hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 py-1.5 flex items-center justify-between group transition-colors"
           >
-            The Attic Café
+            <span>The Attic Café</span>
+            <span className="text-amber-400/40 group-hover:text-amber-400 group-hover:translate-x-1 transition-all">→</span>
           </Link>
           <Link
             href="/naggar"
             onClick={() => setMenuOpen(false)}
-            className="hud-mono text-xs tracking-wider text-cream/80 hover:text-amber py-1"
+            className="hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 py-1.5 flex items-center justify-between group transition-colors"
           >
-            Explore Naggar
+            <span>Explore Naggar</span>
+            <span className="text-amber-400/40 group-hover:text-amber-400 group-hover:translate-x-1 transition-all">→</span>
           </Link>
           <Link
             href="/blog"
             onClick={() => setMenuOpen(false)}
-            className="hud-mono text-xs tracking-wider text-cream/80 hover:text-amber py-1"
+            className="hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 py-1.5 flex items-center justify-between group transition-colors"
           >
-            Himalayan Journal
+            <span>Himalayan Journal</span>
+            <span className="text-amber-400/40 group-hover:text-amber-400 group-hover:translate-x-1 transition-all">→</span>
           </Link>
+          <div className="pt-3 mt-1 border-t border-white/10">
+            <Link
+              href="/book"
+              onClick={() => setMenuOpen(false)}
+              className="w-full py-2.5 rounded-xl bg-amber-400/15 border border-amber-400/50 text-amber-300 hover:bg-amber-400 hover:text-black hud-mono text-[10px] uppercase font-bold tracking-widest flex items-center justify-center gap-2 transition-all shadow-md"
+            >
+              <span>Reserve Room</span>
+              <span>→</span>
+            </Link>
+          </div>
         </div>
       )}
     </header>

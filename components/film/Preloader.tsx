@@ -153,63 +153,56 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
   return (
     <div
       ref={containerRef}
-      className={`fixed inset-0 z-50 flex flex-col justify-center bg-black px-8 md:px-24 transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-black px-6 md:px-12 transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isLoaded ? 'opacity-0 scale-105 pointer-events-none blur-md' : 'opacity-100 scale-100 blur-0'
       }`}
     >
-      <div className="max-w-md space-y-3 relative">
+      {/* Subtle warm ambient glow behind the estate crest */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(245,158,11,0.07)_0%,_transparent_70%)] pointer-events-none" />
+
+      <div className="max-w-xl w-full text-center space-y-5 relative">
         <div 
-          className="overflow-hidden will-change-transform"
-          style={{ transform: 'translate3d(calc(var(--px, 0) * -15px), calc(var(--py, 0) * -15px), 0)' }}
+          className="overflow-hidden will-change-transform space-y-2.5"
+          style={{ transform: 'translate3d(calc(var(--px, 0) * -12px), calc(var(--py, 0) * -12px), 0)' }}
         >
-          <p className="font-mono text-xs tracking-widest text-amber-500 uppercase animate-[steamRise_2s_ease-out_forwards]">
-            RUMSU OBSERVATORY · SYSTEM BOOT
+          <p className="hud-mono text-[10px] md:text-xs tracking-[0.3em] text-amber-400 uppercase flex items-center justify-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+            High Alpine Sanctuary · Naggar Ridge
           </p>
-        </div>
-        
-        <div 
-          className="overflow-hidden will-change-transform"
-          style={{ transform: 'translate3d(calc(var(--px, 0) * -8px), calc(var(--py, 0) * -8px), 0)' }}
-        >
-          <p className="font-mono text-[10px] text-white/40 tracking-widest uppercase delay-100">
-            32.1198° N, 77.1731° E · ELEV 2,180 M
+          <h1 className="font-display italic font-light text-4xl sm:text-5xl md:text-6xl text-cream tracking-tight drop-shadow-[0_2px_24px_rgba(245,158,11,0.18)]">
+            House of Hulda
+          </h1>
+          <p className="hud-mono text-[10px] sm:text-xs text-cream/45 tracking-[0.25em] uppercase">
+            Rumsu · 2,180M · 32.1198° N, 77.1731° E · Bortle Class 1
           </p>
         </div>
 
+        {/* 1px Horizon Line Loader - Warm amber glow with smooth progress */}
         <div 
-          className="overflow-hidden will-change-transform"
-          style={{ transform: 'translate3d(calc(var(--px, 0) * -3px), calc(var(--py, 0) * -3px), 0)' }}
-        >
-          <p className="font-mono text-[10px] text-white/30 tracking-widest uppercase delay-200">
-            12 OCT · SUNSET 18:04 · ASTRO DARK 19:41
-          </p>
-        </div>
-
-        {/* 1px Horizon Line Loader - Moves in the opposite direction for strong parallax */}
-        <div 
-          className="relative w-full max-w-[200px] h-[1px] bg-white/10 mt-8 overflow-hidden will-change-transform"
-          style={{ transform: 'translate3d(calc(var(--px, 0) * 15px), calc(var(--py, 0) * 15px), 0)' }}
+          className="relative w-full max-w-[240px] h-[1.5px] bg-white/10 mx-auto mt-6 overflow-hidden rounded-full will-change-transform"
+          style={{ transform: 'translate3d(calc(var(--px, 0) * 12px), calc(var(--py, 0) * 12px), 0)' }}
         >
           <div
-            className="absolute top-0 left-0 h-full bg-white/80 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-amber-500/50 via-amber-400 to-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.6)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{ width: `${progress}%` }}
           />
         </div>
         
         <div 
-          className="will-change-transform mt-2 h-10"
-          style={{ transform: 'translate3d(calc(var(--px, 0) * 10px), calc(var(--py, 0) * 10px), 0)' }}
+          className="will-change-transform mt-3 h-12 flex items-center justify-center"
+          style={{ transform: 'translate3d(calc(var(--px, 0) * 8px), calc(var(--py, 0) * 8px), 0)' }}
         >
           {!isReady ? (
-            <p className="font-mono text-xs text-white/30 tracking-widest">
+            <p className="font-mono text-xs text-amber-400/60 tracking-widest">
               {progress.toString().padStart(3, '0')}%
             </p>
           ) : (
             <button 
               onClick={handleEnter}
-              className="px-6 py-2 border border-amber-500/30 text-amber-500 text-[10px] uppercase font-mono tracking-widest rounded-full hover:bg-amber-500 hover:text-black transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] animate-[pulse_2s_ease-in-out_infinite]"
+              className="group px-8 py-3.5 border border-amber-400/50 bg-amber-400/10 hover:bg-amber-400 text-amber-300 hover:text-black text-xs font-mono tracking-[0.18em] uppercase rounded-full transition-all duration-300 shadow-[0_0_25px_rgba(245,158,11,0.25)] hover:shadow-[0_0_35px_rgba(245,158,11,0.6)] hover:scale-105 active:scale-95 flex items-center justify-center gap-3 mx-auto"
             >
-              Enter Experience
+              <span>Step Inside the Sanctuary</span>
+              <span className="inline-block transition-transform duration-300 group-hover:translate-x-1 text-sm">→</span>
             </button>
           )}
         </div>
