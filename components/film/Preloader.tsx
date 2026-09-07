@@ -1,33 +1,34 @@
 'use client'
-import { hiresCache, warmRemainingHighResFrames } from "@/components/canvas/ScrollCanvas"
-
-
+import { hiresCache, hiresFrameUrl } from "@/components/canvas/ScrollCanvas"
 import { useEffect, useState, useRef } from 'react'
 
-/** Frames that must be in the HTTP cache before the curtain lifts. Enough to
- *  cover the opening beat; ScrollCanvas sweeps the remaining proxy frames
- *  resident behind the user. */
-const CRITICAL_FRAME_COUNT = 40
 const TOTAL_HERO_FRAMES = 240
-/** Browsers multiplex freely over HTTP/2, so an unbounded fan-out does not
- *  queue — it splits the same pipe and every frame arrives late. */
-const CRITICAL_CONCURRENCY = 6
-const BACKGROUND_CONCURRENCY = 4
-const SAFETY_TIMEOUT_MS = 4000
+const PRELOAD_CONCURRENCY = 14
+const OPENING_DECODE_COUNT = 25
+const SAFETY_TIMEOUT_MS = 25000
 
-
-
-/** Warms the HTTP cache and decodes into GPU memory immediately. */
+/**
+ * Preloader downloads all 240 frames into the browser's HTTP disk cache ('force-cache').
+ * Concurrently pre-decodes the opening beat (frames 1..25) into GPU memory
+ * and pins Frame 1 so the very first viewport frame paints in 0ms upon entering.
+ */
 async function warmFrame(index: number, signal: AbortSignal): Promise<void> {
   if (signal.aborted) return
   try {
-    await hiresCache.load(index)
+    if (index <= OPENING_DECODE_COUNT) {
+      // Decode into GPU memory and HTTP cache simultaneously
+      await hiresCache.load(index)
+    } else {
+      // Warm into browser HTTP disk cache with zero GPU VRAM overhead
+      const url = hiresFrameUrl(index)
+      await fetch(url, { signal, cache: 'force-cache' })
+    }
   } catch {
-    // Cache miss is non-fatal.
+    // Cache miss or network abort is non-fatal.
   }
 }
 
-/** Runs `task` over `items` with at most `limit` in flight. */
+/** Runs `warmFrame` over `items` with at most `limit` in flight over HTTP/2. */
 async function runPool(
   items: readonly number[],
   limit: number,
@@ -57,31 +58,36 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
     const { signal } = controller
     let hasCompleted = false
 
-    const critical = Array.from({ length: CRITICAL_FRAME_COUNT }, (_, i) => i + 1)
+    const allFrames = Array.from({ length: TOTAL_HERO_FRAMES }, (_, i) => i + 1)
     
-    // Protect these frames from being aborted by ScrollCanvas during the opening sequence
-    critical.forEach(i => hiresCache.protect(i))
+    // Protect opening frames from being evicted during boot
+    for (let i = 1; i <= OPENING_DECODE_COUNT; i++) {
+      hiresCache.protect(i)
+    }
 
     const completePreloader = () => {
       if (hasCompleted) return
       hasCompleted = true
       setProgress(100)
       setIsReady(true)
-      critical.forEach(i => hiresCache.unprotect(i))
-      warmRemainingHighResFrames()
+      // Unprotect frames 2..25, keep frame 1 protected until ScrollCanvas takes over pinning
+      for (let i = 2; i <= OPENING_DECODE_COUNT; i++) {
+        hiresCache.unprotect(i)
+      }
     }
 
     const safetyTimeout = setTimeout(completePreloader, SAFETY_TIMEOUT_MS)
 
     let loadedCount = 0
-    const onCriticalFrame = () => {
+    const onFrameLoaded = () => {
       loadedCount++
       if (!hasCompleted) {
-        setProgress(Math.floor((loadedCount / critical.length) * 99))
+        const pct = Math.min(100, Math.floor((loadedCount / TOTAL_HERO_FRAMES) * 100))
+        setProgress(pct)
       }
     }
 
-    runPool(critical, CRITICAL_CONCURRENCY, signal, onCriticalFrame)
+    runPool(allFrames, PRELOAD_CONCURRENCY, signal, onFrameLoaded)
       .then(() => {
         if (signal.aborted) return
         clearTimeout(safetyTimeout)
@@ -90,7 +96,9 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
       .catch(() => {})
 
     return () => {
-      critical.forEach(i => hiresCache.unprotect(i))
+      for (let i = 1; i <= OPENING_DECODE_COUNT; i++) {
+        hiresCache.unprotect(i)
+      }
       clearTimeout(safetyTimeout)
       controller.abort()
     }
@@ -98,7 +106,6 @@ export function Preloader({ onComplete }: { onComplete?: () => void }) {
 
   const handleEnter = () => {
     setIsLoaded(true)
-    warmRemainingHighResFrames()
     setTimeout(() => {
       onComplete?.()
       window.dispatchEvent(new Event('start-atmosphere'))

@@ -18,3 +18,12 @@ frontend:
     paths:
       - .next/cache/**/*
       - node_modules/**/*
+customHeaders:
+  - pattern: '/frames-v2/**/*'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'
+  - pattern: '/videos/**/*'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'

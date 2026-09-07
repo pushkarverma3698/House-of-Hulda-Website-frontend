@@ -439,7 +439,7 @@ class BitmapCache {
   private async loadInternal(index: number, controller: AbortController, onDecode?: () => void): Promise<void> {
     const requestedAt = performance.now()
     try {
-      const response = await fetch(this.urlFor(index), { signal: controller.signal })
+      const response = await fetch(this.urlFor(index), { signal: controller.signal, cache: 'force-cache' })
       if (!response.ok) return
 
       const blob = await response.blob()
