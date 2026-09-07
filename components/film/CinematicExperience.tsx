@@ -227,9 +227,11 @@ export function CinematicExperience() {
 
         {/* L-08: 6.8s to 8.0s · Ephemeris & Date Selector */}
         <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[150vh]" data-time-start="6.8" data-time-end="8.0">
-          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-3 sm:px-8 md:px-16 max-w-6xl mx-auto w-full pb-24 md:pb-0">
-            <div className="story-scrim pointer-events-auto">
-              <DateDial />
+          <div className="sticky top-0 h-[100dvh] w-full flex flex-col justify-center pb-24 md:pb-0 bg-[#0a0f17] bg-[radial-gradient(ellipse_at_center,_rgba(16,24,38,0.75)_0%,_#0a0f17_85%)]">
+            <div className="px-3 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
+              <div className="story-scrim pointer-events-auto">
+                <DateDial />
+              </div>
             </div>
           </div>
         </section>

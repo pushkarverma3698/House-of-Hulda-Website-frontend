@@ -164,7 +164,7 @@ export function DateDial() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 self-end md:self-auto">
+          <div className="flex items-center gap-3 self-start sm:self-end md:self-auto pr-16 sm:pr-0">
             <Link
               href="/book"
               scroll={false}
