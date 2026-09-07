@@ -93,6 +93,13 @@ export const Navigation = memo(function Navigation({
           </Link>
           <span className="text-cream/20 text-xs">/</span>
           <Link
+            href="/the-house"
+            className="px-3 py-1 hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all"
+          >
+            The House
+          </Link>
+          <span className="text-cream/20 text-xs">/</span>
+          <Link
             href="/cafe"
             className="px-3 py-1 hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] transition-all"
           >
@@ -152,6 +159,14 @@ export const Navigation = memo(function Navigation({
             className="hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 py-1.5 flex items-center justify-between group transition-colors"
           >
             <span>The Stay</span>
+            <span className="text-amber-400/40 group-hover:text-amber-400 group-hover:translate-x-1 transition-all">→</span>
+          </Link>
+          <Link
+            href="/the-house"
+            onClick={() => setMenuOpen(false)}
+            className="hud-mono text-xs tracking-wider text-cream/80 hover:text-amber-300 py-1.5 flex items-center justify-between group transition-colors"
+          >
+            <span>The House</span>
             <span className="text-amber-400/40 group-hover:text-amber-400 group-hover:translate-x-1 transition-all">→</span>
           </Link>
           <Link

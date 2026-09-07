@@ -10,6 +10,7 @@ import { Navigation } from '@/components/film/Navigation'
 import { ReserveDock } from '@/components/film/ReserveDock'
 import { FilmReel } from '@/components/film/FilmReel'
 import { StarCard } from '@/components/sky/StarCard'
+import { CelestialPlanetarium } from '@/components/sky/CelestialPlanetarium'
 import { DateDial } from '@/components/astro/DateDial'
 import { EIGHTEEN_GODS, CelestialGod } from '@/content/eighteen'
 import { whatsappLink } from '@/lib/site-config'
@@ -218,52 +219,11 @@ export function CinematicExperience() {
           </div>
         </section>
 
-        {/* L-07: 5.2s to 6.8s · The Eighteen Gods */}
+        {/* L-07: 5.2s to 6.8s · The Eighteen Gods Celestial Planetarium */}
         <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[150vh]" data-time-start="5.2" data-time-end="6.8">
-          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-4 sm:px-8 md:px-16 max-w-6xl mx-auto w-full pb-24 md:pb-0">
-            <div className="story-scrim relative z-10 space-y-4 md:space-y-6 pointer-events-auto">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
-                <div className="space-y-2">
-                  <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber animate-rec shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
-                    L-07 · 19:45 · BORTLE CLASS 1
-                  </p>
-                  <h2 className="font-display text-2xl sm:text-4xl md:text-5xl font-normal text-cream leading-tight">
-                    The Eighteen Gods.
-                  </h2>
-                  <p className="text-xs sm:text-sm text-neutral-400 max-w-xl">
-                    Tap a deity to view astronomical alignment and folklore over Naggar Ridge.
-                  </p>
-                </div>
-              </div>
-
-              {/* Scrollable deity grid with subtle mobile fade-mask inviting horizontal scrub */}
-              <div className="flex gap-2.5 pt-2 overflow-x-auto sm:grid sm:grid-cols-3 lg:grid-cols-6 pb-2 [scrollbar-width:none] [mask-image:linear-gradient(to_right,white_82%,transparent_100%)] sm:[mask-image:none]">
-                {EIGHTEEN_GODS.map((god) => (
-                  <button
-                    key={god.id}
-                    onClick={() => setSelectedStar(god)}
-                    className="w-[44vw] sm:w-auto shrink-0 sm:shrink p-3.5 rounded-xl bg-white/[0.03] hover:bg-amber-400/[0.1] border border-white/[0.08] hover:border-amber-400/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] text-left transition-all duration-300 group min-h-24 flex flex-col justify-between focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400/70"
-                  >
-                    <div className="flex justify-between items-start w-full">
-                      <span className="hud-mono text-[9px] text-amber-400/80">
-                        #{god.id.toString().padStart(2, '0')}
-                      </span>
-                      <span className="hud-mono text-[8px] text-cream/40 uppercase">
-                        {god.constellation.slice(0, 3)}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="font-display text-sm text-cream/90 group-hover:text-amber-300 transition-colors leading-tight">
-                        {god.deity}
-                      </h3>
-                      <p className="hud-mono text-[9px] text-cream/45 line-clamp-1 mt-0.5 group-hover:text-cream/70 transition-colors">
-                        {god.deityRole}
-                      </p>
-                    </div>
-                  </button>
-                ))}
-              </div>
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-4 sm:px-8 md:px-12 max-w-6xl mx-auto w-full pb-20 md:pb-0">
+            <div className="story-scrim relative z-10 w-full pointer-events-auto">
+              <CelestialPlanetarium onSelectGod={setSelectedStar} />
             </div>
           </div>
         </section>
