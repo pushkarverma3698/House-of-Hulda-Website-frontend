@@ -119,7 +119,7 @@ You leave on Saturday. The work isn't done (nothing is ever done), but the direc
 - Accommodation split (attic for group stays, private rooms for people who want privacy)
 - Facilitation (do you want an external facilitator, or will the founder lead? Either works)
 
-**Cost**: A five-day offsite for a team of eight costs approximately **[OFFSITE RATE per person]** all-in — accommodation, meals, space. This is significantly cheaper than a hotel-based offsite and usually produces better results.
+**Cost**: A five-day offsite for a team of eight costs approximately **₹3,500/night** all-in — accommodation, meals, space. This is significantly cheaper than a hotel-based offsite and usually produces better results.
 
 ## How to Book
 

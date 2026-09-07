@@ -47,7 +47,7 @@ Modern engineers call this "ductility" — the ability to deform slightly withou
 
 If you're staying at House of Hulda, or any Kathkuni heritage homestay, the experience registers in ways you might not articulate:
 
-**Thermal mass**: Stone walls are thick — typically [WALL THICKNESS] or more. They absorb heat slowly during the day and release it slowly at night. In a Kathkuni room, the temperature stays relatively stable. In summer, the cool stone keeps rooms comfortable even when outside is hot. In winter, the stored heat keeps you warm through the early morning. You use fewer blankets, less heating, because the stone itself is moderating the climate.
+**Thermal mass**: Stone walls are thick — typically 45 to 60 cm or more. They absorb heat slowly during the day and release it slowly at night. In a Kathkuni room, the temperature stays relatively stable. In summer, the cool stone keeps rooms comfortable even when outside is hot. In winter, the stored heat keeps you warm through the early morning. You use fewer blankets, less heating, because the stone itself is moderating the climate.
 
 **Humidity regulation**: Mud plaster and stone don't trap moisture. They breathe. In humid weather, the walls absorb excess humidity; in dry weather, they release it. You notice the air feels different — fresher, less stale — compared to a modern plastered room. Clothes don't feel clammy. Sleep is deeper.
 
@@ -118,7 +118,7 @@ The best way to understand **Kathkuni architecture** is to stay in one. House of
 
 Book a private room or join a group in the attic. Spend time running your hand along the mud plaster. Ask your host about the stones, the repairs, the way the building behaves in different seasons. The house itself will teach you what no article can.
 
-**Ready to sleep inside Kathkuni history?** [Book a room at House of Hulda](/), or [WhatsApp to ask questions](https://wa.me/[WHATSAPP_NUMBER]).
+**Ready to sleep inside Kathkuni history?** [Book a room at House of Hulda](/book), or [WhatsApp to ask questions](https://wa.me/918284008838).
 
 ---
 

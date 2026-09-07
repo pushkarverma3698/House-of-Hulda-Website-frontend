@@ -256,7 +256,7 @@ export function CinematicExperience() {
         </section>
 
         {/* L-10: 9.2s to 10.0s · First Light & Booking */}
-        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="9.2" data-time-end="10.0">
+        <section id="the-invitation" className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="9.2" data-time-end="10.0">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-center px-6 text-center pb-24 md:pb-0">
             <div className="story-scrim relative z-10 space-y-6 md:space-y-8 max-w-xl pointer-events-auto">
               <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">

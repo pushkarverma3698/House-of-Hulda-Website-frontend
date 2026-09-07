@@ -152,7 +152,7 @@ All of these are valuable outcomes. All of them come from sustained, quiet think
 
 **What to prepare**: Write down your core questions before you arrive. Bring a notebook. Have one book you've been meaning to read. Set "office hours" for your team (maybe 9–10 AM once a week) so they know when to reach you. Otherwise, tell them you're slow to respond and you mean it.
 
-**Cost**: A private room at House of Hulda is **[RATE per night]**, including meals. For a two-week solo retreat: **[2-week rate]**. For a founder + co-founder: **[2-person retreat rate]**.
+**Cost**: A private room at House of Hulda is **₹2,800**, including meals. For a two-week solo retreat: **₹28,000**. For a founder + co-founder: **₹38,000**.
 
 **To book**: Contact House of Hulda directly. Explain that you're a founder seeking a working retreat (not vacation, not family trip). They'll understand what you're looking for and help customize.
 

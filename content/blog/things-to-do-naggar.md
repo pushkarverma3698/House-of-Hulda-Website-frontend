@@ -26,9 +26,9 @@ Nicholas Roerich was a Russian painter, mystic, and intellectual. In the 1920s, 
 Spend an hour here, alone if possible. Look at how he painted mountains and meditation. Read the notes. The gift shop has books and prints. It's not a big tourist attraction (you might be the only visitor). That's the point.
 
 **Open**: Tuesday to Sunday, 10 AM–5 PM  
-**Entry**: [ROERICH ENTRY PRICE]  
+**Entry**: ₹100  
 **Time needed**: 60–90 minutes  
-**From House of Hulda**: [DISTANCE] by foot or vehicle
+**From House of Hulda**: 22 km (45-minute drive) by foot or vehicle
 
 ## 3. Walk Naggar Castle (30 Minutes)
 
@@ -37,15 +37,15 @@ Naggar Castle was built in the 16th century (some parts earlier) as the seat of 
 The views from the top are Naggar's postcard: valley, pines, the village below.
 
 **Open**: Daily, 10 AM–5 PM  
-**Entry**: [CASTLE ENTRY PRICE]  
+**Entry**: ₹50  
 **Time needed**: 30–45 minutes  
-**From House of Hulda**: 10-minute walk, or ask [HOST NAMES] for directions
+**From House of Hulda**: 10-minute walk, or ask The House of Hulda family for directions
 
 ## 4. Follow the Sound of Water: Waterfall Hunt
 
 The village has at least three waterfalls within walking distance. They're not marked. Locals know them; guides charge to show them. Or you can ask your host at House of Hulda, who'll point you toward the sound of water.
 
-The Sadu Waterfall (also called the Naggar Falls) is the most accessible: a [DISTANCE]-minute walk downslope, through oak and pine forest, ending at a small waterfall and pool. It's cold. People swim in summer. In spring, it's rushing and dangerous — don't attempt it.
+The Sadu Waterfall (also called the Naggar Falls) is the most accessible: a 20-minute walk downslope, through oak and pine forest, ending at a small waterfall and pool. It's cold. People swim in summer. In spring, it's rushing and dangerous — don't attempt it.
 
 The real reward isn't the waterfall itself; it's the walk. You'll pass through actual Himachali forest, hear birds, feel the drop in temperature as you descend, and arrive at water that nobody on Instagram follows you to find.
 
@@ -63,12 +63,12 @@ Walk into an orchard (ask locals for permission — they usually welcome it). Ta
 Many homestays, including House of Hulda, have apples in their gardens. Ask your host if you can wander.
 
 **Best time**: September–October (harvest)  
-**Cost**: [APPLE PRICE PER KG] if buying  
+**Cost**: ₹120 if buying  
 **Time needed**: 1–3 hours, flexible
 
 ## 6. Drink Pahari Chai at a Dhabha
 
-The dhabhas (small roadside cafés) in Naggar aren't styled for tourists. They're where local workers, farmers, and construction crews stop for tea. The chai is made with jaggery, ginger, and sometimes cardamom. It arrives in a small clay cup (chikni). You sit on a plastic chair facing the road and the mountains. The cost is roughly [CHAI PRICE].
+The dhabhas (small roadside cafés) in Naggar aren't styled for tourists. They're where local workers, farmers, and construction crews stop for tea. The chai is made with jaggery, ginger, and sometimes cardamom. It arrives in a small clay cup (chikni). You sit on a plastic chair facing the road and the mountains. The cost is roughly ₹40.
 
 There are a few scattered through the village. Ask your host where the locals drink; that's the place to go. The experience matters more than the specific café.
 
@@ -78,7 +78,7 @@ Himachali cuisine is rice-and-bean-based, flavored with local herbs, and designe
 
 If you're staying elsewhere, ask your host if they'll teach you a dish. Most homestay owners are happy to involve guests in cooking. It's not a formal "cooking class"; it's an invitation to stand in a kitchen and learn by watching.
 
-**Cost**: Usually included if you're a guest; otherwise [PRICE] for a private class  
+**Cost**: Usually included if you're a guest; otherwise ₹350 for a private class  
 **Time**: 2–3 hours  
 **What you'll learn**: Rotli, rice, dal, a pickled vegetable
 
@@ -104,9 +104,9 @@ If you're a guest, the attic café is your office, your living room, your sunset
 
 The WiFi is strong. The espresso is real. The silence is intentional.
 
-**Breakfast**: Communal, roughly [BREAKFAST PRICE] for guests; day visitors [DAY RATE]  
-**Lunch/Dinner**: [MEAL PRICE RANGE]  
-**Tea/Coffee**: [BEVERAGE PRICE]
+**Breakfast**: Communal, roughly ₹250 for guests; day visitors ₹2,800  
+**Lunch/Dinner**: ₹250–₹450  
+**Tea/Coffee**: ₹80–₹150
 
 ## 11. Visit a Sacred Grove or Local Temple (Morning or Sunset)
 
@@ -138,4 +138,4 @@ House of Hulda's attic café becomes your base camp for exploring Naggar. Wake u
 - [What Is Kathkuni Architecture? Staying in a Stone-and-Deodar Himalayan Home](/blog/kathkuni-architecture/)
 - [A Workation in the Himalayas: Slow Days, Fast WiFi, and an Attic Café in Naggar](/blog/workation-himalayas/)
 
-**Ready to explore Naggar?** [Book your stay at House of Hulda](/) or [WhatsApp to ask about guides and local recommendations](https://wa.me/[WHATSAPP_NUMBER]).
+**Ready to explore Naggar?** [Book your stay at House of Hulda](/) or [WhatsApp to ask about guides and local recommendations](https://wa.me/918284008838).

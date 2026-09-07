@@ -4,7 +4,7 @@ import Image from "next/image";
 import { PageShell } from "@/components/layout/PageShell";
 import { EditorialHero } from "@/components/editorial/EditorialHero";
 import { PACKAGES, MOOD_ORDER, formatINR } from "@/content/packages";
-import { breadcrumbJsonLd, SITE } from "@/lib/schema";
+import { breadcrumbJsonLd, faqJsonLd, SITE } from "@/lib/schema";
 import { COMMON_FAQ } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -42,6 +42,7 @@ export default function StayPage() {
   return (
     <PageShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(COMMON_FAQ)) }} />
       <EditorialHero
         src="/images/room-morning.jpg"
         alt="A quiet guest room at House of Hulda with hand-plastered walls and mountain light filtering in"
