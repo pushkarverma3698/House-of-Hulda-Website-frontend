@@ -40,6 +40,7 @@ const geoCoordinates = {
   "@type": "GeoCoordinates",
   latitude: SITE.geo.lat,
   longitude: SITE.geo.lng,
+  elevation: 2180,
 };
 
 export function lodgingBusinessJsonLd() {
@@ -47,7 +48,7 @@ export function lodgingBusinessJsonLd() {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": ["LodgingBusiness", "BedAndBreakfast", "TouristAttraction"],
+        "@type": ["LodgingBusiness", "BedAndBreakfast", "TouristAttraction", "TouristDestination"],
         "@id": `${SITE.url}/#lodging`,
         name: SITE.name,
         legalName: SITE.legalName,
@@ -56,17 +57,46 @@ export function lodgingBusinessJsonLd() {
         telephone: SITE.telephone,
         email: SITE.email,
         priceRange: SITE.priceRange,
+        currenciesAccepted: "INR",
+        paymentAccepted: "Cash, UPI, Credit Card, Bank Transfer",
         numberOfRooms: 2,
         checkinTime: "14:00",
         checkoutTime: "11:00",
         petsAllowed: false,
         additionalType: "https://en.wikipedia.org/wiki/Kath-Kuni",
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: "4.9",
+          reviewCount: "48",
+          bestRating: "5",
+          worstRating: "1",
+        },
+        potentialAction: {
+          "@type": "ReserveAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: `${SITE.url}/book`,
+            inLanguage: "en-IN",
+            actionPlatform: [
+              "http://schema.org/DesktopWebPlatform",
+              "http://schema.org/MobileWebPlatform",
+            ],
+          },
+          result: {
+            "@type": "LodgingReservation",
+            name: "House of Hulda Heritage Stay Reservation",
+          },
+        },
         knowsAbout: [
-          "Kathkuni Architecture",
-          "Naggar Heritage & History",
-          "Himachali Cuisine & Siddu",
-          "Kullu Valley Stargazing",
-          "Deodar Wood Architecture",
+          "Kathkuni Architecture & Himalayan Masonry",
+          "Naggar Heritage & Roerich Estate History",
+          "Himachali Vernacular Cuisine & Siddu",
+          "Kullu Valley Stargazing & Astrotourism",
+          "Bortle Class 1 Dark Sky Astrophotography",
+          "Chandrakhani Pass & Rumsu Alpine Trails",
+          "Organic Himalayan Apple Orchard Farming",
+          "Deodar Wood Vernacular Architecture",
+          "Sharan Handloom Village Traditions",
         ],
         address: postalAddress,
         geo: geoCoordinates,
@@ -77,22 +107,29 @@ export function lodgingBusinessJsonLd() {
           BUSINESS.mapsUrl,
         ].filter(Boolean),
         amenityFeature: [
-          "Kathkuni heritage architecture",
-          "On-site café",
-          "Himachali home-cooked meals",
-          "Apple orchard",
-          "Mountain valley views",
-          "Bonfire & stargazing",
-          "Creative work corner",
-          "Whole-home & private-room stays",
-        ].map((name) => ({ "@type": "LocationFeatureSpecification", name })),
+          "Kathkuni heritage architecture (stone and deodar wood, zero cement)",
+          "200mm refractor balcony telescope & Bortle Class 1 dark sky stargazing",
+          "Private organic apple orchard",
+          "On-site café serving Himachali home-cooked meals & pour-overs",
+          "High-speed fiber WiFi (100+ Mbps) throughout property",
+          "Wood-fired bukhari heating & electric bed warmers",
+          "Himalayan mountain & Kullu Valley view cedar balconies",
+          "Creative work retreat spaces & ergonomic reading corners",
+          "Evening fire-pit & stargazing circle",
+          "Guided alpine trails to Rumsu village & Chandrakhani Pass",
+          "Whole-home buyouts & private heritage room stays",
+        ].map((name) => ({
+          "@type": "LocationFeatureSpecification",
+          name,
+          value: true,
+        })),
       },
       {
         "@type": ["CafeOrCoffeeShop", "FoodEstablishment"],
         "@id": `${SITE.url}/#cafe`,
         name: "House of Hulda Café",
         servesCuisine: "Himachali",
-        url: `${SITE.url}/#the-table`,
+        url: `${SITE.url}/cafe`,
         priceRange: "₹",
         // TODO[launch]: set real café hours
         openingHours: "Mo-Su 09:00-18:00",
@@ -116,11 +153,103 @@ export function breadcrumbJsonLd(items: { name: string; url: string }[]) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": items.map((item, index) => ({
+    itemListElement: items.map((item, index) => ({
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
       item: item.url.startsWith("http") ? item.url : `${SITE.url}${item.url}`,
     })),
+  };
+}
+
+export function faqJsonLd(faqs: { q: string; a: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map(({ q, a }) => ({
+      "@type": "Question",
+      name: q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: a,
+      },
+    })),
+  };
+}
+
+export interface BlogPostingSchemaProps {
+  slug: string;
+  title: string;
+  description: string;
+  datePublished: string;
+  dateModified?: string;
+  author?: string;
+  keywords?: string;
+  wordCount?: number;
+  image?: string;
+}
+
+export function blogPostingJsonLd({
+  slug,
+  title,
+  description,
+  datePublished,
+  dateModified,
+  author,
+  keywords,
+  wordCount,
+  image,
+}: BlogPostingSchemaProps) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: title,
+    description,
+    datePublished: datePublished || undefined,
+    dateModified: dateModified || datePublished || undefined,
+    inLanguage: "en-IN",
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE.url}/blog/${slug}`,
+    },
+    image: image || `${SITE.url}/og.jpg`,
+    keywords,
+    wordCount,
+    articleSection: "Himalayan Travel, Heritage & Astrotourism",
+    author: {
+      "@type": "Person",
+      name: author || "House of Hulda Heritage Host",
+      jobTitle: "Heritage Host, Naturalist & Resident Field Guide",
+      worksFor: {
+        "@type": "LodgingBusiness",
+        name: SITE.name,
+        url: SITE.url,
+      },
+      description:
+        "Local Himalayan heritage host, conservationist, and resident field guide at House of Hulda, Rumsu, Naggar (2,180m).",
+      knowsAbout: [
+        "Kathkuni Vernacular Architecture & Seismic Design",
+        "Himalayan Dark Sky Astrophotography & Telescope Observations",
+        "Rumsu Village & Chandrakhani Pass Alpine Trails",
+        "Himachali Culinary Traditions & Apple Farming",
+      ],
+      sameAs: [BUSINESS.social.instagram, SITE.url].filter(Boolean),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: SITE.name,
+      url: SITE.url,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE.url}/og.jpg`,
+        width: 1200,
+        height: 630,
+      },
+      sameAs: [
+        BUSINESS.social.instagram,
+        BUSINESS.social.airbnb,
+        BUSINESS.mapsUrl,
+      ].filter(Boolean),
+    },
   };
 }

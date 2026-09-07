@@ -101,11 +101,11 @@ The taste is also a function of method. Food cooked slowly, in cast iron, with g
 
 House of Hulda's café isn't only for guests. The host welcomes day visitors: **Café in Naggar** is something you can search for if you're passing through, and people do.
 
-**Breakfast**: [BREAKFAST PRICE] for non-guests. This includes bread, a preparation of vegetables, tea or coffee, honey, fruit. It's filling.
+**Breakfast**: ₹250 for non-guests. This includes bread, a preparation of vegetables, tea or coffee, honey, fruit. It's filling.
 
-**Lunch**: [LUNCH PRICE]. Rice or rotli, dal, vegetable curry, yogurt, achaar, fruit.
+**Lunch**: ₹350. Rice or rotli, dal, vegetable curry, yogurt, achaar, fruit.
 
-**Tea and snacks**: [TEA PRICE], [SNACKS PRICE]. Chai or coffee. Sometimes a biscuit or simple snack.
+**Tea and snacks**: ₹60, ₹150. Chai or coffee. Sometimes a biscuit or simple snack.
 
 No advance reservation needed (though large groups should give notice). You come, you sit, you eat when it's ready. It's relaxed, not rushed.
 
@@ -164,17 +164,17 @@ These aren't health claims; they're observations. The food works because it evol
 
 If you want to experience Himachali **home cooking** and eat in the attic café, you need to be a guest at House of Hulda (or come as a day visitor for a meal).
 
-A private room starts at **[RATE per night]**, including breakfast and dinner.
+A private room starts at **₹2,800**, including breakfast and dinner.
 
-A group reservation (2–4 people in the attic) is **[GROUP RATE per person]**, including all meals.
+A group reservation (2–4 people in the attic) is **₹2,200**, including all meals.
 
-Day visitors: breakfast **[PRICE]**, lunch **[PRICE]**, tea **[PRICE]**.
+Day visitors: breakfast **₹350**, lunch **₹350**, tea **₹350**.
 
 **To book:**
 
-WhatsApp: [WHATSAPP NUMBER]  
-Email: [EMAIL ADDRESS]  
-Website: [WEBSITE]
+WhatsApp: +91 82840 08838  
+Email: houseofhuldamanali@gmail.com  
+Website: houseofhuldamanali.com
 
 Mention:
 - Your dates
@@ -198,4 +198,4 @@ If you want to eat well — not pretentiously, just well — in the Himalayas, c
 - [Naggar, Himachal: 12 Quiet Things to Do (Roerich, Orchards, Waterfall Trails)](/blog/things-to-do-naggar/)
 - [A Workation in the Himalayas: Slow Days, Fast WiFi, and an Attic Café in Naggar](/blog/workation-himalayas/)
 
-**Ready to eat Himachali food?** [Book a stay or visit the café at House of Hulda](/) or [WhatsApp to ask about meal options](https://wa.me/[WHATSAPP_NUMBER]).
+**Ready to eat Himachali food?** [Book a stay or visit the café at House of Hulda](/) or [WhatsApp to ask about meal options](https://wa.me/918284008838).

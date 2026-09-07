@@ -17,7 +17,7 @@ House of Hulda sits on a slope above Naggar village, built in the traditional Ka
 
 The main town is loud. Packed. Tour operators, shawl vendors, the smell of diesel and grilled meat stacked into the narrow mall. Real Himachali life — orchards, temple bells, the hiss of wind through deodars — happens outside town.
 
-Naggar sits 2,000 meters up, [distance] minutes from Manali center but a world removed. The village itself hasn't been flattened by tourism. You'll find a few local cafés, the Roerich Art Gallery (quirk and history in a small stone house), Naggar Castle (walk through it, quick), and mostly: apple orchards, terraced fields, paths that lead to waterfalls nobody crowds. Houses cluster loosely. There's sky.
+Naggar sits 2,000 meters up, 45 minutes (22 km) from Manali center but a world removed. The village itself hasn't been flattened by tourism. You'll find a few local cafés, the Roerich Art Gallery (quirk and history in a small stone house), Naggar Castle (walk through it, quick), and mostly: apple orchards, terraced fields, paths that lead to waterfalls nobody crowds. Houses cluster loosely. There's sky.
 
 If you book a **homestay in Naggar** instead of a Manali hotel room, you're choosing the slower version of the same mountains — same views, different quality of silence.
 
@@ -33,17 +33,17 @@ The space is built for quiet work. WiFi reaches the café and bedrooms. Solar pa
 
 House of Hulda offers private bedrooms — **Kathkuni-built**, floor-mattress beds, mud walls, your own pace — and a larger attic space that sleeps groups or travelers who prefer company. A couple might book a private room for a week. A remote worker might rent the whole upstairs to use the café as an office. Four friends might take the attic and the kitchen and stay for ten days, cooking meals together, telling stories at night.
 
-Rates begin at **[RATE per room/night]** for private rooms; groups and longer stays are negotiated. The vibe is honest: no hidden fees, no upsells, direct booking over WhatsApp to arrange your exact needs.
+Rates begin at **₹2,800 per night** for private rooms; groups and longer stays are negotiated. The vibe is honest: no hidden fees, no upsells, direct booking over WhatsApp to arrange your exact needs.
 
 ## The Nearness of Everything That Matters
 
 From your room, you're walking distance from:
 
 - **Roerich Art Gallery**: A painter's collection of Himalayan art and Russian mysticism in a small stone building. An hour inside rewires your understanding of color and light.
-- **Naggar Castle**: [Distance]-minute walk. Built in the 16th century, it's a tangle of stone rooms, views, and local history.
+- **Naggar Castle**: 20-minute walk. Built in the 16th century, it's a tangle of stone rooms, views, and local history.
 - **Waterfall trails**: The hidden waterfalls that feed the village — found by asking locals or following the sound of water.
 - **Apple orchards**: Naggar grows apples that taste like apples. Walk through the orchards in early morning or sunset, talk to farmers, buy fruit warm from the tree.
-- **Solang Valley**: [Distance] away, for paragliding or trekking if you want a day that's slightly less quiet.
+- **Solang Valley**: 35 km away, for paragliding or trekking if you want a day that's slightly less quiet.
 - **Manali town**: Close enough for a market run or a restaurant you missed, far enough that you don't have to.
 
 ## Who Stays Here, and Why
@@ -60,11 +60,11 @@ The pattern: people come to *stay*, not to *see*. They're not checking a box on 
 
 Rooms at House of Hulda fill up — especially spring and autumn — because there are very few like it. To reserve your stay in Naggar, reach out directly:
 
-**WhatsApp: [HOST WHATSAPP]**  
-**Email: [CONTACT EMAIL]**  
-**Website: www.houseofulda.com**
+**WhatsApp: +91 82840 08838**  
+**Email: houseofhuldamanali@gmail.com**  
+**Website: https://houseofhuldamanali.com**
 
-Mention your dates, whether you want a private room or to join a group, and what you're seeking — rest, work, a creative project, time with friends. The host [HOSTS' NAMES] will tell you what's available and answer what matters: water temperature, WiFi strength, quiet hours, what's cooking that week.
+Mention your dates, whether you want a private room or to join a group, and what you're seeking — rest, work, a creative project, time with friends. The House of Hulda family will tell you what's available and answer what matters: water temperature, WiFi strength, quiet hours, what's cooking that week.
 
 For **workation packages** and group bookings, discuss those directly — custom arrangements are the norm here.
 
@@ -82,4 +82,4 @@ The mountains don't require much of you. Neither do we.
 - [What Is Kathkuni Architecture? Staying in a Stone-and-Deodar Himalayan Home](/blog/kathkuni-architecture/)
 - [A Workation in the Himalayas: Slow Days, Fast WiFi, and an Attic Café in Naggar](/blog/workation-himalayas/)
 
-**Ready to book your escape?** [WhatsApp House of Hulda directly](https://wa.me/[WHATSAPP_NUMBER]) or visit our [homepage](/) to see photos and current availability.
+**Ready to book your escape?** [Reserve directly online](/book) or [WhatsApp House of Hulda](https://wa.me/918284008838) to check current availability.

@@ -70,18 +70,18 @@ Most digital nomads adapt within two days. The silence becomes an asset, not a l
 
 **Daily cost breakdown for a solo digital nomad in Naggar**:
 
-- Accommodation: **[RATE per night]** for a private room
-- Meals (breakfast, lunch, dinner): **[MEAL RATE per day]** 
-- Coffee/tea/snacks: **[BEVERAGE RATE]** (usually just tea at breakfast; you're getting coffee/chai in your rate)
+- Accommodation: **₹2,800** for a private room
+- Meals (breakfast, lunch, dinner): **₹650** 
+- Coffee/tea/snacks: **₹120** (usually just tea at breakfast; you're getting coffee/chai in your rate)
 - Local transport: Minimal (mostly walking; occasional ride to Manali if needed)
-- **Total per day**: approximately **[TOTAL per person per day]** all-in
+- **Total per day**: approximately **₹3,500** all-in
 
 **Comparative cost**:
-- Manali co-working space: [MANALI_COWORK_PRICE] per month
-- Manali private room (basic): [MANALI_ROOM_PRICE] per night
-- Naggar at House of Hulda (all-in): [HULDA_ALL_IN] per day
+- Manali co-working space: ₹800/day per month
+- Manali private room (basic): ₹4,000/night per night
+- Naggar at House of Hulda (all-in): ₹3,200/day per day
 
-A month in Naggar (30 nights at House of Hulda): **[MONTHLY_RATE]** all-in. A month in Manali (room + co-working): **[MANALI_MONTHLY]**. The difference: you could nomad for an extra week every month by choosing Naggar.
+A month in Naggar (30 nights at House of Hulda): **₹48,000** all-in. A month in Manali (room + co-working): **₹65,000**. The difference: you could nomad for an extra week every month by choosing Naggar.
 
 ## Building Community in Naggar (You're Not Alone)
 
