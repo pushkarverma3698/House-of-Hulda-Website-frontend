@@ -173,7 +173,7 @@ const HIRES_NEAREST_RADIUS = 8
  *  exact target frame is decoding/fetching. Holding a crisp 1080p frame for a few
  *  fractions of a second reads as natural film shutter cadence, whereas dropping
  *  to a 160px proxy thumbnail reads as a jarring blurry pop. */
-const MAX_HOLD_DISTANCE = 20
+const MAX_HOLD_DISTANCE = 48
 
 /** Near-search radius for the mid tier. Wider than the sharp tier's because the
  *  mid tier is the graceful step down rather than the target: at 4.5x upscale a
@@ -534,7 +534,7 @@ export function warmRemainingHighResFrames(): void {
   if (typeof window === 'undefined' || highResWarmingStarted) return
   highResWarmingStarted = true
 
-  const WARM_CONCURRENCY = 4
+  const WARM_CONCURRENCY = 6
   const framesToWarm = Array.from(
     { length: TOTAL_HERO_FRAMES - 40 },
     (_, i) => i + 41
