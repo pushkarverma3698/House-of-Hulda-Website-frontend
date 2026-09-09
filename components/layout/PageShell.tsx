@@ -4,6 +4,7 @@ import { PageHeader } from "./PageHeader";
 
 const NAV = [
   { href: "/stay", label: "Stay" },
+  { href: "/the-house", label: "The House" },
   { href: "/cafe", label: "Café" },
   { href: "/naggar", label: "Naggar" },
   { href: "/blog", label: "Journal" },

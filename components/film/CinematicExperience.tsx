@@ -10,6 +10,7 @@ import { Navigation } from '@/components/film/Navigation'
 import { ReserveDock } from '@/components/film/ReserveDock'
 import { FilmReel } from '@/components/film/FilmReel'
 import { StarCard } from '@/components/sky/StarCard'
+import { CelestialPlanetarium } from '@/components/sky/CelestialPlanetarium'
 import { DateDial } from '@/components/astro/DateDial'
 import { EIGHTEEN_GODS, CelestialGod } from '@/content/eighteen'
 import { whatsappLink } from '@/lib/site-config'
@@ -72,6 +73,37 @@ export function CinematicExperience() {
               duration: 0.35, 
               ease: 'power3.in',
               stagger: 0.03
+            });
+            return;
+          }
+
+          if (idx === sections.length - 1) {
+            // Final section is the destination (First Light / Reservation):
+            // Smooth arrival with graceful deceleration into its resting pose.
+            // Never exits or blurs away — settles with power3.out and sine.out into perfect center.
+            gsap.set(elements, { opacity: 0, y: 50, filter: 'blur(16px)', scale: 0.96 });
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: section,
+                scroller: document.getElementById('scroll-wrapper') || window,
+                start: 'top 80%',
+                end: 'bottom bottom',
+                scrub: 1.2,
+              }
+            });
+            tl.to(elements, {
+              opacity: 1,
+              y: 0,
+              filter: 'blur(0px)',
+              scale: 1,
+              duration: 0.7,
+              ease: 'power3.out',
+              stagger: 0.04
+            })
+            .to(elements, {
+              y: -4,
+              duration: 0.3,
+              ease: 'sine.out'
             });
             return;
           }
@@ -218,52 +250,11 @@ export function CinematicExperience() {
           </div>
         </section>
 
-        {/* L-07: 5.2s to 6.8s · The Eighteen Gods */}
+        {/* L-07: 5.2s to 6.8s · The Eighteen Gods Celestial Planetarium */}
         <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[150vh]" data-time-start="5.2" data-time-end="6.8">
-          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-4 sm:px-8 md:px-16 max-w-6xl mx-auto w-full pb-24 md:pb-0">
-            <div className="story-scrim relative z-10 space-y-4 md:space-y-6 pointer-events-auto">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
-                <div className="space-y-2">
-                  <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber animate-rec shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
-                    L-07 · 19:45 · BORTLE CLASS 1
-                  </p>
-                  <h2 className="font-display text-2xl sm:text-4xl md:text-5xl font-normal text-cream leading-tight">
-                    The Eighteen Gods.
-                  </h2>
-                  <p className="text-xs sm:text-sm text-neutral-400 max-w-xl">
-                    Tap a deity to view astronomical alignment and folklore over Naggar Ridge.
-                  </p>
-                </div>
-              </div>
-
-              {/* Scrollable deity grid with subtle mobile fade-mask inviting horizontal scrub */}
-              <div className="flex gap-2.5 pt-2 overflow-x-auto sm:grid sm:grid-cols-3 lg:grid-cols-6 pb-2 [scrollbar-width:none] [mask-image:linear-gradient(to_right,white_82%,transparent_100%)] sm:[mask-image:none]">
-                {EIGHTEEN_GODS.map((god) => (
-                  <button
-                    key={god.id}
-                    onClick={() => setSelectedStar(god)}
-                    className="w-[44vw] sm:w-auto shrink-0 sm:shrink p-3.5 rounded-xl bg-white/[0.03] hover:bg-amber-400/[0.1] border border-white/[0.08] hover:border-amber-400/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] text-left transition-all duration-300 group min-h-24 flex flex-col justify-between focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400/70"
-                  >
-                    <div className="flex justify-between items-start w-full">
-                      <span className="hud-mono text-[9px] text-amber-400/80">
-                        #{god.id.toString().padStart(2, '0')}
-                      </span>
-                      <span className="hud-mono text-[8px] text-cream/40 uppercase">
-                        {god.constellation.slice(0, 3)}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="font-display text-sm text-cream/90 group-hover:text-amber-300 transition-colors leading-tight">
-                        {god.deity}
-                      </h3>
-                      <p className="hud-mono text-[9px] text-cream/45 line-clamp-1 mt-0.5 group-hover:text-cream/70 transition-colors">
-                        {god.deityRole}
-                      </p>
-                    </div>
-                  </button>
-                ))}
-              </div>
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-4 sm:px-8 md:px-12 max-w-6xl mx-auto w-full pb-20 md:pb-0">
+            <div className="story-scrim relative z-10 w-full pointer-events-auto">
+              <CelestialPlanetarium onSelectGod={setSelectedStar} />
             </div>
           </div>
         </section>
@@ -297,37 +288,49 @@ export function CinematicExperience() {
         {/* L-10: 9.2s to 10.0s · First Light & Booking */}
         <section id="the-invitation" className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="9.2" data-time-end="10.0">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-center px-6 text-center pb-24 md:pb-0">
-            <div className="story-scrim relative z-10 space-y-6 md:space-y-8 max-w-xl pointer-events-auto">
-              <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
-                L-10 · 06:05 · FIRST LIGHT
-              </p>
-              <h2 className="font-display text-4xl sm:text-6xl md:text-7xl font-normal text-cream leading-tight drop-shadow-md">
-                Sunrise at 06:14.
-              </h2>
-              <p className="text-cream/90 text-sm sm:text-base leading-relaxed drop-shadow-md">
-                The shadow of the ridge slides down the orchard. The fire is still burning. Your morning coffee is ready.
-              </p>
-              <div className="space-y-4">
+            <div className="story-scrim relative z-10 space-y-10 md:space-y-12 max-w-2xl pointer-events-auto flex flex-col items-center">
+              
+              <div className="space-y-6 md:space-y-8">
+                <p className="hud-mono text-amber tracking-eyebrow text-[10px] md:text-xs">
+                  L-10 <span className="opacity-50 font-sans font-light mx-1.5">/</span> 06:05 <span className="opacity-50 font-sans font-light mx-1.5">/</span> FIRST LIGHT
+                </p>
+                
+                <h2 className="font-display text-5xl sm:text-7xl md:text-[5.5rem] font-normal text-cream leading-[0.9] drop-shadow-xl">
+                  <span className="italic block mb-1 md:mb-3 text-cream/90">Sunrise</span>
+                  <span>at 06:14.</span>
+                </h2>
+                
+                <p className="text-cream/80 text-sm sm:text-base leading-relaxed drop-shadow-md font-body max-w-sm mx-auto">
+                  The shadow of the ridge slides down the orchard. The fire is still burning. Your morning coffee is ready.
+                </p>
+              </div>
+
+              {/* Elegant divider */}
+              <div className="w-8 h-px bg-cream/20"></div>
+
+              <div className="space-y-8 flex flex-col items-center w-full">
                 <Link
                   href="/book"
                   scroll={false}
-                  className="group px-10 py-4 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-mono text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:scale-105 active:scale-95 inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f17]"
+                  className="group px-12 py-[18px] rounded-full bg-cream/95 hover:bg-white text-ink font-body text-[11px] font-bold uppercase tracking-eyebrow transition-all duration-500 ease-exhale shadow-[0_10px_40px_rgba(0,0,0,0.6)] hover:shadow-[0_10px_50px_rgba(255,255,255,0.15)] hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                 >
                   Reserve The Stay
-                  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1.5 ml-2">→</span>
+                  <svg className="w-[15px] h-[15px] transition-transform duration-500 ease-exhale group-hover:translate-x-1.5 text-amber" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
                 </Link>
-                <div>
-                  <a
-                    href={whatsappLink("Hello House of Hulda! I have a few questions before reserving a stay.")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hud-mono text-xs text-cream/60 hover:text-amber-300 transition-colors inline-flex items-center gap-2 group"
-                  >
-                    <span>Questions before booking? Inquire with our host on WhatsApp</span>
-                    <span className="group-hover:translate-x-1 transition-transform">→</span>
-                  </a>
-                </div>
+                
+                <a
+                  href={whatsappLink("Hello House of Hulda! I have a few questions before reserving a stay.")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-body text-[10px] tracking-label text-cream/50 hover:text-amber transition-colors duration-300 flex flex-col items-center gap-2 group uppercase"
+                >
+                  <span>Inquire with our host</span>
+                  <div className="h-px w-4 group-hover:w-full bg-amber/30 group-hover:bg-amber transition-all duration-500 ease-exhale"></div>
+                </a>
               </div>
+              
             </div>
           </div>
         </section>
