@@ -5,6 +5,7 @@ import { useState } from "react";
 
 const NAV = [
   { href: "/stay", label: "Stay" },
+  { href: "/the-house", label: "The House" },
   { href: "/cafe", label: "Café" },
   { href: "/naggar", label: "Naggar" },
   { href: "/blog", label: "Journal" },
@@ -31,8 +32,8 @@ export function PageHeader() {
             </Link>
           ))}
           <Link
-            href="/#the-invitation"
-            className="rounded-full bg-clay px-[17px] py-[9px] text-[10px] font-bold tracking-[0.16em] text-parchment transition-transform hover:scale-[1.04]"
+            href="/book"
+            className="rounded-full bg-amber/10 border border-amber/30 px-[17px] py-[9px] text-[10px] font-bold tracking-[0.1em] text-amber transition-all shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:bg-amber/20 hover:border-amber/60 hover:shadow-[0_0_20px_rgba(217,154,78,0.4)] active:scale-95"
           >
             Reserve
           </Link>

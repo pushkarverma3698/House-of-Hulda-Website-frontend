@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-09-05",
+  "depthMaps": {
+    "arrival": {
+      "image": "/images/arrival-golden-hour.jpg",
+      "depth": "/depth/arrival_depth.jpg",
+      "act": "Act 1: Arrival"
+    },
+    "deodarSuite": {
+      "image": "/images/deodar_suite_interior.jpg",
+      "depth": "/depth/deodar_suite_depth.jpg",
+      "act": "Act 3: Sanctuary"
+    },
+    "naggarValley": {
+      "image": "/images/naggar-valley.jpg",
+      "depth": "/depth/naggar_valley_depth.jpg",
+      "act": "Act 6: Dawn"
+    }
+  },
+  "skyboxes": {
+    "day": "/skyboxes/skybox_himalayan_day.jpg",
+    "dawn": "/skyboxes/skybox_himalayan_dawn.jpg",
+    "night": "/images/skybox_himalayan_night.jpg"
+  },
+  "textures": {
+    "woodAlbedo": "/textures/kathkuni_wood_albedo.jpg",
+    "slateAlbedo": "/textures/slate_stone_albedo.jpg",
+    "liquidDistortion": "/textures/distortion_liquid.jpg"
+  }
+}

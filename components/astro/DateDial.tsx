@@ -2,178 +2,263 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { useNight } from '@/lib/store/night'
 
-interface EphemerisDate {
-  day: number
-  dateStr: string
-  darkFrom: string
-  darkUntil: string
-  darkHours: string
-  moonIllum: string
+interface NightPlan {
+  id: string
+  arrivalDate: string
+  nightDate: string
+  month: string
+  arrivalDay: number
+  nightDay: number
+  darkSky: string
+  moonPct: string
   moonPhase: string
-  godsCount: number
+  visibility: 'EXCELLENT' | 'PRISTINE' | 'OPTIMAL' | 'GOOD'
+  godsStatus: 'ALL 18 VISIBLE' | '16 VISIBLE' | '14 VISIBLE'
+  milkyWay: string
   highlight: string
-  bortle: string
 }
 
-const AUGUST_DATES: EphemerisDate[] = [
-  { day: 11, dateStr: '11 Aug', darkFrom: '20:39', darkUntil: '04:13', darkHours: '7.6 h', moonIllum: '2%', moonPhase: 'Waxing Crescent', godsCount: 18, highlight: 'The Ring Nebula climbs to 89° zenith overhead.', bortle: 'Class 1' },
-  { day: 12, dateStr: '12 Aug', darkFrom: '20:38', darkUntil: '04:14', darkHours: '7.6 h', moonIllum: '6%', moonPhase: 'Waxing Crescent', godsCount: 18, highlight: 'Perseid Meteor Shower peak — 60+ meteors/hr.', bortle: 'Class 1' },
-  { day: 13, dateStr: '13 Aug', darkFrom: '20:37', darkUntil: '04:15', darkHours: '7.6 h', moonIllum: '12%', moonPhase: 'Waxing Crescent', godsCount: 17, highlight: 'Cygnus Loop Supernova Remnant at peak altitude.', bortle: 'Class 1' },
-  { day: 14, dateStr: '14 Aug', darkFrom: '20:36', darkUntil: '04:16', darkHours: '7.6 h', moonIllum: '19%', moonPhase: 'Waxing Crescent', godsCount: 16, highlight: 'Saturn & Cassini Division visible at 150x zoom.', bortle: 'Class 1' },
-  { day: 15, dateStr: '15 Aug', darkFrom: '20:35', darkUntil: '04:17', darkHours: '7.7 h', moonIllum: '27%', moonPhase: 'First Quarter', godsCount: 15, highlight: 'Andromeda Galaxy M31 crisp before moonrise.', bortle: 'Class 2' },
-  { day: 16, dateStr: '16 Aug', darkFrom: '20:34', darkUntil: '04:18', darkHours: '7.7 h', moonIllum: '36%', moonPhase: 'Waxing Gibbous', godsCount: 14, highlight: 'Heresy Ridge shadow lines over Chandrakhani.', bortle: 'Class 2' },
-  { day: 17, dateStr: '17 Aug', darkFrom: '20:33', darkUntil: '04:19', darkHours: '7.7 h', moonIllum: '46%', moonPhase: 'Waxing Gibbous', godsCount: 14, highlight: 'Jupiter & 4 Galilean Moons rising by midnight.', bortle: 'Class 2' },
-  { day: 18, dateStr: '18 Aug', darkFrom: '20:32', darkUntil: '04:20', darkHours: '7.8 h', moonIllum: '57%', moonPhase: 'Waxing Gibbous', godsCount: 13, highlight: 'Lunar Terminator passes Tycho Crater.', bortle: 'Class 2' },
-  { day: 19, dateStr: '19 Aug', darkFrom: '20:31', darkUntil: '04:21', darkHours: '7.8 h', moonIllum: '68%', moonPhase: 'Waxing Gibbous', godsCount: 12, highlight: 'Stargazing around fire pit under golden moon.', bortle: 'Class 3' },
-  { day: 20, dateStr: '20 Aug', darkFrom: '20:30', darkUntil: '04:22', darkHours: '7.8 h', moonIllum: '78%', moonPhase: 'Waxing Gibbous', godsCount: 11, highlight: 'Bright moonlit valley walls & cedar silhouette.', bortle: 'Class 3' },
-  { day: 21, dateStr: '21 Aug', darkFrom: '20:28', darkUntil: '04:23', darkHours: '7.9 h', moonIllum: '87%', moonPhase: 'Waxing Gibbous', godsCount: 10, highlight: 'Lunar Photography night from high balcony.', bortle: 'Class 3' },
-  { day: 22, dateStr: '22 Aug', darkFrom: '20:27', darkUntil: '04:24', darkHours: '7.9 h', moonIllum: '94%', moonPhase: 'Waxing Gibbous', godsCount: 9, highlight: 'Supermoon prelude — high contrast peak views.', bortle: 'Class 3' },
-  { day: 23, dateStr: '23 Aug', darkFrom: '20:26', darkUntil: '04:25', darkHours: '7.9 h', moonIllum: '98%', moonPhase: 'Full Moon', godsCount: 8, highlight: 'Full Himalayan Moonlit Valley Panorama.', bortle: 'Class 3' },
-  { day: 24, dateStr: '24 Aug', darkFrom: '20:25', darkUntil: '04:26', darkHours: '8.0 h', moonIllum: '100%', moonPhase: 'Full Moon', godsCount: 8, highlight: 'Midnight trail walking under silver peak glow.', bortle: 'Class 3' },
+const AUTUMN_NIGHTS: NightPlan[] = [
+  {
+    id: 'oct-11',
+    arrivalDate: '11 OCT',
+    nightDate: '12 OCT',
+    month: 'OCTOBER',
+    arrivalDay: 11,
+    nightDay: 12,
+    darkSky: '20:17 — 05:02',
+    moonPct: '18%',
+    moonPhase: 'Waxing Crescent',
+    visibility: 'EXCELLENT',
+    godsStatus: 'ALL 18 VISIBLE',
+    milkyWay: 'BEST 23:30–03:10',
+    highlight: 'Galactic core aligns with Chandrakhani crest under pitch darkness.',
+  },
+  {
+    id: 'oct-12',
+    arrivalDate: '12 OCT',
+    nightDate: '13 OCT',
+    month: 'OCTOBER',
+    arrivalDay: 12,
+    nightDay: 13,
+    darkSky: '20:18 — 05:03',
+    moonPct: '24%',
+    moonPhase: 'Waxing Crescent',
+    visibility: 'PRISTINE',
+    godsStatus: 'ALL 18 VISIBLE',
+    milkyWay: 'BEST 23:25–03:00',
+    highlight: 'Orion and Pleiades rise above the orchard ridge at midnight.',
+  },
+  {
+    id: 'oct-18',
+    arrivalDate: '18 OCT',
+    nightDate: '19 OCT',
+    month: 'OCTOBER',
+    arrivalDay: 18,
+    nightDay: 19,
+    darkSky: '20:23 — 05:08',
+    moonPct: '58%',
+    moonPhase: 'Waxing Gibbous',
+    visibility: 'OPTIMAL',
+    godsStatus: '16 VISIBLE',
+    milkyWay: 'BEST 01:10–04:30',
+    highlight: 'Silver mountain peaks illuminated by moonset before galaxy reveal.',
+  },
+  {
+    id: 'oct-25',
+    arrivalDate: '25 OCT',
+    nightDate: '26 OCT',
+    month: 'OCTOBER',
+    arrivalDay: 25,
+    nightDay: 26,
+    darkSky: '20:30 — 05:14',
+    moonPct: '4%',
+    moonPhase: 'New Moon Window',
+    visibility: 'PRISTINE',
+    godsStatus: 'ALL 18 VISIBLE',
+    milkyWay: 'BEST 22:45–03:40',
+    highlight: 'True Bortle Class 1 black sky. Deep sky nebulae visible to naked eye.',
+  },
+  {
+    id: 'nov-02',
+    arrivalDate: '02 NOV',
+    nightDate: '03 NOV',
+    month: 'NOVEMBER',
+    arrivalDay: 2,
+    nightDay: 3,
+    darkSky: '20:38 — 05:21',
+    moonPct: '12%',
+    moonPhase: 'Waxing Crescent',
+    visibility: 'EXCELLENT',
+    godsStatus: 'ALL 18 VISIBLE',
+    milkyWay: 'BEST 22:15–02:50',
+    highlight: 'Crisp pre-winter transparency with zero atmospheric haze.',
+  },
+  {
+    id: 'nov-10',
+    arrivalDate: '10 NOV',
+    nightDate: '11 NOV',
+    month: 'NOVEMBER',
+    arrivalDay: 10,
+    nightDay: 11,
+    darkSky: '20:45 — 05:28',
+    moonPct: '2%',
+    moonPhase: 'Taurus Meteor Peak',
+    visibility: 'PRISTINE',
+    godsStatus: 'ALL 18 VISIBLE',
+    milkyWay: 'BEST 22:00–02:30',
+    highlight: 'Taurid fireballs streak over the Pir Panjal snowline.',
+  }
 ]
 
 export function DateDial() {
-  const [selectedDay, setSelectedDay] = useState<number>(11)
-  const activeData = AUGUST_DATES.find((d) => d.day === selectedDay) || AUGUST_DATES[0]
+  const [selectedNightId, setSelectedNightId] = useState<string>('oct-11')
+  const activePlan = AUTUMN_NIGHTS.find((p) => p.id === selectedNightId) || AUTUMN_NIGHTS[0]
 
   return (
-    <section className="relative my-16 w-full max-w-5xl mx-auto px-4 pointer-events-auto">
-      {/* Luxury Astronomical Glass Container */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-neutral-950/70 p-6 md:p-10 backdrop-blur-2xl shadow-[0_32px_96px_rgba(0,0,0,0.8)]">
-        {/* Subtle Ambient Radial Glow */}
-        <div 
-          className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-amber-500/10 blur-3xl pointer-events-none transition-all duration-700"
-          style={{ opacity: selectedDay === 11 || selectedDay === 12 ? 0.25 : 0.1 }}
-        />
+    <section className="relative my-0 w-full max-w-5xl mx-auto px-0 md:px-4 pointer-events-auto">
+      <div className="relative overflow-hidden p-4 sm:p-6 md:p-8 rounded-3xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)]">
+        
+        {/* Subtle Ambient Radial Warmth */}
+        <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 
-        {/* Top Header & Telemetry Coordinates */}
+        {/* 1. Header (Human Typography + Instrument Seasoning) */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-white/10">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-              <span className="hud-mono text-[11px] tracking-widest text-amber-400 uppercase">
-                Plan The Night · 32.1198° N, 77.1731° E
+              <span className="hud-mono text-xs tracking-[0.25em] text-amber-400 uppercase font-semibold">
+                PLAN YOUR NIGHT · BORTLE CLASS 1
               </span>
             </div>
-            <h2 className="font-serif text-3xl md:text-5xl font-normal text-neutral-100 leading-tight">
-              Pick a Date. <span className="italic text-amber-200/90">Watch the Sky Re-render.</span>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-normal text-cream leading-tight tracking-tight">
+              Look Up Into The High Sky.
             </h2>
-            <p className="text-sm md:text-base text-neutral-400 max-w-xl font-body">
-              What the sky does on your dates — live ephemeris telemetry computed for Naggar Ridge at 2,180m elevation.
+            <p className="text-cream/80 text-sm md:text-base font-body max-w-xl leading-relaxed">
+              Select your mountain dates. We compute the exact celestial darkness and alignment over Naggar Ridge at 2,180m elevation.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="px-3.5 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hud-mono text-[10px] text-amber-300 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              BORTLE {activeData.bortle.toUpperCase()}
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="hud-mono text-[10px] text-cream/50 uppercase tracking-widest">ELEVATION</span>
+            <span className="px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 hud-mono text-xs font-bold">
+              2,180 M
+            </span>
           </div>
         </div>
 
-        {/* Interactive Date Dial Bar */}
-        <div className="py-8">
-          <div className="flex items-center justify-between mb-3">
-            <span className="hud-mono text-[10px] text-neutral-400 uppercase tracking-widest">
-              August 2026 Night Selector
-            </span>
-            <span className="hud-mono text-[10px] text-amber-400/80">
-              Selected: <strong className="text-amber-300 font-semibold">{activeData.dateStr}</strong>
-            </span>
-          </div>
+        {/* 2. Date Selection (Arrival & Night Inputs) */}
+        <div className="py-6">
+          <span className="hud-mono text-[10px] text-amber-400/80 uppercase tracking-widest block mb-3 font-semibold">
+            Choose Stargazing Window
+          </span>
 
-          <div className="flex gap-2 overflow-x-auto pb-4 pt-1 scrollbar-thin scrollbar-thumb-amber-500/20 scrollbar-track-transparent">
-            {AUGUST_DATES.map((item) => {
-              const isSelected = item.day === selectedDay
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            {AUTUMN_NIGHTS.map((plan) => {
+              const isSelected = plan.id === selectedNightId
               return (
                 <button
-                  key={item.day}
-                  onClick={() => setSelectedDay(item.day)}
-                  className={`relative flex flex-col items-center justify-center min-w-[54px] min-h-[58px] rounded-xl border transition-all duration-300 group ${
+                  key={plan.id}
+                  onClick={() => setSelectedNightId(plan.id)}
+                  className={`p-3.5 rounded-2xl border text-left transition-all duration-300 flex flex-col justify-between min-h-[96px] group ${
                     isSelected
-                      ? 'border-amber-400 bg-amber-400/15 text-white shadow-[0_0_24px_rgba(245,158,11,0.25)] scale-105'
-                      : 'border-white/10 bg-white/[0.03] text-neutral-400 hover:border-amber-500/40 hover:bg-white/[0.07] hover:text-neutral-200'
+                      ? 'border-amber-400 bg-amber-400/15 shadow-[0_0_24px_rgba(245,158,11,0.3)] scale-[1.02]'
+                      : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.05]'
                   }`}
                 >
-                  <span className="hud-mono text-[9px] text-neutral-500 uppercase group-hover:text-neutral-300">
-                    AUG
-                  </span>
-                  <span className={`font-serif text-lg font-medium leading-none ${isSelected ? 'text-amber-300' : 'text-neutral-200'}`}>
-                    {item.day}
-                  </span>
+                  <div className="flex items-center justify-between">
+                    <span className="hud-mono text-[8.5px] uppercase tracking-wider text-cream/40">
+                      {plan.month}
+                    </span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-amber-400' : 'bg-transparent'}`} />
+                  </div>
 
-                  {/* Moon Illumination Dot Indicator */}
-                  <span 
-                    className={`mt-1 h-1.5 w-1.5 rounded-full ${
-                      parseInt(item.moonIllum) < 15 ? 'bg-amber-400' : 'bg-neutral-600'
-                    }`} 
-                  />
+                  <div className="my-1.5">
+                    <div className="hud-mono text-[9px] text-cream/50 uppercase">ARRIVAL</div>
+                    <div className={`font-display text-lg font-medium ${isSelected ? 'text-amber-300' : 'text-cream'}`}>
+                      {plan.arrivalDate}
+                    </div>
+                  </div>
+
+                  <div className="hud-mono text-[9px] text-amber-300/80">
+                    NIGHT: {plan.nightDate}
+                  </div>
                 </button>
               )
             })}
           </div>
         </div>
 
-        {/* Telemetry Grid & Celestial Status */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 pt-2 pb-6">
-          <div className="p-4 rounded-xl border border-white/5 bg-black/40 backdrop-blur-md flex flex-col justify-between">
-            <span className="hud-mono text-[9.5px] uppercase tracking-wider text-neutral-400">Dark From</span>
-            <div className="mt-2 font-mono text-xl md:text-2xl text-amber-300 font-semibold">{activeData.darkFrom}</div>
-            <span className="text-[10px] text-neutral-400 mt-1 font-body">Astronomical twilight start</span>
-          </div>
-
-          <div className="p-4 rounded-xl border border-white/5 bg-black/40 backdrop-blur-md flex flex-col justify-between">
-            <span className="hud-mono text-[9.5px] uppercase tracking-wider text-neutral-400">Until</span>
-            <div className="mt-2 font-mono text-xl md:text-2xl text-amber-300 font-semibold">{activeData.darkUntil}</div>
-            <span className="text-[10px] text-neutral-400 mt-1 font-body">Dawn twilight onset</span>
-          </div>
-
-          <div className="p-4 rounded-xl border border-white/5 bg-black/40 backdrop-blur-md flex flex-col justify-between">
-            <span className="hud-mono text-[9.5px] uppercase tracking-wider text-neutral-400">Hours Dark</span>
-            <div className="mt-2 font-mono text-xl md:text-2xl text-neutral-100 font-semibold">{activeData.darkHours}</div>
-            <span className="text-[10px] text-neutral-400 mt-1 font-body">Total unpolluted dark window</span>
-          </div>
-
-          <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 backdrop-blur-md flex flex-col justify-between">
-            <div className="flex justify-between items-center">
-              <span className="hud-mono text-[9.5px] uppercase tracking-wider text-amber-400">Moon Phase</span>
-              <span className="hud-mono text-[9px] text-amber-300 font-bold">{activeData.moonIllum}</span>
+        {/* 3. Ephemeris Telemetry Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 py-2">
+          {/* Card 1: Dark Sky */}
+          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between">
+            <span className="hud-mono text-[9px] uppercase tracking-widest text-cream/50">DARK SKY</span>
+            <div className="my-2">
+              <span className="font-mono text-lg sm:text-xl font-bold text-amber-300">{activePlan.darkSky}</span>
             </div>
-            <div className="mt-2 font-serif text-lg md:text-xl text-neutral-100 font-medium truncate">{activeData.moonPhase}</div>
-            <span className="text-[10px] text-amber-200/70 mt-1 font-body truncate">
-              {parseInt(activeData.moonIllum) < 15 ? 'Faint objects hold up' : 'Moonlit landscape view'}
-            </span>
+            <span className="text-[10px] text-cream/60 font-body">Astronomical darkness</span>
+          </div>
+
+          {/* Card 2: Moon */}
+          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between">
+            <span className="hud-mono text-[9px] uppercase tracking-widest text-cream/50">MOON</span>
+            <div className="my-2 flex items-baseline gap-2">
+              <span className="font-mono text-lg sm:text-xl font-bold text-cream">{activePlan.moonPct}</span>
+              <span className="text-[10px] font-serif italic text-amber-200/80">{activePlan.moonPhase}</span>
+            </div>
+            <span className="text-[10px] text-cream/60 font-body">Minimal light wash</span>
+          </div>
+
+          {/* Card 3: Visibility */}
+          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between">
+            <span className="hud-mono text-[9px] uppercase tracking-widest text-cream/50">VISIBILITY</span>
+            <div className="my-2">
+              <span className="hud-mono text-lg sm:text-xl font-bold text-emerald-400">{activePlan.visibility}</span>
+            </div>
+            <span className="text-[10px] text-cream/60 font-body">Bortle Class 1 rating</span>
+          </div>
+
+          {/* Card 4: 18 Gods */}
+          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between">
+            <span className="hud-mono text-[9px] uppercase tracking-widest text-cream/50">18 GODS</span>
+            <div className="my-2">
+              <span className="hud-mono text-lg sm:text-xl font-bold text-amber-300">{activePlan.godsStatus}</span>
+            </div>
+            <span className="text-[10px] text-cream/60 font-body">Above valley peaks</span>
+          </div>
+
+          {/* Card 5: Milky Way */}
+          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between col-span-2 md:col-span-1">
+            <span className="hud-mono text-[9px] uppercase tracking-widest text-cream/50">MILKY WAY</span>
+            <div className="my-2">
+              <span className="font-mono text-sm sm:text-base font-bold text-cream">{activePlan.milkyWay}</span>
+            </div>
+            <span className="text-[10px] text-cream/60 font-body">Galactic core window</span>
           </div>
         </div>
 
-        {/* Celestial Highlight & Deity Count Banner */}
-        <div className="p-5 rounded-2xl border border-white/10 bg-white/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-4 my-2">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">✦</span>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="hud-mono text-[10px] text-amber-400 uppercase font-semibold">
-                  {activeData.godsCount} of the 18 Gods at Best Visibility
-                </span>
-              </div>
-              <p className="text-sm text-neutral-200 font-body mt-0.5">
-                {activeData.highlight}
-              </p>
-            </div>
+        {/* 4. Emotional Invitation & Killer Hospitality CTA */}
+        <div className="mt-6 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white/[0.03] to-transparent border border-amber-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+          <div className="space-y-1">
+            <p className="font-serif italic text-xl sm:text-2xl text-cream font-normal leading-snug">
+              &ldquo;Bring a blanket. We&apos;ll light the fire.&rdquo;
+            </p>
+            <p className="text-xs sm:text-sm text-amber-200/80 font-body">
+              {activePlan.highlight}
+            </p>
           </div>
 
-          <div className="flex items-center gap-3 self-end md:self-auto">
-            <Link
-              href="/book"
-              className="px-6 py-3 rounded-full bg-amber-400 text-black font-mono text-xs font-bold uppercase tracking-widest hover:bg-amber-300 transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:scale-[1.03] active:scale-95 whitespace-nowrap flex items-center gap-2"
-            >
-              <span>Hold {activeData.dateStr}</span>
-              <span>→</span>
-            </Link>
-          </div>
+          <Link
+            href={`/book?date=${encodeURIComponent(activePlan.arrivalDate)}`}
+            className="w-full md:w-auto px-8 py-3.5 rounded-full bg-amber-400 hover:bg-amber-300 text-ink font-semibold hud-mono text-xs tracking-widest uppercase transition-all duration-300 shadow-[0_0_24px_rgba(245,158,11,0.4)] hover:shadow-[0_0_32px_rgba(245,158,11,0.6)] hover:scale-105 active:scale-95 text-center shrink-0 flex items-center justify-center gap-2 group"
+          >
+            <span>Reserve This Night</span>
+            <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+          </Link>
         </div>
+
       </div>
     </section>
   )

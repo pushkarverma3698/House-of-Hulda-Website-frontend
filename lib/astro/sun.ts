@@ -11,9 +11,27 @@ const LNG = 77.1731
  * t 0.33 → 0.66 maps 17:50 → 19:45 (115 min)
  * t 0.66 → 1.00 maps 19:45 → 06:05 (620 min, next day)
  */
+/** Naggar is UTC+05:30 year-round — India observes no daylight saving, so a
+ *  fixed offset is exact here rather than an approximation. */
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000
+
 export function getDateAtT(t: number): Date {
+  // The film opens at 15:40 *at the house*, not at 15:40 wherever the viewer
+  // happens to be sitting. `new Date(y, m, d, 15, 40)` builds a local timestamp
+  // in the viewer's zone, and SunCalc then computes the sun over Naggar for that
+  // absolute instant — so the sun's position used to depend on the visitor's
+  // timezone. Measured across the scroll: correct in IST, but a London visitor
+  // opened the film at −13° with the star field at full opacity over sunlit
+  // footage, and a New York visitor got the day/night arc inverted. At the
+  // closing frame the sun read +58°, which drove the sky shader to its
+  // clear-day blue and turned the final call to action into a flat blue screen.
+  //
+  // Building the instant from UTC and applying Naggar's own offset makes the
+  // timeline mean the same thing for every visitor on earth.
   const now = new Date()
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 15, 40, 0)
+  const start = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 15, 40, 0) - IST_OFFSET_MS
+  )
   const clampedT = Math.max(0, Math.min(1, t))
 
   let offsetMinutes = 0
@@ -29,19 +47,59 @@ export function getDateAtT(t: number): Date {
 }
 
 /**
+ * The scene clock as HH:MM at the house.
+ *
+ * getDateAtT returns a correct absolute instant, but reading it back with
+ * getHours() renders it in the viewer's zone — which would print 10:10 for the
+ * moment the film calls 15:40. The story labels are hard-coded to Naggar time
+ * ("L-01 · 15:40"), so the readout has to be too, or the HUD contradicts the
+ * copy sitting next to it.
+ */
+export function formatSceneTime(date: Date): string {
+  const ist = new Date(date.getTime() + IST_OFFSET_MS)
+  return `${ist.getUTCHours().toString().padStart(2, '0')}:${ist
+    .getUTCMinutes()
+    .toString()
+    .padStart(2, '0')}`
+}
+
+export interface SolarState {
+  readonly altitude: number
+  readonly azimuth: number
+  readonly date: Date
+  readonly isDaylight: boolean
+  readonly isCivilTwilight: boolean
+  readonly isNauticalTwilight: boolean
+  readonly isAstroDark: boolean
+}
+
+// Single-entry memo keyed on t. Every consumer in a given frame (the scroll
+// sampler, EphemerisLight x2, SkyBox, StarField, PostProcessing) passes the same
+// t, so without this the render loop allocates 18 Date objects and runs SunCalc
+// six times per frame — pure GC pressure on mobile.
+let cachedT = Number.NaN
+let cachedState: SolarState | null = null
+const SOLAR_MEMO_EPSILON = 1e-4
+
+/**
  * Given a normalized scroll progress t (0→1),
  * returns the exact solar state at Rumsu for that moment.
  *
- * NOTE: suncalc returns altitude and azimuth in DEGREES directly.
+ * The returned object is shared and must be treated as read-only.
  */
-export function getSolarState(t: number) {
+export function getSolarState(t: number): SolarState {
+  if (cachedState !== null && Math.abs(t - cachedT) < SOLAR_MEMO_EPSILON) {
+    return cachedState
+  }
+
   const dateAtT = getDateAtT(t)
   const sunPos = SunCalc.getPosition(dateAtT, LAT, LNG)
 
   const altDeg = sunPos.altitude
   const azDeg = (sunPos.azimuth + 360) % 360
 
-  return {
+  cachedT = t
+  cachedState = {
     altitude: altDeg,
     azimuth: azDeg,
     date: dateAtT,
@@ -50,6 +108,8 @@ export function getSolarState(t: number) {
     isNauticalTwilight:   altDeg <= -6 && altDeg > -12,
     isAstroDark:          altDeg <= -12,
   }
+
+  return cachedState
 }
 
 

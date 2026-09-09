@@ -2,342 +2,347 @@
 
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { ScrollCanvas } from '@/components/canvas/ScrollCanvas'
 import { Preloader } from '@/components/film/Preloader'
-import { TimeRail } from '@/components/film/TimeRail'
+import { ScrubDebugOverlay } from '@/components/film/ScrubDebugOverlay'
 import { Marketplace } from '@/components/film/Marketplace'
 import { Soundscape } from '@/components/film/Soundscape'
 import { Navigation } from '@/components/film/Navigation'
+import { ReserveDock } from '@/components/film/ReserveDock'
 import { FilmReel } from '@/components/film/FilmReel'
 import { StarCard } from '@/components/sky/StarCard'
+import { CelestialPlanetarium } from '@/components/sky/CelestialPlanetarium'
 import { DateDial } from '@/components/astro/DateDial'
 import { EIGHTEEN_GODS, CelestialGod } from '@/content/eighteen'
-import { useState } from 'react'
+import { whatsappLink } from '@/lib/site-config'
+import { useState, useEffect, useRef } from 'react'
+import { ScrollCanvas } from '@/components/canvas/ScrollCanvas'
+import gsap from 'gsap'
+import ScrollTrigger from 'gsap/ScrollTrigger'
 
-const SceneRoot = dynamic(
-  () => import('@/components/canvas/SceneRoot').then((mod) => mod.SceneRoot),
+gsap.registerPlugin(ScrollTrigger)
+
+const HeritageSandbox = dynamic(
+  () => import('@/components/canvas/HeritageSandbox').then((mod) => mod.HeritageSandbox),
   { ssr: false }
 )
 
-// Stagger delays for deity grid cascade
-const STAGGER_MS = [0,40,80,120,160,200,240,280,320,360,400,440,480,520,560,600,640,680]
+const WebGLGallery = dynamic(
+  () => import('@/components/canvas/WebGLGallery').then((mod) => mod.WebGLGallery),
+  { ssr: false }
+)
 
 export function CinematicExperience() {
   const [selectedStar, setSelectedStar] = useState<CelestialGod | null>(null)
-  const [isHearthMenuOpen, setIsHearthMenuOpen] = useState(false)
+  const [isSandboxOpen, setIsSandboxOpen] = useState(false)
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false)
+
+  const containerRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    let ctx = gsap.context(() => {
+      // Atmospheric entrance and exit easing for each story beat
+      const sections = gsap.utils.toArray('.cine-section') as HTMLElement[]
+      
+      sections.forEach((section, idx) => {
+        const textWrapper = section.querySelector('.story-scrim')
+        if (textWrapper) {
+          const elements = Array.from(textWrapper.children);
+          
+          if (idx === 0) {
+            // First section is hero arrival: starts fully visible and fades up smoothly on scroll
+            gsap.set(elements, { opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 });
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: section,
+                scroller: document.getElementById('scroll-wrapper') || window,
+                start: 'top top',
+                end: 'bottom 20%',
+                scrub: 1.2,
+              }
+            });
+            tl.to(elements, {
+              y: -20,
+              duration: 0.5,
+              ease: 'none'
+            })
+            .to(elements, { 
+              opacity: 0, 
+              y: -60, 
+              filter: 'blur(16px)', 
+              scale: 1.05, 
+              duration: 0.35, 
+              ease: 'power3.in',
+              stagger: 0.03
+            });
+            return;
+          }
+
+          if (idx === sections.length - 1) {
+            // Final section is the destination (First Light / Reservation):
+            // Smooth arrival with graceful deceleration into its resting pose.
+            // Never exits or blurs away — settles with power3.out and sine.out into perfect center.
+            gsap.set(elements, { opacity: 0, y: 50, filter: 'blur(16px)', scale: 0.96 });
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: section,
+                scroller: document.getElementById('scroll-wrapper') || window,
+                start: 'top 80%',
+                end: 'bottom bottom',
+                scrub: 1.2,
+              }
+            });
+            tl.to(elements, {
+              opacity: 1,
+              y: 0,
+              filter: 'blur(0px)',
+              scale: 1,
+              duration: 0.7,
+              ease: 'power3.out',
+              stagger: 0.04
+            })
+            .to(elements, {
+              y: -4,
+              duration: 0.3,
+              ease: 'sine.out'
+            });
+            return;
+          }
+
+          gsap.set(elements, { opacity: 0, y: 60, filter: 'blur(16px)', scale: 0.95 });
+          
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              scroller: document.getElementById('scroll-wrapper') || window,
+              start: 'top 85%',
+              end: 'bottom 15%',
+              scrub: 1.2,
+            }
+          });
+          
+          tl.to(elements, { 
+            opacity: 1, 
+            y: 15, 
+            filter: 'blur(0px)', 
+            scale: 1, 
+            duration: 0.25, 
+            ease: 'power3.out',
+            stagger: 0.05
+          })
+          .to(elements, {
+            y: -15,
+            duration: 0.5,
+            ease: 'none'
+          })
+          .to(elements, { 
+            opacity: 0, 
+            y: -60, 
+            filter: 'blur(16px)', 
+            scale: 1.05, 
+            duration: 0.25, 
+            ease: 'power3.in',
+            stagger: 0.03
+          }, ">-0.1");
+        }
+      })
+    }, containerRef)
+
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <main className="relative min-h-[950vh] bg-transparent text-cream font-body selection:bg-amber selection:text-ink">
-      {/* 2D Master Drone Frame Scrubber Canvas */}
+    <main ref={containerRef} className="relative bg-transparent text-cream font-body selection:bg-amber selection:text-ink">
+      
+      {/* 2026 Apple-Tier Scrubbed Cinematic Image Sequence */}
       <ScrollCanvas />
 
-      {/* z-0 Fixed WebGL Canvas (Dynamic Ephemeris, SkyBox, Embers, StarField, PostProcessing) */}
-      <SceneRoot />
-
-      {/* Navigation Header */}
       <Navigation />
-
-      {/* z-20 Fixed UI Overlays */}
-      <TimeRail />
-      <Soundscape />
-
-      {/* Cinematic film-reel scroll progress — top of viewport */}
+            <Soundscape />
       <FilmReel />
-
-      {/* z-50 Initial Atmospheric Loader */}
+      <ReserveDock />
       <Preloader />
+      <ScrubDebugOverlay />
 
-      {/* Cinematic overlay: vignette + film grain tied to every act */}
       <div className="cine-overlay" aria-hidden="true" />
 
-      {/* z-10 Transparent Scroll Spacers with Story Beats */}
-      <div className="relative z-10 pointer-events-none">
+      {/* Master Cinematic Narrative Track */}
+      <div className="relative z-10 pointer-events-none flex flex-col">
 
-        {/* ═══════════════════════════════════════════
-            L-01: 15:40 — THE ROAD STOPS AT RUMSU
-            Text lives on the ground — no box.
-            A deep bottom gradient anchors it.
-        ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-end pb-28 px-8 md:px-24">
-          <div className="relative space-y-5 max-w-2xl">
-            <p className="hud-mono text-amber tracking-widest text-[10px] flex items-center gap-2 hero-hint-enter"
-              style={{ animationDelay: '0.4s' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber animate-ping" />
-              L-01 · 15:40 · ALT 2,180M
-            </p>
-            <h1 className="hero-title-enter font-display text-4xl md:text-6xl lg:text-7xl font-normal leading-[1.05] text-cream text-glow-amber">
-              The road stops<br />at Rumsu.
-            </h1>
-            <p className="hero-sub-enter text-cream/90 text-base md:text-lg leading-relaxed max-w-xl text-glow-amber">
-              Above it, the trail to Chandrakhani — where a storm once tore a basket of eighteen gods off a rishi&apos;s head and scattered them across these peaks.
-            </p>
-            <p className="hero-sub-enter text-amber/70 text-sm hud-mono tracking-wide text-glow-amber"
-              style={{ animationDelay: '1.5s' }}>
-              They&apos;re still up there. We have a telescope.
-            </p>
-            <div className="hero-hint-enter pt-3 flex items-center gap-2 text-cream/60 text-[10px] hud-mono tracking-widest"
-              style={{ animationDelay: '1.9s' }}>
-              <span className="animate-bounce inline-block">↓</span> SCROLL TO DESCEND INTO THE VALLEY
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            L-02: 16:23 — THE WATER
-            Right-side alignment, no box
-        ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-center px-8 md:px-24 items-end">
-          <div className="relative space-y-4 max-w-lg text-right">
-            <p className="hud-mono text-amber tracking-widest text-[10px]">
-              L-02 · 16:23 · GLACIAL SPRINGS
-            </p>
-            <h2 className="font-display text-3xl md:text-5xl font-normal text-cream leading-tight text-glow-amber">
-              You will hear it<br />before you see it.
-            </h2>
-            <p className="text-cream/90 text-sm md:text-base leading-relaxed text-glow-amber">
-              Glacial melt from Chandrakhani ridge. Piped into cedar soaking tubs and copper kitchen urns. Cold enough to bite. Pure enough to drink without a filter.
-            </p>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            L-03: 17:07 — DEODAR AND STONE
-            Left-side, lower third placement
-        ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-end pb-28 px-8 md:px-24">
-          <div className="relative space-y-4 max-w-xl">
-            <p className="hud-mono text-amber tracking-widest text-[10px]">
-              L-03 · 17:07 · KATH-KUNI ARCHITECTURE
-            </p>
-            <h2 className="font-display text-3xl md:text-5xl font-normal text-cream leading-tight text-glow-amber">
-              Deodar and stone.
-            </h2>
-            <p className="text-cream/90 text-sm md:text-base leading-relaxed text-glow-amber">
-              Stacked in alternating courses of dressed mountain schist and hand-hewn cedar. No mortar. No iron nails. The structure tightens with winter frost and breathes with earth tremors.
-            </p>
-            <p className="text-amber/60 text-xs hud-mono tracking-wide text-glow-amber">
-              500 years of mountain engineering in every beam.
-            </p>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            L-04: 17:50 — THE ORCHARD TURNS
-            Center, upper-third — the golden hour shot
-        ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-center items-center text-center px-8 md:px-24">
-          <div className="relative space-y-4 max-w-2xl">
-            <p className="hud-mono text-amber tracking-widest text-[10px]">
-              L-04 · 17:50 · GOLDEN HOUR
-            </p>
-            <h2 className="font-display text-4xl md:text-6xl font-normal text-cream leading-tight text-glow-amber">
-              The orchard turns<br />amber.
-            </h2>
-            <p className="text-cream/90 text-base md:text-lg leading-relaxed text-glow-amber">
-              Ancient Royal Delicious apple trees. Long shadows across grass. The Pir Panjal crest holding the last direct ray of the day.
-            </p>
-            <p className="text-amber/70 text-sm hud-mono text-glow-amber">
-              This light lasts twelve minutes.
-            </p>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            L-05: 18:29 — THE LOFT
-            Right-side panel, mid-section
-        ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-center px-8 md:px-24 items-end">
-          <div className="relative space-y-4 max-w-lg text-right">
-            <p className="hud-mono text-amber tracking-widest text-[10px]">
-              L-05 · 18:29 · THE LOFT
-            </p>
-            <h2 className="font-display text-3xl md:text-5xl font-normal text-cream leading-tight text-glow-amber">
-              The Attic Sanctuary.
-            </h2>
-            <p className="text-cream/90 text-sm md:text-base leading-relaxed text-glow-amber">
-              Low timber floor seating under a pitched slate roof. Handwoven Kullu blankets. A cup of mountain kahwa as the valley goes dark below you.
-            </p>
-            <p className="text-cream/60 text-xs hud-mono text-glow-amber">
-              Warm light. Dusk settling. Nowhere else to be.
-            </p>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            L-06: 19:07 — THE HEARTH
-            Center cinematic panel with amber warmth
-        ═══════════════════════════════════════════ */}
-        <section className="relative h-[120vh] flex flex-col justify-center items-center text-center px-8 md:px-24">
-          <div className="relative space-y-5 max-w-xl">
-            <p className="hud-mono text-amber tracking-widest text-[10px]">
-              L-06 · 19:07 · THE HEARTH
-            </p>
-            <h2 className="font-display text-4xl md:text-6xl font-normal text-cream leading-tight text-glow-amber">
-              The Woodstove<br />Hearth.
-            </h2>
-            <p className="text-cream/90 text-base md:text-lg leading-relaxed text-glow-amber">
-              A cast-iron stove burning aged deodar rootwood. Fresh siddu over wild walnut stuffing. Ghee poured hot at the table.
-            </p>
-            <p className="text-amber/70 text-sm hud-mono tracking-wide text-glow-amber">
-              Outside, the temperature drops toward zero.<br />Inside, pure Himalayan warmth.
-            </p>
-            <div className="pt-8 pointer-events-auto">
-              {!isHearthMenuOpen ? (
-                <button
-                  onClick={() => setIsHearthMenuOpen(true)}
-                  className="px-5 py-2.5 rounded-full border border-amber/30 bg-ink/40 backdrop-blur-md text-amber hud-mono text-xs uppercase tracking-widest hover:border-amber hover:bg-amber/10 transition-all flex items-center justify-center gap-2 mx-auto shadow-lg hover:shadow-[0_0_20px_rgba(217,154,78,0.2)]"
+        {/* L-01: 0s to 1.8s · The Valley Opening */}
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="0" data-time-end="1.8">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-start px-6 sm:px-12 md:px-24 pr-16 md:pr-24 pb-24 md:pb-0">
+            <div className="story-scrim relative z-10 space-y-4 md:space-y-6 max-w-2xl pointer-events-auto">
+              <p className="hud-mono text-amber tracking-[0.25em] text-xs md:text-sm font-medium uppercase flex items-center gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-amber animate-rec shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                HOUSE OF HULDA
+              </p>
+              <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal uppercase leading-[1.02] tracking-tight text-cream drop-shadow-lg">
+                THE ROAD STOPS<br />AT RUMSU.
+              </h1>
+              <p className="text-cream/90 font-serif italic text-lg sm:text-xl md:text-2xl drop-shadow-md">
+                Naggar · Himachal Pradesh
+              </p>
+              <p className="hud-mono text-amber-300/90 text-xs sm:text-sm tracking-widest uppercase [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
+                2,180 m
+              </p>
+              <div className="pt-2">
+                <Link
+                  href="/book"
+                  className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-400 text-ink font-semibold hud-mono text-xs tracking-widest uppercase transition-all duration-300 shadow-[0_0_24px_rgba(245,158,11,0.4)] hover:shadow-[0_0_32px_rgba(245,158,11,0.7)] hover:scale-105 active:scale-95"
                 >
-                  <span className="w-1 h-1 rounded-full bg-amber animate-ping" />
-                  + In the Hearth
-                </button>
-              ) : (
-                <div className="bg-ink/60 backdrop-blur-xl border border-amber/20 rounded-2xl p-6 text-left max-w-sm mx-auto shadow-2xl animate-in zoom-in-95 fade-in duration-300">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="hud-mono text-xs tracking-widest uppercase text-amber">
-                      Heritage Menu
-                    </span>
-                    <button onClick={() => setIsHearthMenuOpen(false)} className="text-cream/50 hover:text-cream transition-colors">✕</button>
-                  </div>
-                  <ul className="space-y-4 font-display text-cream/90">
-                    <li className="flex gap-3 items-start">
-                      <span className="text-amber/50 mt-1">✦</span>
-                      <div>
-                        <p className="text-sm md:text-base text-amber/90">Fresh Siddu</p>
-                        <p className="text-xs text-cream/60 font-body">Steamed yeast bread with wild walnut & opium seed stuffing.</p>
-                      </div>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <span className="text-amber/50 mt-1">✦</span>
-                      <div>
-                        <p className="text-sm md:text-base text-amber/90">Apple Wood Smoked Trout</p>
-                        <p className="text-xs text-cream/60 font-body">Caught in the Tirthan River, smoked slow over orchard trimmings.</p>
-                      </div>
-                    </li>
-                    <li className="flex gap-3 items-start">
-                      <span className="text-amber/50 mt-1">✦</span>
-                      <div>
-                        <p className="text-sm md:text-base text-amber/90">Wildflower Honey & Ghee</p>
-                        <p className="text-xs text-cream/60 font-body">Poured hot over every meal. Raw and unfiltered.</p>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              )}
+                  Reserve
+                  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════
-            L-07: 19:45 → 23:06 — THE EIGHTEEN GODS
-            Interactive Celestial Registry
-            Minimal glass panel — this IS an instrument
-        ═══════════════════════════════════════════ */}
-        <section className="relative min-h-[155vh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
-          <div className="space-y-6 bg-ink/[0.65] p-6 md:p-10 rounded-2xl backdrop-blur-xl border border-white/[0.07] shadow-2xl pointer-events-auto">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="space-y-3">
-                <p className="hud-mono text-amber tracking-widest text-[10px] flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber animate-pulse" />
-                  L-07 · 19:45 · BORTLE CLASS 1 CELESTIAL VAULT
+        {/* L-02: 1.8s to 3.5s · The Architecture */}
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="1.8" data-time-end="3.5">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-6 sm:px-12 md:px-24 pr-16 md:pr-24 pb-24 md:pb-0">
+            <div className="story-scrim relative z-10 space-y-4 md:space-y-6 max-w-lg pointer-events-auto">
+              <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
+                L-02 · 16:15 · THE APPROACH
+              </p>
+              <h2 className="font-display text-3xl sm:text-5xl md:text-6xl font-normal leading-tight text-cream drop-shadow-md">
+                Built like a fortress.<br /><span className="italic text-amber-200/90">Smells like pine.</span>
+              </h2>
+              <p className="text-cream/90 text-sm sm:text-base leading-relaxed drop-shadow-md">
+                Kath-kuni architecture doesn&apos;t use nails. It weaves solid deodar cedar and metamorphic slate into a joint that flexes with the mountain.
+              </p>
+              <div>
+                <button 
+                  onClick={() => setIsSandboxOpen(true)}
+                  className="group px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/20 hover:border-amber-400/80 text-amber-300 text-xs hud-mono tracking-widest transition-all uppercase pointer-events-auto shadow-2xl backdrop-blur-xl hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f17]"
+                >
+                  Inspect Architecture
+                  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1.5 ml-2">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* L-03: 3.5s to 5.2s · The Hearth */}
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="3.5" data-time-end="5.2">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-end text-right px-6 sm:px-12 md:px-24 pl-16 md:pl-24 pb-24 md:pb-0">
+            <div className="story-scrim relative z-10 space-y-4 md:space-y-6 max-w-lg pointer-events-auto">
+              <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
+                L-03 · 18:30 · THE HEARTH
+              </p>
+              <h2 className="font-display text-3xl sm:text-5xl md:text-6xl font-normal leading-tight text-cream drop-shadow-md">
+                Cold outside.<br /><span className="italic text-amber-300">Warm inside.</span>
+              </h2>
+              <p className="text-cream/90 text-sm sm:text-base leading-relaxed drop-shadow-md">
+                The woodstove is always running. Dinner is slow-cooked, and the stories outlast the embers.
+              </p>
+              <div>
+                <button 
+                  onClick={() => setIsGalleryOpen(true)}
+                  className="group px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/20 hover:border-amber-400/80 text-amber-300 text-xs hud-mono tracking-widest transition-all uppercase pointer-events-auto shadow-2xl backdrop-blur-xl hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f17]"
+                >
+                  View The Hearth
+                  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1.5 ml-2">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* L-07: 5.2s to 6.8s · The Eighteen Gods Celestial Planetarium */}
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[150vh]" data-time-start="5.2" data-time-end="6.8">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-4 sm:px-8 md:px-12 max-w-6xl mx-auto w-full pb-20 md:pb-0">
+            <div className="story-scrim relative z-10 w-full pointer-events-auto">
+              <CelestialPlanetarium onSelectGod={setSelectedStar} />
+            </div>
+          </div>
+        </section>
+
+        {/* L-08: 6.8s to 8.0s · Ephemeris & Date Selector */}
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[150vh]" data-time-start="6.8" data-time-end="8.0">
+          <div className="sticky top-0 h-[100dvh] w-full flex flex-col justify-center pb-24 md:pb-0 bg-[#0a0f17] bg-[radial-gradient(ellipse_at_center,_rgba(16,24,38,0.75)_0%,_#0a0f17_85%)]">
+            <div className="px-3 sm:px-8 md:px-16 max-w-6xl mx-auto w-full">
+              <div className="story-scrim pointer-events-auto">
+                <DateDial />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* L-09: 8.0s to 9.2s · The Valley Commons */}
+        <section className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="8.0" data-time-end="9.2">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center px-4 sm:px-8 md:px-16 max-w-6xl mx-auto w-full pb-24 md:pb-0">
+            <div className="story-scrim relative z-10 space-y-4 md:space-y-6 pointer-events-auto">
+              <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
+                L-09 · 02:27 · THE VALLEY COMMONS
+              </p>
+              <h2 className="font-display text-2xl sm:text-4xl md:text-5xl font-normal text-cream">
+                Crafted in the Valley.
+              </h2>
+              <Marketplace />
+            </div>
+          </div>
+        </section>
+
+        {/* L-10: 9.2s to 10.0s · First Light & Booking */}
+        <section id="the-invitation" className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="9.2" data-time-end="10.0">
+          <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-center px-6 text-center pb-24 md:pb-0">
+            <div className="story-scrim relative z-10 space-y-10 md:space-y-12 max-w-2xl pointer-events-auto flex flex-col items-center">
+              
+              <div className="space-y-6 md:space-y-8">
+                <p className="hud-mono text-amber tracking-eyebrow text-[10px] md:text-xs">
+                  L-10 <span className="opacity-50 font-sans font-light mx-1.5">/</span> 06:05 <span className="opacity-50 font-sans font-light mx-1.5">/</span> FIRST LIGHT
                 </p>
-                <h2 className="font-display text-3xl md:text-5xl font-normal text-cream leading-tight">
-                  The Eighteen Gods<br />in the Sky.
+                
+                <h2 className="font-display text-5xl sm:text-7xl md:text-[5.5rem] font-normal text-cream leading-[0.9] drop-shadow-xl">
+                  <span className="italic block mb-1 md:mb-3 text-cream/90">Sunrise</span>
+                  <span>at 06:14.</span>
                 </h2>
-                <p className="text-cream/60 text-sm md:text-base max-w-lg leading-relaxed">
-                  Select any celestial deity to bring up live astronomical coordinates and our 200mm balcony refractor telemetry.
+                
+                <p className="text-cream/80 text-sm sm:text-base leading-relaxed drop-shadow-md font-body max-w-sm mx-auto">
+                  The shadow of the ridge slides down the orchard. The fire is still burning. Your morning coffee is ready.
                 </p>
               </div>
-              <span className="hud-mono text-[10px] text-amber/70 border border-amber/20 px-3 py-1.5 rounded-full self-start md:self-auto bg-amber/5">
-                18 OBJECTS ACTIVE
-              </span>
-            </div>
 
-            {/* Interactive Grid of Eighteen Deities — staggered cascade */}
-            <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-2">
-              {EIGHTEEN_GODS.map((god, idx) => (
-                <button
-                  key={god.id}
-                  onClick={() => setSelectedStar(god)}
-                  className="p-3 rounded-xl bg-white/[0.03] hover:bg-amber/[0.08] border border-white/[0.06] hover:border-amber/30 text-left transition-all group flex flex-col justify-between h-24 shadow-sm hover:shadow-[0_0_15px_rgba(217,154,78,0.15)] hover:scale-[1.02] active:scale-95"
-                  style={{ animationDelay: `${STAGGER_MS[idx] || idx * 40}ms` }}
+              {/* Elegant divider */}
+              <div className="w-8 h-px bg-cream/20"></div>
+
+              <div className="space-y-8 flex flex-col items-center w-full">
+                <Link
+                  href="/book"
+                  scroll={false}
+                  className="group px-12 py-[18px] rounded-full bg-cream/95 hover:bg-white text-ink font-body text-[11px] font-bold uppercase tracking-eyebrow transition-all duration-500 ease-exhale shadow-[0_10px_40px_rgba(0,0,0,0.6)] hover:shadow-[0_10px_50px_rgba(255,255,255,0.15)] hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                 >
-                  <div className="flex justify-between items-start w-full">
-                    <span className="hud-mono text-[9px] text-amber/60">
-                      #{god.id.toString().padStart(2, '0')}
-                    </span>
-                    <span className="hud-mono text-[8px] text-cream/40 uppercase">
-                      {god.constellation.slice(0, 3)}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-display text-sm text-cream/90 group-hover:text-amber/90 transition-colors leading-tight line-clamp-1">
-                      {god.deity}
-                    </h3>
-                    <p className="hud-mono text-[9px] text-cream/50 truncate mt-0.5">
-                      {god.designation.split(' ')[0]}
-                    </p>
-                  </div>
-                </button>
-              ))}
+                  Reserve The Stay
+                  <svg className="w-[15px] h-[15px] transition-transform duration-500 ease-exhale group-hover:translate-x-1.5 text-amber" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </Link>
+                
+                <a
+                  href={whatsappLink("Hello House of Hulda! I have a few questions before reserving a stay.")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-body text-[10px] tracking-label text-cream/50 hover:text-amber transition-colors duration-300 flex flex-col items-center gap-2 group uppercase"
+                >
+                  <span>Inquire with our host</span>
+                  <div className="h-px w-4 group-hover:w-full bg-amber/30 group-hover:bg-amber transition-all duration-500 ease-exhale"></div>
+                </a>
+              </div>
+              
             </div>
-
-            {/* Interactive Ephemeris Date Picker & Stargazing Planner */}
-            <DateDial />
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            L-08: 02:27 — THE VALLEY COMMONS
-            Marketplace — minimal wrap, editorial
-        ═══════════════════════════════════════════ */}
-        <section className="relative min-h-[120vh] flex flex-col justify-center px-6 md:px-16 max-w-6xl mx-auto py-24">
-          <div className="space-y-4 bg-ink/[0.70] p-8 md:p-12 rounded-2xl backdrop-blur-xl border border-white/[0.06] shadow-2xl">
-            <p className="hud-mono text-amber tracking-widest text-[10px]">
-              L-08 · 02:27 · THE VALLEY COMMONS
-            </p>
-            <h2 className="font-display text-3xl md:text-5xl font-normal text-cream leading-tight">
-              Crafted in the Valley.
-            </h2>
-            <p className="text-cream/60 text-sm md:text-base leading-relaxed max-w-2xl">
-              Everything in House of Hulda comes from local Himalayan hands. Pure wool handlooms, raw wildflower honey, carved deodar keepsakes.
-            </p>
-            <Marketplace />
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            L-09: 06:05 — DAWN & INVITATION
-            Full-bleed. No box. Text on first light.
-        ═══════════════════════════════════════════ */}
-        <section className="relative h-[100vh] flex flex-col justify-center items-center px-8 text-center">
-          <div className="relative space-y-7 max-w-xl">
-            <p className="hud-mono text-amber tracking-widest text-[10px]">
-              L-09 · 06:05 · FIRST LIGHT
-            </p>
-            <h2 className="font-display text-5xl md:text-7xl font-normal text-cream leading-tight text-glow-amber">
-              Sunrise at 06:14.
-            </h2>
-            <p className="text-cream/90 text-base md:text-lg leading-relaxed text-glow-amber">
-              One secluded residence. One private telescope.<br />
-              Eighteen wonders you will remember for the rest of your life.
-            </p>
-
-            <Link
-              href="/book"
-              className="pointer-events-auto relative group overflow-hidden px-10 py-4 border border-amber/60 bg-ink/70 backdrop-blur-xl text-cream hud-mono text-xs uppercase tracking-widest hover:border-amber transition-all duration-[600ms] inline-block shadow-2xl rounded-full"
-            >
-              <span className="relative z-10 transition-colors duration-[600ms] group-hover:text-ink font-bold">Reserve The Stay</span>
-              <div className="absolute inset-0 bg-amber transform translate-y-full group-hover:translate-y-0 transition-transform duration-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] z-0" />
-            </Link>
           </div>
         </section>
 
       </div>
 
-      {/* Celestial Deity Inspection Drawer */}
       {selectedStar && (
         <StarCard star={selectedStar} onClose={() => setSelectedStar(null)} />
       )}
+
+      <HeritageSandbox isOpen={isSandboxOpen} onClose={() => setIsSandboxOpen(false)} />
+      <WebGLGallery isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} />
     </main>
   )
 }

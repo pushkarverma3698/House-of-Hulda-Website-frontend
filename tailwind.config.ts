@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 /**
  * Design tokens from the story bible's color & light system.
@@ -6,6 +7,14 @@ import type { Config } from "tailwindcss";
  * are the static brand colors used for UI chrome, text, and accents.
  */
 const config: Config = {
+  // Every `hover:` rule compiles inside `@media (hover: hover)`.
+  //
+  // There are 119 of them and a phone cannot hover. What iOS does instead is
+  // apply :hover on tap and leave it applied until you tap something else — so
+  // a deity tile you opened and closed stays lit and scaled at 1.02, and the
+  // grid ends up with a trail of tiles that look selected and are not. The
+  // effect is a UI that appears to be stuck.
+  future: { hoverOnlyWhenSupported: true },
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -17,8 +26,12 @@ const config: Config = {
         // Warm cream — primary text/UI on dark grade
         cream: "#f3ece1",
         ink: "#1a120b",
-        // Brand accent (window-light amber) + ember
-        amber: "#d99a4e",
+        // Brand accent: preserves full Tailwind amber palette (amber-200, 300, 400, 500)
+        // while defaulting `bg-amber` / `text-amber` to the brand's window-light amber #d99a4e
+        amber: {
+          ...colors.amber,
+          DEFAULT: "#d99a4e",
+        },
         ember: "#c2603a",
         // Base canvas before grade kicks in
         canvas: "#0a0f17",

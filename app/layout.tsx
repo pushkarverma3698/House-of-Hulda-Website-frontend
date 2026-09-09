@@ -48,7 +48,6 @@ export const metadata: Metadata = {
     siteName: SITE.name,
     title: "House of Hulda Manali — Somewhere above the noise, a light is on.",
     description: SITE.description,
-    // TODO[Phase 2]: replace with the golden Arrival hero (real photo) at /og.jpg
     images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "House of Hulda at golden hour, Naggar, Manali" }],
   },
   twitter: {
@@ -64,6 +63,7 @@ export const viewport: Viewport = {
   themeColor: "#0a0f17",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -75,15 +75,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-IN" className={`${cormorant.variable} ${mulish.variable}`}>
-      <body className="font-body">
+      <body className="font-body bg-[#0a0f17] text-cream">
+        <div className="film-grain" />
         <script
           type="application/ld+json"
-          // schema validates against Google Rich Results — see lib/schema.ts
           dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd()) }}
         />
         <Providers>
-          {children}
-          {booking}
+          <main id="scroll-wrapper" className="h-[100dvh] w-[100dvw] overflow-y-auto overflow-x-hidden relative snap-y snap-mandatory">
+            <div id="scroll-content">
+              {children}
+              {booking}
+            </div>
+          </main>
           <WhatsappFab />
         </Providers>
         <Analytics />

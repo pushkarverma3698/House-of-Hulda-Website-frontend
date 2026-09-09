@@ -48,7 +48,27 @@ export function Atmosphere() {
   useFrame((state) => {
     const t = useNight.getState().t
 
+    // Visible in the deep night (t > 0.6)
+    let opacity = 0
+    if (t > 0.60 && t <= 0.70) {
+      opacity = (t - 0.60) / 0.10
+    } else if (t > 0.70) {
+      opacity = 1.0
+    }
+
+    if (materialRef.current) {
+      materialRef.current.opacity = Math.max(0, Math.min(0.4, opacity * 0.4))
+    }
+
+    // Skip the CPU integration and the full position-buffer re-upload while
+    // invisible — that is the first 60% of the scroll spent animating nothing.
+    if (opacity <= 0) {
+      if (pointsRef.current) pointsRef.current.visible = false
+      return
+    }
+
     if (pointsRef.current) {
+      pointsRef.current.visible = true
       const pos = pointsRef.current.geometry.attributes.position.array as Float32Array
       const elapsed = state.clock.elapsedTime
 
@@ -63,17 +83,6 @@ export function Atmosphere() {
       }
 
       pointsRef.current.geometry.attributes.position.needsUpdate = true
-    }
-
-    // Visible in the deep night (t > 0.6)
-    if (materialRef.current) {
-      let opacity = 0
-      if (t > 0.60 && t <= 0.70) {
-        opacity = (t - 0.60) / 0.10
-      } else if (t > 0.70) {
-        opacity = 1.0
-      }
-      materialRef.current.opacity = Math.max(0, Math.min(0.4, opacity * 0.4))
     }
   })
 

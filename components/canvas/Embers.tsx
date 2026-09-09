@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { useRef, useMemo } from 'react'
 import * as THREE from 'three'
 import { useNight } from '@/lib/store/night'
+import { getPointSprite } from '@/lib/three/pointSprite'
 
 const COUNT = 180
 
@@ -27,11 +28,34 @@ export function Embers() {
   const pointsRef = useRef<THREE.Points>(null)
   const materialRef = useRef<THREE.PointsMaterial>(null)
   const { positions, speeds, offsets } = useMemo(() => generateEmbers(), [])
+  const sprite = useMemo(() => getPointSprite(), [])
 
   useFrame((state, _dt) => {
     const t = useNight.getState().t
 
+    // Only visible in the hearth + night window: t=0.48 to t=0.88
+    let opacity = 0
+    if (t > 0.48 && t <= 0.60) {
+      opacity = (t - 0.48) / 0.12
+    } else if (t > 0.60 && t <= 0.80) {
+      opacity = 1.0
+    } else if (t > 0.80 && t <= 0.88) {
+      opacity = 1.0 - (t - 0.80) / 0.08
+    }
+
+    if (materialRef.current) {
+      materialRef.current.opacity = Math.max(0, Math.min(0.75, opacity * 0.75))
+    }
+
+    // Skip the CPU integration and the full position-buffer re-upload while
+    // invisible — that is ~60% of the scroll spent animating nothing.
+    if (opacity <= 0) {
+      if (pointsRef.current) pointsRef.current.visible = false
+      return
+    }
+
     if (pointsRef.current) {
+      pointsRef.current.visible = true
       const pos = pointsRef.current.geometry.attributes.position.array as Float32Array
       const elapsed = state.clock.elapsedTime
 
@@ -47,19 +71,6 @@ export function Embers() {
 
       pointsRef.current.geometry.attributes.position.needsUpdate = true
     }
-
-    // Only visible in the hearth + night window: t=0.48 to t=0.88
-    if (materialRef.current) {
-      let opacity = 0
-      if (t > 0.48 && t <= 0.60) {
-        opacity = (t - 0.48) / 0.12
-      } else if (t > 0.60 && t <= 0.80) {
-        opacity = 1.0
-      } else if (t > 0.80 && t <= 0.88) {
-        opacity = 1.0 - (t - 0.80) / 0.08
-      }
-      materialRef.current.opacity = Math.max(0, Math.min(0.75, opacity * 0.75))
-    }
   })
 
   return (
@@ -69,7 +80,11 @@ export function Embers() {
       </bufferGeometry>
       <pointsMaterial
         ref={materialRef}
-        size={0.06}
+        // Larger than the old 0.06 because the sprite's falloff means most of
+        // the quad is transparent — the lit core is about a third of it, so the
+        // ember reads at roughly its previous size but as a glow, not a block.
+        size={0.16}
+        map={sprite}
         color="#f5a623"
         transparent
         opacity={0}

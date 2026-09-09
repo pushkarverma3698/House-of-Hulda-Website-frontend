@@ -5,6 +5,7 @@ import { useRef, useMemo } from 'react'
 import * as THREE from 'three'
 import { useNight } from '@/lib/store/night'
 import { getSolarState } from '@/lib/astro/sun'
+import { getPointSprite } from '@/lib/three/pointSprite'
 
 // Generates procedural star points representing the bright star catalog
 function generateStarPositions(count: number = 1800) {
@@ -55,6 +56,7 @@ export function StarField() {
   const materialRef = useRef<THREE.PointsMaterial>(null)
 
   const { positions, colors } = useMemo(() => generateStarPositions(2000), [])
+  const sprite = useMemo(() => getPointSprite(), [])
 
   useFrame((_, dt) => {
     const t = useNight.getState().t
@@ -91,11 +93,16 @@ export function StarField() {
       </bufferGeometry>
       <pointsMaterial
         ref={materialRef}
-        size={1.8}
+        // The sprite's falloff means the lit core is roughly a third of the
+        // quad, so this reads at about the previous 1.8 px but as a point of
+        // light with an airglow rather than as a 2 px square.
+        size={4.5}
+        map={sprite}
         vertexColors
         sizeAttenuation={false}
         opacity={0}
         transparent
+        blending={THREE.AdditiveBlending}
         depthWrite={false}
       />
     </points>

@@ -7,3 +7,6 @@ next-env.d.ts
 .env*.local
 .DS_Store
 .vercel
+# Design-audit captures from scripts/audit-shots.js — hundreds of MB of PNGs,
+# regenerated on demand, never part of the build.
+/shots

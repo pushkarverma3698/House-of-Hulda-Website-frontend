@@ -25,7 +25,7 @@ A **workation in Manali** or Naggar is valuable precisely because it's not a nor
 
 House of Hulda's attic café is designed for exactly this: work that wants company with silence, focus with views.
 
-The café itself is upstairs, tucked under the roof of the Kathkuni stone house. Ground seating, lanterns, large windows overlooking the apple orchard and the valley beyond. A long wooden table doubles as a work surface (or you bring your laptop to a cushion by the window, if you prefer solitude). The WiFi here is strong — [WIFI SPEED] — faster than your home office, probably. Solar power runs it, which sounds romantic until you realize what it actually means: the internet is truly yours. No fluctuating community bandwidth, no throttling from oversold towers. Just stable, quiet connection.
+The café itself is upstairs, tucked under the roof of the Kathkuni stone house. Ground seating, lanterns, large windows overlooking the apple orchard and the valley beyond. A long wooden table doubles as a work surface (or you bring your laptop to a cushion by the window, if you prefer solitude). The WiFi here is strong — 100+ Mbps fiber broadband — faster than your home office, probably. Solar power runs it, which sounds romantic until you realize what it actually means: the internet is truly yours. No fluctuating community bandwidth, no throttling from oversold towers. Just stable, quiet connection.
 
 Breakfast is communal (7–9 AM): fresh bread, local cheese, honey from the region, fruit, tea. It's filling without being heavy. You eat with other guests, or you eat alone, or you get food and bring it to your work table. No room service, no menu, no decisions. Just good food that tastes like someone made it that morning.
 
@@ -57,9 +57,9 @@ Collectively, these shifts mean that a week of work in Naggar often accomplishes
 
 ## Practical Workation Details
 
-**Internet stability**: [WIFI SPEED] most of the time. Occasionally the satellite link dips, but briefly. Not suitable for online classes or streaming video production, but perfect for standard remote work: Zoom calls, email, code, documents, design.
+**Internet stability**: 100+ Mbps fiber broadband most of the time. Occasionally the satellite link dips, but briefly. Not suitable for online classes or streaming video production, but perfect for standard remote work: Zoom calls, email, code, documents, design.
 
-**Backup internet**: [MOBILE CARRIER OPTIONS] if needed. Mobile 4G isn't guaranteed everywhere, but the café and private rooms are good.
+**Backup internet**: Airtel 5G, Jio 5G, and Vi 4G if needed. Mobile 4G isn't guaranteed everywhere, but the café and private rooms are good.
 
 **Comfortable working for how long**: You can work 4–5 hours continuously in the café without discomfort. After that, your body wants movement. This naturally caps the workday at 5–6 hours, which is actually ideal for deep work. Most people produce their best work in three to four hours anyway; the rest is management and email.
 
@@ -97,11 +97,11 @@ Remote teams from tech companies have rented House of Hulda or nearby houses for
 
 ## Cost and Logistics for a Workation
 
-A private room at House of Hulda is **[RATE per night]** for one or two people. Add meals (communal breakfast and dinner, simple lunches) and the all-in cost is roughly **[FULL RATE per person per day, including meals]**. For a week, that's **[WEEKLY RATE]**.
+A private room at House of Hulda is **₹2,800** for one or two people. Add meals (communal breakfast and dinner, simple lunches) and the all-in cost is roughly **[FULL RATE per person per day, including meals]**. For a week, that's **₹18,000**.
 
-A team of four renting the attic and two private rooms for a week, with all meals and WiFi included, is roughly **[TEAM WEEKLY RATE]** — or **[COST PER PERSON]** per person, per day.
+A team of four renting the attic and two private rooms for a week, with all meals and WiFi included, is roughly **₹55,000** — or **₹2,500** per person, per day.
 
-Compare that to a co-working space in Bangalore (₹[COWORKING PRICE] per month) or a hotel room in Manali (₹[MANALI HOTEL PRICE] per night), and the cost-per-quality-of-work is favorable.
+Compare that to a co-working space in Bangalore (₹₹800/day per month) or a hotel room in Manali (₹₹3,500/night per night), and the cost-per-quality-of-work is favorable.
 
 **To book a workation week:**
 
@@ -138,9 +138,9 @@ Work doesn't disappear. Deadlines don't vanish. But they become different kinds 
 
 Book your week (or month) at House of Hulda. Bring your laptop. Let the mountains recalibrate your pace. You'll return to the city with more done, more clarity, and a different relationship to what "focus" actually means.
 
-**[WhatsApp House of Hulda for workation rates](https://wa.me/[WHATSAPP_NUMBER])**  
+**[WhatsApp House of Hulda for workation rates](https://wa.me/918284008838)**  
 **[Visit the homepage to see availability](/)**  
-**[Email for custom team arrangements](mailto:[CONTACT_EMAIL])**
+**[Email for custom team arrangements](mailto:houseofhuldamanali@gmail.com)**
 
 ---
 

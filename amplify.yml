@@ -4,11 +4,12 @@ frontend:
     preBuild:
       commands:
         - nvm use 20
-        - npm ci
+        - npm install
     build:
       commands:
         - npm run build
         - cp -r public .next/public
+        - rm -rf .next/public/videos .next/public/frames-v2
   artifacts:
     baseDirectory: .next
     files:
@@ -17,3 +18,12 @@ frontend:
     paths:
       - .next/cache/**/*
       - node_modules/**/*
+customHeaders:
+  - pattern: '/frames-v2/**/*'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'
+  - pattern: '/videos/**/*'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'
