@@ -77,6 +77,37 @@ export function CinematicExperience() {
             return;
           }
 
+          if (idx === sections.length - 1) {
+            // Final section is the destination (First Light / Reservation):
+            // Smooth arrival with graceful deceleration into its resting pose.
+            // Never exits or blurs away — settles with power3.out and sine.out into perfect center.
+            gsap.set(elements, { opacity: 0, y: 50, filter: 'blur(16px)', scale: 0.96 });
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: section,
+                scroller: document.getElementById('scroll-wrapper') || window,
+                start: 'top 80%',
+                end: 'bottom bottom',
+                scrub: 1.2,
+              }
+            });
+            tl.to(elements, {
+              opacity: 1,
+              y: 0,
+              filter: 'blur(0px)',
+              scale: 1,
+              duration: 0.7,
+              ease: 'power3.out',
+              stagger: 0.04
+            })
+            .to(elements, {
+              y: -4,
+              duration: 0.3,
+              ease: 'sine.out'
+            });
+            return;
+          }
+
           gsap.set(elements, { opacity: 0, y: 60, filter: 'blur(16px)', scale: 0.95 });
           
           const tl = gsap.timeline({
@@ -257,37 +288,49 @@ export function CinematicExperience() {
         {/* L-10: 9.2s to 10.0s · First Light & Booking */}
         <section id="the-invitation" className="cine-section snap-start [scroll-snap-stop:always] relative h-[140vh]" data-time-start="9.2" data-time-end="10.0">
           <div className="sticky top-0 h-[100dvh] flex flex-col justify-center items-center px-6 text-center pb-24 md:pb-0">
-            <div className="story-scrim relative z-10 space-y-6 md:space-y-8 max-w-xl pointer-events-auto">
-              <p className="hud-mono text-amber tracking-widest text-[10px] md:text-xs">
-                L-10 · 06:05 · FIRST LIGHT
-              </p>
-              <h2 className="font-display text-4xl sm:text-6xl md:text-7xl font-normal text-cream leading-tight drop-shadow-md">
-                Sunrise at 06:14.
-              </h2>
-              <p className="text-cream/90 text-sm sm:text-base leading-relaxed drop-shadow-md">
-                The shadow of the ridge slides down the orchard. The fire is still burning. Your morning coffee is ready.
-              </p>
-              <div className="space-y-4">
+            <div className="story-scrim relative z-10 space-y-10 md:space-y-12 max-w-2xl pointer-events-auto flex flex-col items-center">
+              
+              <div className="space-y-6 md:space-y-8">
+                <p className="hud-mono text-amber tracking-eyebrow text-[10px] md:text-xs">
+                  L-10 <span className="opacity-50 font-sans font-light mx-1.5">/</span> 06:05 <span className="opacity-50 font-sans font-light mx-1.5">/</span> FIRST LIGHT
+                </p>
+                
+                <h2 className="font-display text-5xl sm:text-7xl md:text-[5.5rem] font-normal text-cream leading-[0.9] drop-shadow-xl">
+                  <span className="italic block mb-1 md:mb-3 text-cream/90">Sunrise</span>
+                  <span>at 06:14.</span>
+                </h2>
+                
+                <p className="text-cream/80 text-sm sm:text-base leading-relaxed drop-shadow-md font-body max-w-sm mx-auto">
+                  The shadow of the ridge slides down the orchard. The fire is still burning. Your morning coffee is ready.
+                </p>
+              </div>
+
+              {/* Elegant divider */}
+              <div className="w-8 h-px bg-cream/20"></div>
+
+              <div className="space-y-8 flex flex-col items-center w-full">
                 <Link
                   href="/book"
                   scroll={false}
-                  className="group px-10 py-4 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-mono text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:scale-105 active:scale-95 inline-block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f17]"
+                  className="group px-12 py-[18px] rounded-full bg-cream/95 hover:bg-white text-ink font-body text-[11px] font-bold uppercase tracking-eyebrow transition-all duration-500 ease-exhale shadow-[0_10px_40px_rgba(0,0,0,0.6)] hover:shadow-[0_10px_50px_rgba(255,255,255,0.15)] hover:scale-[1.03] active:scale-95 flex items-center justify-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cream/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                 >
                   Reserve The Stay
-                  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1.5 ml-2">→</span>
+                  <svg className="w-[15px] h-[15px] transition-transform duration-500 ease-exhale group-hover:translate-x-1.5 text-amber" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
                 </Link>
-                <div>
-                  <a
-                    href={whatsappLink("Hello House of Hulda! I have a few questions before reserving a stay.")}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hud-mono text-xs text-cream/60 hover:text-amber-300 transition-colors inline-flex items-center gap-2 group"
-                  >
-                    <span>Questions before booking? Inquire with our host on WhatsApp</span>
-                    <span className="group-hover:translate-x-1 transition-transform">→</span>
-                  </a>
-                </div>
+                
+                <a
+                  href={whatsappLink("Hello House of Hulda! I have a few questions before reserving a stay.")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-body text-[10px] tracking-label text-cream/50 hover:text-amber transition-colors duration-300 flex flex-col items-center gap-2 group uppercase"
+                >
+                  <span>Inquire with our host</span>
+                  <div className="h-px w-4 group-hover:w-full bg-amber/30 group-hover:bg-amber transition-all duration-500 ease-exhale"></div>
+                </a>
               </div>
+              
             </div>
           </div>
         </section>
